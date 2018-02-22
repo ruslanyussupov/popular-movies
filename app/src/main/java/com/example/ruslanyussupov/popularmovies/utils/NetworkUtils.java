@@ -29,6 +29,10 @@ public class NetworkUtils {
     private static final String QUERY_KEY_INCLUDE_VIDEO = "include_video";
     private static final String QUERY_KEY_PAGE = "page";
 
+    private static final String QUERY_VALUE_EN_US = "en-US";
+    private static final String QUERY_VALUE_SORT_BY_POPULAR = "popularity.desc";
+    private static final String QUERY_VALUE_SORT_BY_TOP_RATED = "vote_average.desc";
+
 
     /**
      * Takes URL as String and make connection to read the data and return it.
@@ -115,12 +119,12 @@ public class NetworkUtils {
 
     }
 
-    public static URL buildUrlDiscoverMovies(Context context) {
+    private static URL buildUrlDiscoverMovies(Context context, String sortBy) {
 
         Uri discoverMoviesQueryUri = Uri.parse(DISCOVER_MOVIE_URL).buildUpon()
                 .appendQueryParameter(QUERY_KEY_API_KEY, context.getString(R.string.themoviedb_api_key))
-                .appendQueryParameter(QUERY_KEY_LANGUAGE, "en-US")
-                .appendQueryParameter(QUERY_KEY_SORT_BY, "popularity.desc")
+                .appendQueryParameter(QUERY_KEY_LANGUAGE, QUERY_VALUE_EN_US)
+                .appendQueryParameter(QUERY_KEY_SORT_BY, sortBy)
                 .appendQueryParameter(QUERY_KEY_INCLUDE_ADULT, "false")
                 .appendQueryParameter(QUERY_KEY_INCLUDE_VIDEO, "false")
                 .appendQueryParameter(QUERY_KEY_PAGE, "1")
@@ -128,6 +132,14 @@ public class NetworkUtils {
 
         return makeUrl(discoverMoviesQueryUri.toString());
 
+    }
+
+    public static URL getUrlPopularMovies(Context context) {
+        return buildUrlDiscoverMovies(context, QUERY_VALUE_SORT_BY_POPULAR);
+    }
+
+    public static URL getUrlTopRatedMovies(Context context) {
+        return buildUrlDiscoverMovies(context, QUERY_VALUE_SORT_BY_TOP_RATED);
     }
 
 }

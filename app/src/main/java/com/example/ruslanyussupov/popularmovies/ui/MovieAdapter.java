@@ -74,8 +74,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     }
 
     public void updateData(List<Movie> movies) {
-        Log.d(LOG_TAG, movies.toString());
-        mMovies.addAll(movies);
+        mMovies = movies;
         notifyDataSetChanged();
     }
 
