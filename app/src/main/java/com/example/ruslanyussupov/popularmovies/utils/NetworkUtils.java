@@ -30,8 +30,8 @@ public class NetworkUtils {
     private static final String QUERY_KEY_PAGE = "page";
 
     private static final String QUERY_VALUE_EN_US = "en-US";
-    private static final String QUERY_VALUE_SORT_BY_POPULAR = "popularity.desc";
-    private static final String QUERY_VALUE_SORT_BY_TOP_RATED = "vote_average.desc";
+    public static final String QUERY_VALUE_SORT_BY_POPULAR = "popularity.desc";
+    public static final String QUERY_VALUE_SORT_BY_TOP_RATED = "vote_average.desc";
 
 
     /**
@@ -119,7 +119,7 @@ public class NetworkUtils {
 
     }
 
-    private static URL buildUrlDiscoverMovies(Context context, String sortBy) {
+    public static URL buildUrlDiscoverMovies(Context context, String sortBy) {
 
         Uri discoverMoviesQueryUri = Uri.parse(DISCOVER_MOVIE_URL).buildUpon()
                 .appendQueryParameter(QUERY_KEY_API_KEY, context.getString(R.string.themoviedb_api_key))

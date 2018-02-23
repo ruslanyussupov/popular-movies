@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.example.ruslanyussupov.popularmovies.R;
@@ -30,9 +32,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final int LOADER_ID = 111;
+    private static final String BUNDLE_SORT_BY = "sort_by";
+    private static final String BUNDLE_MOVIES = "movies";
     private MovieAdapter mMovieAdapter;
     private LoaderManager mLoaderManager;
-    private URL mJsonReq;
+    private String mSortBy;
+    private List<Movie> mMovies;
 
     @BindView(R.id.rv_movies)RecyclerView mMoviesRecyclerView;
     @BindView(R.id.drawer)DrawerLayout mDrawerLayout;
@@ -55,19 +60,36 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         }
 
+        if (TextUtils.equals(mSortBy, NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR)) {
+            mNavView.getMenu().getItem(1).setChecked(true);
+        } else {
+            mNavView.getMenu().getItem(0).setChecked(true);
+        }
+
+        mLoaderManager = getSupportLoaderManager();
 
         mMovieAdapter = new MovieAdapter(new ArrayList<Movie>());
         mMoviesRecyclerView.setAdapter(mMovieAdapter);
         mMoviesRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
-        mLoaderManager = getSupportLoaderManager();
+        if (savedInstanceState == null) {
 
-        if (mLoaderManager.getLoader(LOADER_ID) == null) {
-            mJsonReq = NetworkUtils.getUrlPopularMovies(this);
-            mLoaderManager.initLoader(LOADER_ID, null, this);
+            mSortBy = NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR;
+
+            if (mLoaderManager.getLoader(LOADER_ID) == null) {
+                Log.d(LOG_TAG, "Init loader");
+                mLoaderManager.initLoader(LOADER_ID, null, this);
+            } else {
+                Log.d(LOG_TAG, "Restart loader");
+                mLoaderManager.restartLoader(LOADER_ID, null, this);
+            }
+
         } else {
-            mLoaderManager.restartLoader(LOADER_ID, null, this);
+            mSortBy = savedInstanceState.getString(BUNDLE_SORT_BY);
+            mMovies = savedInstanceState.getParcelableArrayList(BUNDLE_MOVIES);
+            mMovieAdapter.updateData(mMovies);
         }
+
 
         mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -78,22 +100,44 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 int itemId = item.getItemId();
 
                 switch (itemId) {
+
                     case R.id.nav_popular:
-                        mJsonReq = NetworkUtils.getUrlPopularMovies(MainActivity.this);
-                        mLoaderManager.restartLoader(LOADER_ID, null, MainActivity.this);
+
+                        if (TextUtils.equals(mSortBy, NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR)) {
+                            return true;
+                        }
+
+                        mSortBy = NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR;
+                        mLoaderManager.restartLoader(LOADER_ID, null,
+                                MainActivity.this);
                         return true;
+
                     case R.id.nav_top_rated:
-                        mJsonReq = NetworkUtils.getUrlTopRatedMovies(MainActivity.this);
-                        mLoaderManager.restartLoader(LOADER_ID, null, MainActivity.this);
+
+                        if (TextUtils.equals(mSortBy, NetworkUtils.QUERY_VALUE_SORT_BY_TOP_RATED)) {
+                            return true;
+                        }
+
+                        mSortBy = NetworkUtils.QUERY_VALUE_SORT_BY_TOP_RATED;
+                        mLoaderManager.restartLoader(LOADER_ID, null,
+                                MainActivity.this);
                         return true;
+
                     default:
-                        return true;
+                        return false;
                 }
 
             }
         });
 
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(BUNDLE_SORT_BY, mSortBy);
+        outState.putParcelableArrayList(BUNDLE_MOVIES, (ArrayList<Movie>) mMovies);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -112,7 +156,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
-        return new MovieLoader(this, mJsonReq);
+        Log.d(LOG_TAG, mSortBy);
+        URL jsonUrl = NetworkUtils.buildUrlDiscoverMovies(MainActivity.this, mSortBy);
+        return new MovieLoader(this, jsonUrl);
     }
 
     @Override
@@ -120,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if (data == null || data.size() == 0) {
             return;
         }
+        mMovies = data;
         mMovieAdapter.updateData(data);
     }
 

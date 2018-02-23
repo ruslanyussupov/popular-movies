@@ -61,12 +61,11 @@ public class JsonUtils {
                 String overview = currentMovie.getString(JSON_OVERVIEW);
                 String releaseDate = currentMovie.getString(JSON_RELEASE_DATE);
 
-                Movie movie = new Movie();
-                movie.setOriginalTitle(originalTitle);
-                movie.setOverview(overview);
-                movie.setPosterPath(posterPath);
-                movie.setReleaseDate(releaseDate);
-                movie.setVoteAverage(voteAverage);
+                Movie movie = new Movie(originalTitle,
+                        posterPath,
+                        overview,
+                        voteAverage,
+                        releaseDate);
 
                 movies.add(movie);
 
