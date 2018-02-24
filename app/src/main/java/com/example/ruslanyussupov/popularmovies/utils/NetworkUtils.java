@@ -22,6 +22,8 @@ public class NetworkUtils {
 
     private static final String DISCOVER_MOVIE_URL = "https://api.themoviedb.org/3/discover/movie";
 
+    private static final String MOVIE_POSTER_MAIN_PATH = "http://image.tmdb.org/t/p/w185";
+
     private static final String QUERY_KEY_API_KEY = "api_key";
     private static final String QUERY_KEY_LANGUAGE = "language";
     private static final String QUERY_KEY_SORT_BY = "sort_by";
@@ -140,6 +142,10 @@ public class NetworkUtils {
 
     public static URL getUrlTopRatedMovies(Context context) {
         return buildUrlDiscoverMovies(context, QUERY_VALUE_SORT_BY_TOP_RATED);
+    }
+
+    public static String buildMoviePosterUrlPath(String posterPath) {
+        return MOVIE_POSTER_MAIN_PATH + posterPath;
     }
 
 }

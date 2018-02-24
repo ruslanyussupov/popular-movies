@@ -1,5 +1,8 @@
 package com.example.ruslanyussupov.popularmovies.ui;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.LoaderManager;
@@ -28,17 +31,26 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Movie>> {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Movie>>,
+        MovieAdapter.OnItemClickListener {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
+    // Id for MovieLoader
     private static final int LOADER_ID = 111;
+
+    // Bundle keys for saving instance state
     private static final String BUNDLE_SORT_BY = "sort_by";
     private static final String BUNDLE_MOVIES = "movies";
+
+    public static final String EXTRA_MOVIE = "movie";
+
     private MovieAdapter mMovieAdapter;
     private LoaderManager mLoaderManager;
     private String mSortBy;
     private List<Movie> mMovies;
 
+    // Define views for binding
     @BindView(R.id.rv_movies)RecyclerView mMoviesRecyclerView;
     @BindView(R.id.drawer)DrawerLayout mDrawerLayout;
     @BindView(R.id.nav_view)NavigationView mNavView;
@@ -49,29 +61,37 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Bind views
         ButterKnife.bind(this);
 
+        // Set our custom Toolbar as ActionBar
         setSupportActionBar(mToolbar);
 
+        // Get ActionBar
         ActionBar actionBar = getSupportActionBar();
 
+        // Set icon to open the navigation drawer
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
         }
-
+        
+        // Set appropriate sorting mode as checked in the navigation drawer
         if (TextUtils.equals(mSortBy, NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR)) {
             mNavView.getMenu().getItem(1).setChecked(true);
         } else {
             mNavView.getMenu().getItem(0).setChecked(true);
         }
 
+
         mLoaderManager = getSupportLoaderManager();
 
-        mMovieAdapter = new MovieAdapter(new ArrayList<Movie>());
+        // Set up MovieAdapter and GridLayoutManager to RV
+        mMovieAdapter = new MovieAdapter(new ArrayList<Movie>(), this);
         mMoviesRecyclerView.setAdapter(mMovieAdapter);
         mMoviesRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
+        // If there is nothing to restore start loading, else restore from Bundle
         if (savedInstanceState == null) {
 
             mSortBy = NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR;
@@ -91,10 +111,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
 
 
+
         mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
+                // Close drawer if item is clicked
                 mDrawerLayout.closeDrawers();
 
                 int itemId = item.getItemId();
@@ -131,12 +153,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         });
 
 
+
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putString(BUNDLE_SORT_BY, mSortBy);
         outState.putParcelableArrayList(BUNDLE_MOVIES, (ArrayList<Movie>) mMovies);
+        Log.d(LOG_TAG, "Save instance state");
         super.onSaveInstanceState(outState);
     }
 
@@ -175,4 +199,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mMovieAdapter.updateData(new ArrayList<Movie>());
     }
 
+    @Override
+    public void onClick(int position) {
+        Movie movie = mMovies.get(position);
+        Intent openDetailActivity = new Intent(MainActivity.this, DetailActivity.class);
+        openDetailActivity.putExtra(EXTRA_MOVIE, movie);
+        startActivity(openDetailActivity);
+    }
 }

@@ -11,6 +11,7 @@ import android.widget.ImageView;
 
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
+import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -23,9 +24,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     private static final String LOG_TAG = MovieAdapter.class.getSimpleName();
 
     private List<Movie> mMovies;
+    private OnItemClickListener mOnItemClickListener;
 
-    public MovieAdapter(List<Movie> movies) {
+    public MovieAdapter(List<Movie> movies, OnItemClickListener onItemClickListener) {
         mMovies = movies;
+        mOnItemClickListener = onItemClickListener;
     }
 
     @Override
@@ -47,9 +50,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         Movie currentMovie = mMovies.get(position);
 
         // Load movie poster into ImageView
-        String posterPath = "http://image.tmdb.org/t/p/w185" + currentMovie.getPosterPath();
+        String posterPath = NetworkUtils.buildMoviePosterUrlPath(currentMovie.getPosterPath());
         Log.v(LOG_TAG, posterPath);
-        Picasso.with(context).load(posterPath).into(holder.posterImageView);
+        Picasso.with(context).load(posterPath).placeholder(R.drawable.ic_poster_placeholder)
+                .error(R.drawable.ic_error)
+                .into(holder.posterImageView);
 
     }
 
@@ -70,6 +75,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
             // Execute binding
             ButterKnife.bind(this, itemView);
 
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mOnItemClickListener.onClick(getAdapterPosition());
+                }
+            });
+
         }
     }
 
@@ -77,5 +89,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         mMovies = movies;
         notifyDataSetChanged();
     }
+
+    public interface OnItemClickListener {
+        void onClick(int position);
+    }
+
 
 }
