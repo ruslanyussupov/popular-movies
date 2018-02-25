@@ -14,16 +14,17 @@
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"/>
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
 
         <TextView
             android:id="@+id/title_tv"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="#009688"
             android:paddingLeft="16dp"
@@ -36,6 +37,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Display1"
             tools:text="Chappie"
             app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/toolbar"/>
 
         <ImageView
@@ -44,10 +46,8 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:layout_marginTop="8dp"
-            android:paddingEnd="16dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
             android:scaleType="fitCenter"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="@id/vertical_gl"
@@ -56,7 +56,7 @@
 
         <TextView
             android:id="@+id/release_date_tv"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:paddingLeft="16dp"
@@ -66,11 +66,12 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             tools:text="2015"
             app:layout_constraintTop_toBottomOf="@id/title_tv"
-            app:layout_constraintLeft_toRightOf="@id/vertical_gl"/>
+            app:layout_constraintLeft_toRightOf="@id/vertical_gl"
+            app:layout_constraintRight_toRightOf="parent"/>
 
         <TextView
             android:id="@+id/user_rating_tv"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:paddingLeft="16dp"
@@ -80,7 +81,8 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             tools:text="8.1/10"
             app:layout_constraintTop_toBottomOf="@id/release_date_tv"
-            app:layout_constraintLeft_toRightOf="@id/vertical_gl"/>
+            app:layout_constraintLeft_toRightOf="@id/vertical_gl"
+            app:layout_constraintRight_toRightOf="parent"/>
 
         <TextView
             android:id="@+id/overview_tv"
