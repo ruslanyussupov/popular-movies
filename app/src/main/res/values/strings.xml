@@ -4,5 +4,11 @@
 
     <string name="popular">Popular</string>
     <string name="top_rated">Top Rated</string>
+    
+    <string name="release_date_label">Release\nDate</string>
+    <string name="average_rating_label">Average\nRating</string>
+
+    <string name="empty_state">There are no movies…</string>
+    <string name="no_network_connection_state">No network connection</string>
 
 </resources>

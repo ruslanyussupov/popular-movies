@@ -136,14 +136,6 @@ public class NetworkUtils {
 
     }
 
-    public static URL getUrlPopularMovies(Context context) {
-        return buildUrlDiscoverMovies(context, QUERY_VALUE_SORT_BY_POPULAR);
-    }
-
-    public static URL getUrlTopRatedMovies(Context context) {
-        return buildUrlDiscoverMovies(context, QUERY_VALUE_SORT_BY_TOP_RATED);
-    }
-
     public static String buildMoviePosterUrlPath(String posterPath) {
         return MOVIE_POSTER_MAIN_PATH + posterPath;
     }

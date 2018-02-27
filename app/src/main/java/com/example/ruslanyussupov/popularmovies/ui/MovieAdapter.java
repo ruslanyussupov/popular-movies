@@ -26,7 +26,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     private List<Movie> mMovies;
     private OnItemClickListener mOnItemClickListener;
 
-    public MovieAdapter(List<Movie> movies, OnItemClickListener onItemClickListener) {
+    MovieAdapter(List<Movie> movies, OnItemClickListener onItemClickListener) {
         mMovies = movies;
         mOnItemClickListener = onItemClickListener;
     }
@@ -52,8 +52,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         // Load movie poster into ImageView
         String posterPath = NetworkUtils.buildMoviePosterUrlPath(currentMovie.getPosterPath());
         Log.v(LOG_TAG, posterPath);
-        Picasso.with(context).load(posterPath).placeholder(R.drawable.ic_poster_placeholder)
-                .error(R.drawable.ic_error)
+        Picasso.with(context).load(posterPath).placeholder(R.drawable.poster_placeholder)
+                .error(R.drawable.poster_error)
                 .into(holder.posterImageView);
 
     }

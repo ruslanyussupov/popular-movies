@@ -50,8 +50,8 @@ public class DetailActivity extends AppCompatActivity {
             Movie movie = intent.getParcelableExtra(MainActivity.EXTRA_MOVIE);
 
             Picasso.with(this).load(NetworkUtils.buildMoviePosterUrlPath(movie.getPosterPath()))
-                    .error(R.drawable.ic_error)
-                    .placeholder(R.drawable.ic_poster_placeholder)
+                    .error(R.drawable.poster_placeholder)
+                    .placeholder(R.drawable.poster_error)
                     .into(mPosterIv);
 
             mTitleTv.setText(movie.getOriginalTitle());
@@ -59,7 +59,6 @@ public class DetailActivity extends AppCompatActivity {
             mVoteAverageTv.setText(String.valueOf(movie.getVoteAverage()));
             mOverviewTv.setText(movie.getOverview());
 
-            Log.d(LOG_TAG, movie.getOverview());
         }
 
     }

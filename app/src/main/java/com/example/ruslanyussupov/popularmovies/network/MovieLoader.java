@@ -26,20 +26,17 @@ public class MovieLoader extends AsyncTaskLoader<List<Movie>> {
 
     @Override
     protected void onStartLoading() {
-
+        // If there is cached data, then pass it as result, otherwise download it
         if (mMovies != null) {
-            // If there is cached data, then pass it as result
-            Log.d(LOG_TAG, "Deliver result");
             deliverResult(mMovies);
         } else {
-            // If no cached data, then download it
             forceLoad();
         }
     }
 
     @Override
     public List<Movie> loadInBackground() {
-        Log.d(LOG_TAG, "Loading data");
+        // Get JSON response from URL and parsing it
         String jsonResponse = NetworkUtils.getResponseFromUrl(mJsonUrl);
         return JsonUtils.jsonParser(jsonResponse);
 

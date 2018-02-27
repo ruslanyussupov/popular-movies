@@ -1,8 +1,8 @@
 package com.example.ruslanyussupov.popularmovies.ui;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.LoaderManager;
@@ -15,9 +15,11 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
@@ -37,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     // Id for MovieLoader
-    private static final int LOADER_ID = 111;
+    private static final int MOVIE_LOADER_ID = 111;
 
     // Bundle keys for saving instance state
     private static final String BUNDLE_SORT_BY = "sort_by";
@@ -47,14 +49,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private MovieAdapter mMovieAdapter;
     private LoaderManager mLoaderManager;
-    private String mSortBy;
+    private String mSortBy = NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR;
     private List<Movie> mMovies;
+    private ConnectivityManager mConnectivityManager;
 
     // Define views for binding
     @BindView(R.id.rv_movies)RecyclerView mMoviesRecyclerView;
     @BindView(R.id.drawer)DrawerLayout mDrawerLayout;
     @BindView(R.id.nav_view)NavigationView mNavView;
     @BindView(R.id.toolbar)Toolbar mToolbar;
+    @BindView(R.id.state_tv)TextView mStateTv;
+    @BindView(R.id.loading_pb)ProgressBar mLoadingPb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,25 +69,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // Bind views
         ButterKnife.bind(this);
 
-        // Set our custom Toolbar as ActionBar
-        setSupportActionBar(mToolbar);
+        setupActionBar();
 
-        // Get ActionBar
-        ActionBar actionBar = getSupportActionBar();
-
-        // Set icon to open the navigation drawer
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
-        }
-        
-        // Set appropriate sorting mode as checked in the navigation drawer
-        if (TextUtils.equals(mSortBy, NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR)) {
-            mNavView.getMenu().getItem(1).setChecked(true);
-        } else {
-            mNavView.getMenu().getItem(0).setChecked(true);
-        }
-
+        // Get information about internet connection
+        mConnectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
+        boolean isConnected = networkInfo != null && networkInfo.isConnectedOrConnecting();
 
         mLoaderManager = getSupportLoaderManager();
 
@@ -94,15 +86,23 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // If there is nothing to restore start loading, else restore from Bundle
         if (savedInstanceState == null) {
 
-            mSortBy = NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR;
+            // Check internet connection before loading data
+            if (isConnected) {
 
-            if (mLoaderManager.getLoader(LOADER_ID) == null) {
-                Log.d(LOG_TAG, "Init loader");
-                mLoaderManager.initLoader(LOADER_ID, null, this);
+                if (mLoaderManager.getLoader(MOVIE_LOADER_ID) == null) {
+                    mLoaderManager.initLoader(MOVIE_LOADER_ID, null, this);
+                } else {
+                    mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
+                }
+
             } else {
-                Log.d(LOG_TAG, "Restart loader");
-                mLoaderManager.restartLoader(LOADER_ID, null, this);
+
+                mLoadingPb.setVisibility(View.GONE);
+                mStateTv.setVisibility(View.VISIBLE);
+                mStateTv.setText(R.string.no_network_connection_state);
+
             }
+
 
         } else {
             mSortBy = savedInstanceState.getString(BUNDLE_SORT_BY);
@@ -110,49 +110,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
             mMovieAdapter.updateData(mMovies);
         }
 
-
-
-        mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-
-                // Close drawer if item is clicked
-                mDrawerLayout.closeDrawers();
-
-                int itemId = item.getItemId();
-
-                switch (itemId) {
-
-                    case R.id.nav_popular:
-
-                        if (TextUtils.equals(mSortBy, NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR)) {
-                            return true;
-                        }
-
-                        mSortBy = NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR;
-                        mLoaderManager.restartLoader(LOADER_ID, null,
-                                MainActivity.this);
-                        return true;
-
-                    case R.id.nav_top_rated:
-
-                        if (TextUtils.equals(mSortBy, NetworkUtils.QUERY_VALUE_SORT_BY_TOP_RATED)) {
-                            return true;
-                        }
-
-                        mSortBy = NetworkUtils.QUERY_VALUE_SORT_BY_TOP_RATED;
-                        mLoaderManager.restartLoader(LOADER_ID, null,
-                                MainActivity.this);
-                        return true;
-
-                    default:
-                        return false;
-                }
-
-            }
-        });
-
-
+        setupNavDrawer();
 
     }
 
@@ -160,7 +118,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     protected void onSaveInstanceState(Bundle outState) {
         outState.putString(BUNDLE_SORT_BY, mSortBy);
         outState.putParcelableArrayList(BUNDLE_MOVIES, (ArrayList<Movie>) mMovies);
-        Log.d(LOG_TAG, "Save instance state");
         super.onSaveInstanceState(outState);
     }
 
@@ -180,16 +137,30 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
-        Log.d(LOG_TAG, mSortBy);
+
+        // Show the progress bar
+        mLoadingPb.setVisibility(View.VISIBLE);
+
+        // Build URL to fetch JSON
         URL jsonUrl = NetworkUtils.buildUrlDiscoverMovies(MainActivity.this, mSortBy);
+
         return new MovieLoader(this, jsonUrl);
     }
 
     @Override
     public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
+
+        // Hide the progress bar
+        mLoadingPb.setVisibility(View.GONE);
+
+        // If there is no data show empty state viewm otherwise hide empty state view
+        // and update the adapter with new data
         if (data == null || data.size() == 0) {
+            mStateTv.setText(R.string.empty_state);
+            mStateTv.setVisibility(View.VISIBLE);
             return;
         }
+        mStateTv.setVisibility(View.GONE);
         mMovies = data;
         mMovieAdapter.updateData(data);
     }
@@ -206,4 +177,80 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         openDetailActivity.putExtra(EXTRA_MOVIE, movie);
         startActivity(openDetailActivity);
     }
+
+    private void setupNavDrawer() {
+
+        // Set appropriate sorting mode as checked in the navigation drawer
+        if (mSortBy.equals(NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR)) {
+            mNavView.getMenu().getItem(0).setChecked(true);
+        } else {
+            mNavView.getMenu().getItem(1).setChecked(true);
+        }
+
+        mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+                // Close drawer if item is clicked
+                mDrawerLayout.closeDrawers();
+
+                int itemId = item.getItemId();
+
+                switch (itemId) {
+
+                    case R.id.nav_popular:
+                        updateUi(NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR);
+                        return true;
+
+                    case R.id.nav_top_rated:
+                        updateUi(NetworkUtils.QUERY_VALUE_SORT_BY_TOP_RATED);
+                        return true;
+
+                    default:
+                        return false;
+                }
+
+            }
+        });
+
+    }
+
+    private void updateUi(String sortBy) {
+
+        // If sorting is same, then no need to update UI
+        if (sortBy.equals(mSortBy)) {
+            return;
+        }
+
+        mSortBy = sortBy;
+
+        //
+        NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnectedOrConnecting()) {
+            mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
+        } else {
+            mMovieAdapter.updateData(new ArrayList<Movie>());
+            mLoadingPb.setVisibility(View.GONE);
+            mStateTv.setVisibility(View.VISIBLE);
+            mStateTv.setText(R.string.no_network_connection_state);
+        }
+
+    }
+
+    private void setupActionBar() {
+
+        // Set our custom Toolbar as ActionBar
+        setSupportActionBar(mToolbar);
+
+        // Get ActionBar
+        ActionBar actionBar = getSupportActionBar();
+
+        // Set icon to open the navigation drawer
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        }
+
+    }
+
 }

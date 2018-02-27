@@ -17,7 +17,7 @@
             android:layout_width="0dp"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"/>
@@ -26,84 +26,104 @@
             android:id="@+id/title_tv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="#009688"
-            android:paddingLeft="16dp"
-            android:paddingStart="16dp"
-            android:paddingRight="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="32dp"
-            android:paddingBottom="32dp"
+            android:background="@color/detailTitle"
+            android:paddingLeft="@dimen/detail_padding_horizontal"
+            android:paddingStart="@dimen/detail_padding_horizontal"
+            android:paddingRight="@dimen/detail_padding_horizontal"
+            android:paddingEnd="@dimen/detail_padding_horizontal"
+            android:paddingTop="@dimen/detail_title_padding_vertical"
+            android:paddingBottom="@dimen/detail_title_padding_vertical"
             android:textColor="@android:color/white"
-            android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-            tools:text="Chappie"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            tools:text="Avengers: Age of Ultron"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/toolbar"/>
 
         <ImageView
             android:id="@+id/poster_iv"
-            android:layout_width="0dp"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
-            android:layout_marginTop="8dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp"
-            android:scaleType="fitCenter"
+            android:layout_marginTop="@dimen/detail_margin_vertical"
+            android:layout_marginLeft="@dimen/detail_poster_margin_left"
+            android:layout_marginStart="@dimen/detail_poster_margin_left"
+            android:scaleType="fitStart"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="@id/vertical_gl"
             app:layout_constraintTop_toBottomOf="@id/title_tv"
-            tools:src="@drawable/poster" />
+            tools:src="@drawable/avengers_poster" />
+
+        <TextView
+            android:id="@+id/release_date_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/detail_margin_vertical"
+            android:layout_marginLeft="@dimen/detail_label_margin_left"
+            android:layout_marginStart="@dimen/detail_label_margin_left"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:text="@string/release_date_label"
+            app:layout_constraintLeft_toRightOf="@id/poster_iv"
+            app:layout_constraintTop_toBottomOf="@id/title_tv" />
+
+        <TextView
+            android:id="@+id/average_rating_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/detail_margin_vertical"
+            android:layout_marginLeft="@dimen/detail_label_margin_left"
+            android:layout_marginStart="@dimen/detail_label_margin_left"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+            android:text="@string/average_rating_label"
+            app:layout_constraintLeft_toRightOf="@id/poster_iv"
+            app:layout_constraintTop_toBottomOf="@id/release_date_label" />
 
         <TextView
             android:id="@+id/release_date_tv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:paddingLeft="16dp"
-            android:paddingStart="16dp"
-            android:paddingRight="16dp"
-            android:paddingEnd="16dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            tools:text="2015"
-            app:layout_constraintTop_toBottomOf="@id/title_tv"
-            app:layout_constraintLeft_toRightOf="@id/vertical_gl"
-            app:layout_constraintRight_toRightOf="parent"/>
+            android:layout_marginTop="@dimen/detail_margin_vertical"
+            android:paddingEnd="@dimen/detail_padding_horizontal"
+            android:paddingLeft="@dimen/detail_padding_horizontal"
+            android:paddingRight="@dimen/detail_padding_horizontal"
+            android:paddingStart="@dimen/detail_padding_horizontal"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/release_date_label"
+            app:layout_constraintLeft_toRightOf="@id/release_date_label"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title_tv"
+            tools:text="2015-04-22" />
 
         <TextView
             android:id="@+id/user_rating_tv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:paddingLeft="16dp"
-            android:paddingStart="16dp"
-            android:paddingRight="16dp"
-            android:paddingEnd="16dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            tools:text="8.1/10"
-            app:layout_constraintTop_toBottomOf="@id/release_date_tv"
-            app:layout_constraintLeft_toRightOf="@id/vertical_gl"
-            app:layout_constraintRight_toRightOf="parent"/>
+            android:layout_marginTop="@dimen/detail_margin_vertical"
+            android:paddingEnd="@dimen/detail_padding_horizontal"
+            android:paddingLeft="@dimen/detail_padding_horizontal"
+            android:paddingRight="@dimen/detail_padding_horizontal"
+            android:paddingStart="@dimen/detail_padding_horizontal"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/average_rating_label"
+            app:layout_constraintLeft_toRightOf="@id/average_rating_label"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/release_date_label"
+            tools:text="7.3" />
 
         <TextView
             android:id="@+id/overview_tv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:paddingLeft="16dp"
-            android:paddingStart="16dp"
-            android:paddingRight="16dp"
-            android:paddingEnd="16dp"
-            tools:text="Every child comes into the world full of promise, and none more so than Chappie: he is gifted, special, a prodigy. Like any child, Chappie will come under the influence of his surroundings—some good, some bad—and…"
+            android:layout_marginTop="@dimen/detail_margin_vertical"
+            android:paddingLeft="@dimen/detail_padding_horizontal"
+            android:paddingStart="@dimen/detail_padding_horizontal"
+            android:paddingRight="@dimen/detail_padding_horizontal"
+            android:paddingEnd="@dimen/detail_padding_horizontal"
+            tools:text="When Tony Stark tries to jumpstart a dormant peacekeeping program, things go awry and Earth’s Mightiest Heroes are put to the ultimate test as the fate of the planet hangs in the balance. As the villainous Ultron emerges, it is up to The Avengers to stop him from enacting his terrible plans, and soon uneasy alliances and unexpected action pave the way for an epic and unique global adventure."
             app:layout_constraintTop_toBottomOf="@id/poster_iv"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"/>
 
-        <android.support.constraint.Guideline
-            android:id="@+id/vertical_gl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5"/>
-
     </android.support.constraint.ConstraintLayout>
+
+
 </ScrollView>
