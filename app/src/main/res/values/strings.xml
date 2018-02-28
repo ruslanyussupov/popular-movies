@@ -11,4 +11,6 @@
     <string name="empty_state">There are no movies…</string>
     <string name="no_network_connection_state">No network connection</string>
 
+    <string name="movie_poster_content_description">The movie poster</string>
+
 </resources>

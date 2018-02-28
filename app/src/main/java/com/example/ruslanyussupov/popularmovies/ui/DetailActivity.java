@@ -5,7 +5,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,8 +17,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class DetailActivity extends AppCompatActivity {
-
-    private static final String LOG_TAG = DetailActivity.class.getSimpleName();
 
     @BindView(R.id.title_tv)TextView mTitleTv;
     @BindView(R.id.poster_iv)ImageView mPosterIv;
@@ -49,7 +46,8 @@ public class DetailActivity extends AppCompatActivity {
 
             Movie movie = intent.getParcelableExtra(MainActivity.EXTRA_MOVIE);
 
-            Picasso.with(this).load(NetworkUtils.buildMoviePosterUrlPath(movie.getPosterPath()))
+            Picasso.with(this)
+                    .load(NetworkUtils.buildMoviePosterUrlPath(movie.getPosterPath()))
                     .error(R.drawable.poster_placeholder)
                     .placeholder(R.drawable.poster_error)
                     .into(mPosterIv);

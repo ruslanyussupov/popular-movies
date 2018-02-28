@@ -3,7 +3,6 @@ package com.example.ruslanyussupov.popularmovies.ui;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,6 @@ import butterknife.ButterKnife;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
 
-    private static final String LOG_TAG = MovieAdapter.class.getSimpleName();
 
     private List<Movie> mMovies;
     private OnItemClickListener mOnItemClickListener;
@@ -51,7 +49,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
         // Load movie poster into ImageView
         String posterPath = NetworkUtils.buildMoviePosterUrlPath(currentMovie.getPosterPath());
-        Log.v(LOG_TAG, posterPath);
         Picasso.with(context).load(posterPath).placeholder(R.drawable.poster_placeholder)
                 .error(R.drawable.poster_error)
                 .into(holder.posterImageView);

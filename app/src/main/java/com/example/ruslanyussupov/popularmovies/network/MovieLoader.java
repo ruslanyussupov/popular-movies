@@ -3,7 +3,6 @@ package com.example.ruslanyussupov.popularmovies.network;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
-import android.util.Log;
 
 import com.example.ruslanyussupov.popularmovies.model.Movie;
 import com.example.ruslanyussupov.popularmovies.utils.JsonUtils;
@@ -13,8 +12,6 @@ import java.net.URL;
 import java.util.List;
 
 public class MovieLoader extends AsyncTaskLoader<List<Movie>> {
-
-    private static final String LOG_TAG = MovieLoader.class.getSimpleName();
 
     private URL mJsonUrl;
     private List<Movie> mMovies;

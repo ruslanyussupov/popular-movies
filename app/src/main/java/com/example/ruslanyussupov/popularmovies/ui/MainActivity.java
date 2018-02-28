@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -36,8 +35,6 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<Movie>>,
         MovieAdapter.OnItemClickListener {
 
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
-
     // Id for MovieLoader
     private static final int MOVIE_LOADER_ID = 111;
 
@@ -47,11 +44,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     public static final String EXTRA_MOVIE = "movie";
 
+    private static final int SORT_BY_POPULAR = 1;
+    private static final int SORT_BY_TOP_RATED = 2;
+
     private MovieAdapter mMovieAdapter;
     private LoaderManager mLoaderManager;
-    private String mSortBy = NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR;
+    private int mSortBy = SORT_BY_POPULAR;
     private List<Movie> mMovies;
-    private ConnectivityManager mConnectivityManager;
 
     // Define views for binding
     @BindView(R.id.rv_movies)RecyclerView mMoviesRecyclerView;
@@ -71,11 +70,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         setupActionBar();
 
-        // Get information about internet connection
-        mConnectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
-        boolean isConnected = networkInfo != null && networkInfo.isConnectedOrConnecting();
-
         mLoaderManager = getSupportLoaderManager();
 
         // Set up MovieAdapter and GridLayoutManager to RV
@@ -87,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         if (savedInstanceState == null) {
 
             // Check internet connection before loading data
-            if (isConnected) {
+            if (hasNetworkConnection()) {
 
                 if (mLoaderManager.getLoader(MOVIE_LOADER_ID) == null) {
                     mLoaderManager.initLoader(MOVIE_LOADER_ID, null, this);
@@ -97,15 +91,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
             } else {
 
-                mLoadingPb.setVisibility(View.GONE);
-                mStateTv.setVisibility(View.VISIBLE);
-                mStateTv.setText(R.string.no_network_connection_state);
+                showNoNetworkConnectionState();
 
             }
 
 
         } else {
-            mSortBy = savedInstanceState.getString(BUNDLE_SORT_BY);
+            mSortBy = savedInstanceState.getInt(BUNDLE_SORT_BY);
             mMovies = savedInstanceState.getParcelableArrayList(BUNDLE_MOVIES);
             mMovieAdapter.updateData(mMovies);
         }
@@ -116,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(BUNDLE_SORT_BY, mSortBy);
+        outState.putInt(BUNDLE_SORT_BY, mSortBy);
         outState.putParcelableArrayList(BUNDLE_MOVIES, (ArrayList<Movie>) mMovies);
         super.onSaveInstanceState(outState);
     }
@@ -141,8 +133,19 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // Show the progress bar
         mLoadingPb.setVisibility(View.VISIBLE);
 
-        // Build URL to fetch JSON
-        URL jsonUrl = NetworkUtils.buildUrlDiscoverMovies(MainActivity.this, mSortBy);
+        URL jsonUrl;
+
+        // Get appropriate URL to fetch movies data
+        switch (mSortBy) {
+            case SORT_BY_POPULAR:
+                jsonUrl = NetworkUtils.getPopularMoviesUrl(this);
+                break;
+            case SORT_BY_TOP_RATED:
+                jsonUrl = NetworkUtils.getTopRatedMoviesUrl(this);
+                break;
+            default:
+                throw new IllegalArgumentException("Sort by = " + mSortBy);
+        }
 
         return new MovieLoader(this, jsonUrl);
     }
@@ -153,13 +156,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // Hide the progress bar
         mLoadingPb.setVisibility(View.GONE);
 
-        // If there is no data show empty state viewm otherwise hide empty state view
+        // If there is no data show empty state view otherwise hide empty state view
         // and update the adapter with new data
         if (data == null || data.size() == 0) {
-            mStateTv.setText(R.string.empty_state);
-            mStateTv.setVisibility(View.VISIBLE);
+            showEmptyState();
             return;
         }
+
         mStateTv.setVisibility(View.GONE);
         mMovies = data;
         mMovieAdapter.updateData(data);
@@ -181,10 +184,19 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private void setupNavDrawer() {
 
         // Set appropriate sorting mode as checked in the navigation drawer
-        if (mSortBy.equals(NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR)) {
-            mNavView.getMenu().getItem(0).setChecked(true);
-        } else {
-            mNavView.getMenu().getItem(1).setChecked(true);
+        switch (mSortBy) {
+
+            case SORT_BY_POPULAR:
+                mNavView.getMenu().getItem(0).setChecked(true);
+                break;
+
+            case SORT_BY_TOP_RATED:
+                mNavView.getMenu().getItem(1).setChecked(true);
+                break;
+
+            default:
+                throw new IllegalArgumentException("Sort by = " + mSortBy);
+
         }
 
         mNavView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -199,11 +211,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 switch (itemId) {
 
                     case R.id.nav_popular:
-                        updateUi(NetworkUtils.QUERY_VALUE_SORT_BY_POPULAR);
+                        updateUi(SORT_BY_POPULAR);
                         return true;
 
                     case R.id.nav_top_rated:
-                        updateUi(NetworkUtils.QUERY_VALUE_SORT_BY_TOP_RATED);
+                        updateUi(SORT_BY_TOP_RATED);
                         return true;
 
                     default:
@@ -215,24 +227,22 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     }
 
-    private void updateUi(String sortBy) {
+    private void updateUi(int sortBy) {
 
         // If sorting is same, then no need to update UI
-        if (sortBy.equals(mSortBy)) {
+        if (mSortBy == sortBy) {
             return;
         }
 
         mSortBy = sortBy;
 
-        //
-        NetworkInfo networkInfo = mConnectivityManager.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnectedOrConnecting()) {
+        // If there is network connection load data
+        // Otherwise clear adapter's data and show no network connection state
+        if (hasNetworkConnection()) {
             mLoaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
         } else {
             mMovieAdapter.updateData(new ArrayList<Movie>());
-            mLoadingPb.setVisibility(View.GONE);
-            mStateTv.setVisibility(View.VISIBLE);
-            mStateTv.setText(R.string.no_network_connection_state);
+            showNoNetworkConnectionState();
         }
 
     }
@@ -252,5 +262,38 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         }
 
     }
+
+    private boolean hasNetworkConnection() {
+
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+
+        if (connectivityManager != null) {
+
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            return networkInfo != null && networkInfo.isConnectedOrConnecting();
+
+        }
+
+        return false;
+
+    }
+
+    private void showEmptyState() {
+
+        mLoadingPb.setVisibility(View.GONE);
+        mStateTv.setVisibility(View.VISIBLE);
+        mStateTv.setText(R.string.empty_state);
+
+    }
+
+    private void showNoNetworkConnectionState() {
+
+        mLoadingPb.setVisibility(View.GONE);
+        mStateTv.setVisibility(View.VISIBLE);
+        mStateTv.setText(R.string.no_network_connection_state);
+
+    }
+
 
 }

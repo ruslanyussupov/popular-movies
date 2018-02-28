@@ -15,25 +15,21 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Locale;
 
 public class NetworkUtils {
 
     private static final String LOG_TAG = NetworkUtils.class.getSimpleName();
 
-    private static final String DISCOVER_MOVIE_URL = "https://api.themoviedb.org/3/discover/movie";
+    private static final String POPULAR_MOVIES_URL = "https://api.themoviedb.org/3/movie/popular";
+    private static final String TOP_RATED_MOVIES_URL = "https://api.themoviedb.org/3/movie/top_rated";
 
     private static final String MOVIE_POSTER_MAIN_PATH = "http://image.tmdb.org/t/p/w185";
 
     private static final String QUERY_KEY_API_KEY = "api_key";
     private static final String QUERY_KEY_LANGUAGE = "language";
-    private static final String QUERY_KEY_SORT_BY = "sort_by";
-    private static final String QUERY_KEY_INCLUDE_ADULT = "include_adult";
-    private static final String QUERY_KEY_INCLUDE_VIDEO = "include_video";
-    private static final String QUERY_KEY_PAGE = "page";
 
-    private static final String QUERY_VALUE_EN_US = "en-US";
-    public static final String QUERY_VALUE_SORT_BY_POPULAR = "popularity.desc";
-    public static final String QUERY_VALUE_SORT_BY_TOP_RATED = "vote_average.desc";
+    private static final String QUERY_VALUE_LANGUAGE = Locale.getDefault().toString();
 
 
     /**
@@ -94,8 +90,6 @@ public class NetworkUtils {
             }
         }
 
-        Log.v(LOG_TAG, "JSON response: " + response);
-
         return response;
 
     }
@@ -121,18 +115,25 @@ public class NetworkUtils {
 
     }
 
-    public static URL buildUrlDiscoverMovies(Context context, String sortBy) {
+    public static URL getPopularMoviesUrl(Context context) {
 
-        Uri discoverMoviesQueryUri = Uri.parse(DISCOVER_MOVIE_URL).buildUpon()
+        Uri popularMoviesUri = Uri.parse(POPULAR_MOVIES_URL).buildUpon()
                 .appendQueryParameter(QUERY_KEY_API_KEY, context.getString(R.string.themoviedb_api_key))
-                .appendQueryParameter(QUERY_KEY_LANGUAGE, QUERY_VALUE_EN_US)
-                .appendQueryParameter(QUERY_KEY_SORT_BY, sortBy)
-                .appendQueryParameter(QUERY_KEY_INCLUDE_ADULT, "false")
-                .appendQueryParameter(QUERY_KEY_INCLUDE_VIDEO, "false")
-                .appendQueryParameter(QUERY_KEY_PAGE, "1")
+                .appendQueryParameter(QUERY_KEY_LANGUAGE, QUERY_VALUE_LANGUAGE)
                 .build();
 
-        return makeUrl(discoverMoviesQueryUri.toString());
+        return makeUrl(popularMoviesUri.toString());
+
+    }
+
+    public static URL getTopRatedMoviesUrl(Context context) {
+
+        Uri popularMoviesUri = Uri.parse(TOP_RATED_MOVIES_URL).buildUpon()
+                .appendQueryParameter(QUERY_KEY_API_KEY, context.getString(R.string.themoviedb_api_key))
+                .appendQueryParameter(QUERY_KEY_LANGUAGE, QUERY_VALUE_LANGUAGE)
+                .build();
+
+        return makeUrl(popularMoviesUri.toString());
 
     }
 

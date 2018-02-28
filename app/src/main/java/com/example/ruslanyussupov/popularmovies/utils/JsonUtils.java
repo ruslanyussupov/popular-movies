@@ -17,12 +17,12 @@ public class JsonUtils {
     private static final String LOG_TAG = JsonUtils.class.getSimpleName();
 
     // JSON keys
-    private static final String JSON_RESULTS = "results";
-    private static final String JSON_ORIGINAL_TITLE = "original_title";
-    private static final String JSON_VOTE_AVERAGE = "vote_average";
-    private static final String JSON_POSTER_PATH = "poster_path";
-    private static final String JSON_OVERVIEW = "overview";
-    private static final String JSON_RELEASE_DATE = "release_date";
+    private static final String RESULTS = "results";
+    private static final String ORIGINAL_TITLE = "original_title";
+    private static final String VOTE_AVERAGE = "vote_average";
+    private static final String POSTER_PATH = "poster_path";
+    private static final String OVERVIEW = "overview";
+    private static final String RELEASE_DATE = "release_date";
 
 
     /**
@@ -40,7 +40,7 @@ public class JsonUtils {
             JSONObject root = new JSONObject(json);
 
             // Get JSONArray of movies
-            JSONArray results = root.getJSONArray(JSON_RESULTS);
+            JSONArray results = root.getJSONArray(RESULTS);
 
             int length = results.length();
 
@@ -55,11 +55,11 @@ public class JsonUtils {
             for (int i = 0; i < length; i++) {
 
                 JSONObject currentMovie = (JSONObject) results.get(i);
-                String posterPath = currentMovie.getString(JSON_POSTER_PATH);
-                String originalTitle = currentMovie.getString(JSON_ORIGINAL_TITLE);
-                double voteAverage = currentMovie.getDouble(JSON_VOTE_AVERAGE);
-                String overview = currentMovie.getString(JSON_OVERVIEW);
-                String releaseDate = currentMovie.getString(JSON_RELEASE_DATE);
+                String posterPath = currentMovie.getString(POSTER_PATH);
+                String originalTitle = currentMovie.getString(ORIGINAL_TITLE);
+                double voteAverage = currentMovie.getDouble(VOTE_AVERAGE);
+                String overview = currentMovie.getString(OVERVIEW);
+                String releaseDate = currentMovie.getString(RELEASE_DATE);
 
                 Movie movie = new Movie(originalTitle,
                         posterPath,
@@ -75,8 +75,6 @@ public class JsonUtils {
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Json parse error.", e);
         }
-
-        Log.v(LOG_TAG, "JSON parsing result: " + movies.size());
 
         return movies;
     }
