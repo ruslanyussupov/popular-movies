@@ -13,4 +13,6 @@
 
     <string name="movie_poster_content_description">The movie poster</string>
 
+    <string name="no_information">No information</string>
+
 </resources>

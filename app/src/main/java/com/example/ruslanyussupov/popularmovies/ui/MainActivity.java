@@ -99,7 +99,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         } else {
             mSortBy = savedInstanceState.getInt(BUNDLE_SORT_BY);
             mMovies = savedInstanceState.getParcelableArrayList(BUNDLE_MOVIES);
-            mMovieAdapter.updateData(mMovies);
+
+            if (mMovies == null || mMovies.isEmpty()) {
+                if (!hasNetworkConnection())  {
+                    showNoNetworkConnectionState();
+                } else {
+                    showEmptyState();
+                }
+            } else {
+                mMovieAdapter.updateData(mMovies);
+            }
         }
 
         setupNavDrawer();
@@ -138,10 +147,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // Get appropriate URL to fetch movies data
         switch (mSortBy) {
             case SORT_BY_POPULAR:
-                jsonUrl = NetworkUtils.getPopularMoviesUrl(this);
+                jsonUrl = NetworkUtils.getPopularMoviesUrl();
                 break;
             case SORT_BY_TOP_RATED:
-                jsonUrl = NetworkUtils.getTopRatedMoviesUrl(this);
+                jsonUrl = NetworkUtils.getTopRatedMoviesUrl();
                 break;
             default:
                 throw new IllegalArgumentException("Sort by = " + mSortBy);

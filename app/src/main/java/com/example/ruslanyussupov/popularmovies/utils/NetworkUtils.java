@@ -1,12 +1,11 @@
 package com.example.ruslanyussupov.popularmovies.utils;
 
 
-import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.example.ruslanyussupov.popularmovies.R;
+import com.example.ruslanyussupov.popularmovies.BuildConfig;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,7 +28,8 @@ public class NetworkUtils {
     private static final String QUERY_KEY_API_KEY = "api_key";
     private static final String QUERY_KEY_LANGUAGE = "language";
 
-    private static final String QUERY_VALUE_LANGUAGE = Locale.getDefault().toString();
+    private static final String LANGUAGE = Locale.getDefault().toString();
+    private static final String API_KEY = BuildConfig.THEMOVIEDB_API_KEY;
 
 
     /**
@@ -115,22 +115,22 @@ public class NetworkUtils {
 
     }
 
-    public static URL getPopularMoviesUrl(Context context) {
+    public static URL getPopularMoviesUrl() {
 
         Uri popularMoviesUri = Uri.parse(POPULAR_MOVIES_URL).buildUpon()
-                .appendQueryParameter(QUERY_KEY_API_KEY, context.getString(R.string.themoviedb_api_key))
-                .appendQueryParameter(QUERY_KEY_LANGUAGE, QUERY_VALUE_LANGUAGE)
+                .appendQueryParameter(QUERY_KEY_API_KEY, API_KEY)
+                .appendQueryParameter(QUERY_KEY_LANGUAGE, LANGUAGE)
                 .build();
 
         return makeUrl(popularMoviesUri.toString());
 
     }
 
-    public static URL getTopRatedMoviesUrl(Context context) {
+    public static URL getTopRatedMoviesUrl() {
 
         Uri popularMoviesUri = Uri.parse(TOP_RATED_MOVIES_URL).buildUpon()
-                .appendQueryParameter(QUERY_KEY_API_KEY, context.getString(R.string.themoviedb_api_key))
-                .appendQueryParameter(QUERY_KEY_LANGUAGE, QUERY_VALUE_LANGUAGE)
+                .appendQueryParameter(QUERY_KEY_API_KEY, API_KEY)
+                .appendQueryParameter(QUERY_KEY_LANGUAGE, LANGUAGE)
                 .build();
 
         return makeUrl(popularMoviesUri.toString());
