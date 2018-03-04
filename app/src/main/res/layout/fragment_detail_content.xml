@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/backdrop_iv"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        tools:src="@drawable/backdrop_placeholder"
+        app:layout_constraintDimensionRatio="h, 780:439"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <TextView
+        android:id="@+id/title_tv"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="@dimen/detail_margin_vertical"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:maxLines="3"
+        android:ellipsize="end"
+        tools:text="Avengers: Age of Ultron"
+        app:layout_constraintLeft_toRightOf="@id/poster_iv"
+        app:layout_constraintRight_toLeftOf="@id/favorite_iv"
+        app:layout_constraintTop_toBottomOf="@id/backdrop_iv"
+        app:layout_constraintBottom_toBottomOf="@id/poster_iv"/>
+
+    <ImageView
+        android:id="@+id/favorite_iv"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="2dp"
+        android:layout_marginTop="@dimen/detail_margin_vertical"
+        android:layout_marginRight="16dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_favorite"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/backdrop_iv"/>
+
+    <ImageView
+        android:id="@+id/poster_iv"
+        android:layout_width="@dimen/detail_poster_width"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/movie_poster_content_description"
+        android:adjustViewBounds="true"
+        android:layout_marginLeft="@dimen/detail_poster_margin_left"
+        android:layout_marginStart="@dimen/detail_poster_margin_left"
+        android:scaleType="fitStart"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/backdrop_iv"
+        app:layout_constraintBottom_toBottomOf="@id/backdrop_iv"
+        tools:src="@drawable/poster_placeholder" />
+
+    <TextView
+        android:id="@+id/average_rating_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        android:text="@string/average_rating_label"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/labels_barrier" />
+
+    <TextView
+        android:id="@+id/user_rating_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingEnd="@dimen/detail_padding_horizontal"
+        android:paddingLeft="@dimen/detail_padding_horizontal"
+        android:paddingRight="@dimen/detail_padding_horizontal"
+        android:paddingStart="@dimen/detail_padding_horizontal"
+        android:textStyle="bold"
+        android:textSize="24sp"
+        android:text="@string/no_information"
+        app:layout_constraintLeft_toRightOf="@id/average_rating_label"
+        app:layout_constraintTop_toTopOf="@id/average_rating_label"
+        app:layout_constraintBottom_toBottomOf="@id/average_rating_label"
+        tools:text="7.3" />
+
+    <TextView
+        android:id="@+id/release_date_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+        android:text="@string/release_date_label"
+        app:layout_constraintLeft_toRightOf="@id/user_rating_tv"
+        app:layout_constraintTop_toBottomOf="@id/labels_barrier" />
+
+    <TextView
+        android:id="@+id/release_date_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingEnd="@dimen/detail_padding_horizontal"
+        android:paddingLeft="@dimen/detail_padding_horizontal"
+        android:paddingRight="@dimen/detail_padding_horizontal"
+        android:paddingStart="@dimen/detail_padding_horizontal"
+        android:gravity="center_vertical"
+        android:textStyle="bold"
+        android:text="@string/no_information"
+        app:layout_constraintLeft_toRightOf="@id/release_date_label"
+        app:layout_constraintTop_toTopOf="@id/release_date_label"
+        app:layout_constraintBottom_toBottomOf="@id/release_date_label"
+        tools:text="2015-04-22" />
+
+    <android.support.constraint.Barrier
+        android:id="@+id/labels_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="poster_iv, title_tv"/>
+
+    <android.support.constraint.Barrier
+        android:id="@+id/overview_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="release_date_label, release_date_tv" />
+
+
+    <TextView
+        android:id="@+id/overview_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/overview_label"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/overview_barrier"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+    <View
+        android:layout_width="24dp"
+        android:layout_height="2dp"
+        android:background="@color/colorPrimary"
+        app:layout_constraintTop_toBottomOf="@id/overview_label"
+        app:layout_constraintLeft_toLeftOf="@id/overview_label"/>
+
+    <TextView
+        android:id="@+id/overview_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/detail_margin_vertical"
+        android:paddingLeft="@dimen/detail_padding_horizontal"
+        android:paddingStart="@dimen/detail_padding_horizontal"
+        android:paddingRight="@dimen/detail_padding_horizontal"
+        android:paddingEnd="@dimen/detail_padding_horizontal"
+        android:paddingBottom="@dimen/detail_padding_vertical"
+        tools:text="When Tony Stark tries to jumpstart a dormant peacekeeping program, things go awry and Earth’s Mightiest Heroes are put to the ultimate test as the fate of the planet hangs in the balance. As the villainous Ultron emerges, it is up to The Avengers to stop him from enacting his terrible plans, and soon uneasy alliances and unexpected action pave the way for an epic and unique global adventure."
+        app:layout_constraintTop_toBottomOf="@id/overview_label"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+</android.support.constraint.ConstraintLayout>

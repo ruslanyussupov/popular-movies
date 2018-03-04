@@ -24,6 +24,7 @@ public class NetworkUtils {
     private static final String TOP_RATED_MOVIES_URL = "https://api.themoviedb.org/3/movie/top_rated";
 
     private static final String MOVIE_POSTER_MAIN_PATH = "http://image.tmdb.org/t/p/w185";
+    private static final String MOVIE_BACKDROP_MAIN_PATH = "http://image.tmdb.org/t/p/w780";
 
     private static final String QUERY_KEY_API_KEY = "api_key";
     private static final String QUERY_KEY_LANGUAGE = "language";
@@ -139,6 +140,10 @@ public class NetworkUtils {
 
     public static String buildMoviePosterUrlPath(String posterPath) {
         return MOVIE_POSTER_MAIN_PATH + posterPath;
+    }
+
+    public static String buildMovieBackdropUrlPath(String backdropPath) {
+        return MOVIE_BACKDROP_MAIN_PATH + backdropPath;
     }
 
 }

@@ -23,6 +23,7 @@ public class JsonUtils {
     private static final String POSTER_PATH = "poster_path";
     private static final String OVERVIEW = "overview";
     private static final String RELEASE_DATE = "release_date";
+    private static final String BACKDROP_PATH = "backdrop_path";
 
 
     /**
@@ -60,12 +61,14 @@ public class JsonUtils {
                 double voteAverage = currentMovie.getDouble(VOTE_AVERAGE);
                 String overview = currentMovie.getString(OVERVIEW);
                 String releaseDate = currentMovie.getString(RELEASE_DATE);
+                String backdropPath = currentMovie.getString(BACKDROP_PATH);
 
                 Movie movie = new Movie(originalTitle,
                         posterPath,
                         overview,
                         voteAverage,
-                        releaseDate);
+                        releaseDate,
+                        backdropPath);
 
                 movies.add(movie);
 

@@ -25,6 +25,7 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.release_date_tv)TextView mReleaseDateTv;
     @BindView(R.id.user_rating_tv)TextView mVoteAverageTv;
     @BindView(R.id.overview_tv)TextView mOverviewTv;
+    @BindView(R.id.backdrop_iv)ImageView mBackdropIv;
     @BindView(R.id.toolbar)Toolbar mToolbar;
 
     @Override
@@ -53,6 +54,12 @@ public class DetailActivity extends AppCompatActivity {
                     .error(R.drawable.poster_placeholder)
                     .placeholder(R.drawable.poster_error)
                     .into(mPosterIv);
+
+            Picasso.with(this)
+                    .load(NetworkUtils.buildMovieBackdropUrlPath(movie.getBackdropPath()))
+                    .error(R.drawable.backdrop_error)
+                    .placeholder(R.drawable.poster_placeholder)
+                    .into(mBackdropIv);
 
             mTitleTv.setText(movie.getOriginalTitle());
             mReleaseDateTv.setText(movie.getReleaseDate());
