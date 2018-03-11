@@ -18,7 +18,12 @@ public class MainActivity extends AppCompatActivity {
     public static final int SORT_BY_POPULAR = 1;
     public static final int SORT_BY_TOP_RATED = 2;
 
+    private static final String BUNDLE_SORT_BY = "sort_by";
+
     private int mSortBy = SORT_BY_POPULAR;
+
+    private static final int ADD_FRAGMENT = 0;
+    private static final int REPLACE_FRAGMENT = 1;
 
     // Define views for binding
     @BindView(R.id.toolbar)Toolbar mToolbar;
@@ -31,17 +36,25 @@ public class MainActivity extends AppCompatActivity {
         // Bind views
         ButterKnife.bind(this);
 
-        setupActionBar();
+        // Set our custom Toolbar as ActionBar
+        setSupportActionBar(mToolbar);
 
-        MovieGridFragment movieGridFragment = new MovieGridFragment();
-        Bundle args = new Bundle();
-        args.putInt(MovieGridFragment.BUNDLE_SORT_BY, mSortBy);
-        movieGridFragment.setArguments(args);
+        if (savedInstanceState == null) {
 
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.movies_grid_container, movieGridFragment)
-                .commit();
+            showMoviesGrid(mSortBy, ADD_FRAGMENT);
 
+        } else {
+
+            mSortBy = savedInstanceState.getInt(BUNDLE_SORT_BY);
+
+        }
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(BUNDLE_SORT_BY, mSortBy);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -93,13 +106,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setupActionBar() {
-
-        // Set our custom Toolbar as ActionBar
-        setSupportActionBar(mToolbar);
-
-    }
-
     private void updateMoviesGrid(int sortBy) {
 
         if (mSortBy == sortBy) {
@@ -108,13 +114,31 @@ public class MainActivity extends AppCompatActivity {
 
         mSortBy = sortBy;
 
+        showMoviesGrid(mSortBy, REPLACE_FRAGMENT);
+
+    }
+
+    private void showMoviesGrid(int sortBy, int action) {
+
         MovieGridFragment movieGridFragment = new MovieGridFragment();
         Bundle args = new Bundle();
-        args.putInt(MovieGridFragment.BUNDLE_SORT_BY, mSortBy);
+        args.putInt(MovieGridFragment.BUNDLE_SORT_BY, sortBy);
         movieGridFragment.setArguments(args);
 
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.movies_grid_container, movieGridFragment).commit();
+        switch (action) {
+
+            case ADD_FRAGMENT:
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.movies_grid_container, movieGridFragment).commit();
+                break;
+            case REPLACE_FRAGMENT:
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.movies_grid_container, movieGridFragment).commit();
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported action: " + action);
+
+        }
 
     }
 

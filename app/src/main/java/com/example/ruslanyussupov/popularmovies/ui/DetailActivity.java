@@ -1,6 +1,5 @@
 package com.example.ruslanyussupov.popularmovies.ui;
 
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.example.ruslanyussupov.popularmovies.R;
+import com.example.ruslanyussupov.popularmovies.model.Movie;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,7 +29,9 @@ public class DetailActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
 
         if (actionBar != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            Movie movie = getIntent().getParcelableExtra(MovieGridFragment.EXTRA_MOVIE);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setTitle(movie.getOriginalTitle());
         }
 
     }

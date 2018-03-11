@@ -10,9 +10,13 @@
     <string name="release_date_label">Release\nDate</string>
     <string name="average_rating_label">Average\nRating</string>
     <string name="overview_label">Overview</string>
+    <string name="trailers_label">Trailers</string>
+    <string name="reviews_label">Reviews</string>
 
     <string name="empty_state">There are no movies…</string>
     <string name="no_network_connection_state">No network connection</string>
+    <string name="empty_state_videos">There are no trailers…</string>
+    <string name="empty_state_reviews">There are no reviews…</string>
 
     <string name="movie_poster_content_description">The movie poster</string>
 

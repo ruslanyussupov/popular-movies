@@ -20,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.ruslanyussupov.popularmovies.R;
+import com.example.ruslanyussupov.popularmovies.adapters.MovieAdapter;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
 import com.example.ruslanyussupov.popularmovies.network.MovieLoader;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
@@ -71,6 +72,8 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
+        Log.d(LOG_TAG, "onCreateView");
+
         View rootView = inflater.inflate(R.layout.fragment_movie_grid, container, false);
 
         // Bind views
@@ -84,14 +87,14 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        Log.d(LOG_TAG, "onActivityCreated");
+
         mSortBy = getArguments().getInt(BUNDLE_SORT_BY, MainActivity.SORT_BY_POPULAR);
 
         View movieDetailContainer = getActivity().findViewById(R.id.movie_detail_container);
         mIsTwoPane = movieDetailContainer != null
                 && movieDetailContainer.getVisibility() == View.VISIBLE;
         Log.d(LOG_TAG, "Is two pane: " + mIsTwoPane);
-
-        LoaderManager loaderManager = getActivity().getSupportLoaderManager();
 
         // Set up MovieAdapter and GridLayoutManager to RV
         mMovieAdapter = new MovieAdapter(new ArrayList<Movie>(), this);
@@ -101,8 +104,12 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
         // If there is nothing to restore start loading, else restore from Bundle
         if (savedInstanceState == null) {
 
+            Log.d(LOG_TAG, "savedInstanceState == null");
+
             // Check internet connection before loading data
             if (hasNetworkConnection()) {
+
+                LoaderManager loaderManager = getActivity().getSupportLoaderManager();
 
                 if (loaderManager.getLoader(MOVIE_LOADER_ID) == null) {
                     loaderManager.initLoader(MOVIE_LOADER_ID, null, this);
@@ -117,6 +124,8 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
             }
 
         } else {
+
+            Log.d(LOG_TAG, "savedInstanceState != null");
 
             mSortBy = savedInstanceState.getInt(BUNDLE_SORT_BY);
             mMovies = savedInstanceState.getParcelableArrayList(BUNDLE_MOVIES);
@@ -133,10 +142,6 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
 
             } else {
 
-                if (mIsTwoPane) {
-                    showDetailMovieFragment(mCurrentPosition);
-                }
-
                 mMovieAdapter.updateData(mMovies);
 
             }
@@ -146,10 +151,17 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        Log.d(LOG_TAG, "onSaveInstanceState");
         outState.putInt(BUNDLE_SORT_BY, mSortBy);
         outState.putParcelableArrayList(BUNDLE_MOVIES, (ArrayList<Movie>) mMovies);
         outState.putInt(BUNDLE_CURRENT_POSITION, mCurrentPosition);
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(LOG_TAG, "onDestroy");
+        super.onDestroy();
     }
 
     @Override

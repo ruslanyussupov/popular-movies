@@ -1,4 +1,4 @@
-package com.example.ruslanyussupov.popularmovies.ui;
+package com.example.ruslanyussupov.popularmovies.adapters;
 
 
 import android.content.Context;
@@ -24,7 +24,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     private List<Movie> mMovies;
     private OnItemClickListener mOnItemClickListener;
 
-    MovieAdapter(List<Movie> movies, OnItemClickListener onItemClickListener) {
+    public MovieAdapter(List<Movie> movies, OnItemClickListener onItemClickListener) {
         mMovies = movies;
         mOnItemClickListener = onItemClickListener;
     }
@@ -62,7 +62,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         }
         return mMovies.size();
     }
-
 
     class ViewHolder extends RecyclerView.ViewHolder {
 

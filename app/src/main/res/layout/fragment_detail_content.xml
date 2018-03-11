@@ -159,9 +159,35 @@
         android:paddingStart="@dimen/detail_padding_horizontal"
         android:paddingRight="@dimen/detail_padding_horizontal"
         android:paddingEnd="@dimen/detail_padding_horizontal"
-        android:paddingBottom="@dimen/detail_padding_vertical"
         tools:text="When Tony Stark tries to jumpstart a dormant peacekeeping program, things go awry and Earth’s Mightiest Heroes are put to the ultimate test as the fate of the planet hangs in the balance. As the villainous Ultron emerges, it is up to The Avengers to stop him from enacting his terrible plans, and soon uneasy alliances and unexpected action pave the way for an epic and unique global adventure."
         app:layout_constraintTop_toBottomOf="@id/overview_label"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <FrameLayout
+        android:id="@+id/videos_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:paddingLeft="@dimen/detail_padding_horizontal"
+        android:paddingStart="@dimen/detail_padding_horizontal"
+        android:paddingRight="@dimen/detail_padding_horizontal"
+        android:paddingEnd="@dimen/detail_padding_horizontal"
+        app:layout_constraintTop_toBottomOf="@id/overview_tv"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <FrameLayout
+        android:id="@+id/reviews_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:paddingLeft="@dimen/detail_padding_horizontal"
+        android:paddingStart="@dimen/detail_padding_horizontal"
+        android:paddingRight="@dimen/detail_padding_horizontal"
+        android:paddingEnd="@dimen/detail_padding_horizontal"
+        android:paddingBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/videos_container"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"/>
 

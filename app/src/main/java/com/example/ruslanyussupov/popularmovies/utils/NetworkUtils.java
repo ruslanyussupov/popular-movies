@@ -26,6 +26,11 @@ public class NetworkUtils {
     private static final String MOVIE_POSTER_MAIN_PATH = "http://image.tmdb.org/t/p/w185";
     private static final String MOVIE_BACKDROP_MAIN_PATH = "http://image.tmdb.org/t/p/w780";
 
+    private static final String MOVIE_BASE_URL = "https://api.themoviedb.org/3/movie";
+
+    private static final String MOVIE_REVIEWS = "reviews";
+    private static final String MOVIE_VIDEOS = "videos";
+
     private static final String QUERY_KEY_API_KEY = "api_key";
     private static final String QUERY_KEY_LANGUAGE = "language";
 
@@ -118,24 +123,22 @@ public class NetworkUtils {
 
     public static URL getPopularMoviesUrl() {
 
-        Uri popularMoviesUri = Uri.parse(POPULAR_MOVIES_URL).buildUpon()
-                .appendQueryParameter(QUERY_KEY_API_KEY, API_KEY)
-                .appendQueryParameter(QUERY_KEY_LANGUAGE, LANGUAGE)
-                .build();
-
-        return makeUrl(popularMoviesUri.toString());
+        return buildEndpointUrl(POPULAR_MOVIES_URL);
 
     }
 
     public static URL getTopRatedMoviesUrl() {
 
-        Uri popularMoviesUri = Uri.parse(TOP_RATED_MOVIES_URL).buildUpon()
-                .appendQueryParameter(QUERY_KEY_API_KEY, API_KEY)
-                .appendQueryParameter(QUERY_KEY_LANGUAGE, LANGUAGE)
-                .build();
+        return buildEndpointUrl(TOP_RATED_MOVIES_URL);
 
-        return makeUrl(popularMoviesUri.toString());
+    }
 
+    public static URL getMovieReviewsUrl(int movieId) {
+        return movieDetailUrlBuilder(movieId, MOVIE_REVIEWS);
+    }
+
+    public static URL getMovieVideosUrl(int movieId) {
+        return movieDetailUrlBuilder(movieId, MOVIE_VIDEOS);
     }
 
     public static String buildMoviePosterUrlPath(String posterPath) {
@@ -144,6 +147,25 @@ public class NetworkUtils {
 
     public static String buildMovieBackdropUrlPath(String backdropPath) {
         return MOVIE_BACKDROP_MAIN_PATH + backdropPath;
+    }
+
+    private static URL movieDetailUrlBuilder(int movieId, String detail) {
+
+        String url = MOVIE_BASE_URL + "/" + movieId + "/" + detail;
+
+        return buildEndpointUrl(url);
+
+    }
+
+    private static URL buildEndpointUrl(String url) {
+
+        Uri uri = Uri.parse(url).buildUpon()
+                .appendQueryParameter(QUERY_KEY_API_KEY, API_KEY)
+                .appendQueryParameter(QUERY_KEY_LANGUAGE, LANGUAGE)
+                .build();
+
+        return makeUrl(uri.toString());
+
     }
 
 }
