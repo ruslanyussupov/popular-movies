@@ -30,6 +30,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MainActivity"/>
         </activity>
+        
+        <provider
+            android:authorities="com.example.ruslanyussupov.popularmovies"
+            android:name=".db.MovieProvider"
+            android:exported="false" />
 
     </application>
 
