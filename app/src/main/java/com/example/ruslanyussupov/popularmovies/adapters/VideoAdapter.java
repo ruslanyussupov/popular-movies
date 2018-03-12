@@ -17,12 +17,12 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class VideosAdapter extends RecyclerView.Adapter<VideosAdapter.ViewHolder> {
+public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> {
 
     private List<Video> mVideos;
     private OnVideoClickListener mOnVideoClickListener;
 
-    public VideosAdapter(List<Video> videos, OnVideoClickListener onVideoClickListener) {
+    public VideoAdapter(List<Video> videos, OnVideoClickListener onVideoClickListener) {
         mVideos = videos;
         mOnVideoClickListener = onVideoClickListener;
     }

@@ -21,9 +21,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.ruslanyussupov.popularmovies.R;
-import com.example.ruslanyussupov.popularmovies.adapters.ReviewsAdapter;
-import com.example.ruslanyussupov.popularmovies.model.Review;
-import com.example.ruslanyussupov.popularmovies.network.ReviewLoader;
+import com.example.ruslanyussupov.popularmovies.adapters.VideoAdapter;
+import com.example.ruslanyussupov.popularmovies.model.Video;
+import com.example.ruslanyussupov.popularmovies.network.VideoLoader;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 
 import java.util.ArrayList;
@@ -32,22 +32,24 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ReviewsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Review>>,
-        ReviewsAdapter.OnReviewClickListener {
+public class VideoFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Video>>,
+        VideoAdapter.OnVideoClickListener {
 
-    private static final String LOG_TAG = ReviewsFragment.class.getSimpleName();
-    private static final int REVIEWS_LOADER = 333;
+    private static final String LOG_TAG = VideoFragment.class.getSimpleName();
+
     private static final String BUNDLE_MOVIE_ID = "movie_id";
-    private static final String BUNDLE_REVIEWS = "reviews";
+    private static final String BUNDLE_VIDEOS = "videos";
 
+    private List<Video> mVideos;
     private int mMovieId;
-    private List<Review> mReviews;
-    private ReviewsAdapter mAdapter;
+    private VideoAdapter mVideoAdapter;
 
-    @BindView(R.id.reviews_rv)RecyclerView mReviewsRv;
+    private static final int VIDEO_LOADER = 222;
+
+    @BindView(R.id.videos_rv)RecyclerView mVideosRv;
     @BindView(R.id.state_tv)TextView mStateTv;
 
-    public ReviewsFragment() {}
+    public VideoFragment() {}
 
     @Nullable
     @Override
@@ -55,7 +57,7 @@ public class ReviewsFragment extends Fragment implements LoaderManager.LoaderCal
 
         Log.d(LOG_TAG, "onCreateView");
 
-        View rootView = inflater.inflate(R.layout.fragment_reviews, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_video, container, false);
         ButterKnife.bind(this, rootView);
 
         return rootView;
@@ -70,9 +72,9 @@ public class ReviewsFragment extends Fragment implements LoaderManager.LoaderCal
 
         mStateTv.setVisibility(View.GONE);
 
-        mAdapter = new ReviewsAdapter(new ArrayList<Review>(), this);
-        mReviewsRv.setAdapter(mAdapter);
-        mReviewsRv.setLayoutManager(new LinearLayoutManager(getActivity(),
+        mVideoAdapter = new VideoAdapter(new ArrayList<Video>(), this);
+        mVideosRv.setAdapter(mVideoAdapter);
+        mVideosRv.setLayoutManager(new LinearLayoutManager(getActivity(),
                 LinearLayoutManager.HORIZONTAL, false));
 
         if (savedInstanceState == null) {
@@ -83,10 +85,10 @@ public class ReviewsFragment extends Fragment implements LoaderManager.LoaderCal
 
                 LoaderManager loaderManager = getLoaderManager();
 
-                if (loaderManager.getLoader(REVIEWS_LOADER) == null) {
-                    loaderManager.initLoader(REVIEWS_LOADER, null, this);
+                if (loaderManager.getLoader(VIDEO_LOADER) == null) {
+                    loaderManager.initLoader(VIDEO_LOADER, null, this);
                 } else {
-                    loaderManager.restartLoader(REVIEWS_LOADER, null, this);
+                    loaderManager.restartLoader(VIDEO_LOADER, null, this);
                 }
 
             } else {
@@ -98,11 +100,11 @@ public class ReviewsFragment extends Fragment implements LoaderManager.LoaderCal
         } else {
 
             mMovieId = savedInstanceState.getInt(BUNDLE_MOVIE_ID);
-            mReviews = savedInstanceState.getParcelableArrayList(BUNDLE_REVIEWS);
+            mVideos = savedInstanceState.getParcelableArrayList(BUNDLE_VIDEOS);
 
-            if (mReviews != null) {
+            if (mVideos != null) {
                 mStateTv.setVisibility(View.GONE);
-                mAdapter.updateData(mReviews);
+                mVideoAdapter.updateData(mVideos);
             } else {
                 showEmptyState();
             }
@@ -111,12 +113,11 @@ public class ReviewsFragment extends Fragment implements LoaderManager.LoaderCal
 
 
 
-
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(BUNDLE_REVIEWS, (ArrayList<? extends Parcelable>) mReviews);
+        outState.putParcelableArrayList(BUNDLE_VIDEOS, (ArrayList<? extends Parcelable>) mVideos);
         outState.putInt(BUNDLE_MOVIE_ID, mMovieId);
         super.onSaveInstanceState(outState);
     }
@@ -128,33 +129,35 @@ public class ReviewsFragment extends Fragment implements LoaderManager.LoaderCal
     }
 
     @Override
-    public Loader<List<Review>> onCreateLoader(int id, Bundle args) {
-        return new ReviewLoader(getActivity(), NetworkUtils.getMovieReviewsUrl(mMovieId));
+    public Loader<List<Video>> onCreateLoader(int id, Bundle args) {
+        return new VideoLoader(getActivity(), NetworkUtils.getMovieVideosUrl(mMovieId));
     }
 
     @Override
-    public void onLoadFinished(Loader<List<Review>> loader, List<Review> data) {
+    public void onLoadFinished(Loader<List<Video>> loader, List<Video> data) {
+
         if (data == null || data.size() == 0) {
             showEmptyState();
             return;
         }
 
         mStateTv.setVisibility(View.GONE);
-        mReviews = data;
-        mAdapter.updateData(mReviews);
+        mVideos = data;
+        mVideoAdapter.updateData(mVideos);
+
     }
 
     @Override
-    public void onLoaderReset(Loader<List<Review>> loader) {
-        mAdapter.updateData(new ArrayList<Review>());
+    public void onLoaderReset(Loader<List<Video>> loader) {
+        mVideoAdapter.updateData(new ArrayList<Video>());
     }
 
     @Override
-    public void onReviewClick(int position) {
-        Review review = mReviews.get(position);
-        Intent openReviewIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(review.getUrl()));
-        if (openReviewIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-            startActivity(openReviewIntent);
+    public void onVideoClick(int position) {
+        Intent openVideoIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse(mVideos.get(position).getUrl()));
+        if (openVideoIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+            startActivity(openVideoIntent);
         }
     }
 
@@ -164,10 +167,8 @@ public class ReviewsFragment extends Fragment implements LoaderManager.LoaderCal
                 (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         if (connectivityManager != null) {
-
             NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
             return networkInfo != null && networkInfo.isConnectedOrConnecting();
-
         }
 
         return false;
@@ -184,7 +185,8 @@ public class ReviewsFragment extends Fragment implements LoaderManager.LoaderCal
     private void showEmptyState() {
 
         mStateTv.setVisibility(View.VISIBLE);
-        mStateTv.setText(R.string.empty_state_reviews);
+        mStateTv.setText(R.string.empty_state_videos);
 
     }
+
 }

@@ -15,12 +15,12 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ViewHolder> {
+public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder> {
 
     private List<Review> mReviews;
     private OnReviewClickListener mOnReviewClickListener;
 
-    public ReviewsAdapter(List<Review> reviews, OnReviewClickListener onReviewClickListener) {
+    public ReviewAdapter(List<Review> reviews, OnReviewClickListener onReviewClickListener) {
         mReviews = reviews;
         mOnReviewClickListener = onReviewClickListener;
     }

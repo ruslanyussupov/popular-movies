@@ -97,21 +97,21 @@ public class DetailContentFragment extends Fragment {
 
     private void addFragments() {
 
-        VideosFragment videosFragment = new VideosFragment();
-        ReviewsFragment reviewsFragment = new ReviewsFragment();
+        VideoFragment videoFragment = new VideoFragment();
+        ReviewFragment reviewFragment = new ReviewFragment();
 
         Bundle args = new Bundle();
         args.putInt(BUNDLE_MOVIE_ID, mMovie.getId());
 
-        videosFragment.setArguments(args);
-        reviewsFragment.setArguments(args);
+        videoFragment.setArguments(args);
+        reviewFragment.setArguments(args);
 
         getFragmentManager().beginTransaction()
-                .add(R.id.videos_container, videosFragment)
+                .add(R.id.videos_container, videoFragment)
                 .commit();
 
         getFragmentManager().beginTransaction()
-                .add(R.id.reviews_container, reviewsFragment)
+                .add(R.id.reviews_container, reviewFragment)
                 .commit();
 
     }
