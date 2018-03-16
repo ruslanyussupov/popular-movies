@@ -1,6 +1,9 @@
 package com.example.ruslanyussupov.popularmovies.utils;
 
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -101,7 +104,7 @@ public class NetworkUtils {
     }
 
     // Takes URL as String and returns URL object
-    private static URL makeUrl(String urlString) {
+    public static URL makeUrl(String urlString) {
 
         // If URL is empty then return null
         if (TextUtils.isEmpty(urlString)) {
@@ -118,6 +121,22 @@ public class NetworkUtils {
         }
 
         return url;
+
+    }
+
+    public static boolean hasNetworkConnection(Context context) {
+
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (connectivityManager != null) {
+
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            return networkInfo != null && networkInfo.isConnectedOrConnecting();
+
+        }
+
+        return false;
 
     }
 

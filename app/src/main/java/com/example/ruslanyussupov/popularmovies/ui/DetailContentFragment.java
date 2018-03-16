@@ -2,6 +2,9 @@ package com.example.ruslanyussupov.popularmovies.ui;
 
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -9,16 +12,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
+import com.example.ruslanyussupov.popularmovies.utils.DbUtils;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class DetailContentFragment extends Fragment {
 
@@ -34,6 +41,7 @@ public class DetailContentFragment extends Fragment {
     @BindView(R.id.user_rating_tv)TextView mVoteAverageTv;
     @BindView(R.id.overview_tv)TextView mOverviewTv;
     @BindView(R.id.backdrop_iv)ImageView mBackdropIv;
+    @BindView(R.id.favorite_ib)ImageButton mFavouriteIb;
 
     public DetailContentFragment() {}
 
@@ -95,6 +103,14 @@ public class DetailContentFragment extends Fragment {
         super.onDestroy();
     }
 
+    @OnClick(R.id.favorite_ib)
+    public void addToFavourite() {
+
+        Uri row = DbUtils.insertMovieIntoDb(getActivity(), mMovie);
+        Toast.makeText(getActivity(), "The movie added to favourite:\n" + row, Toast.LENGTH_SHORT).show();
+
+    }
+
     private void addFragments() {
 
         VideoFragment videoFragment = new VideoFragment();
@@ -118,17 +134,38 @@ public class DetailContentFragment extends Fragment {
 
     private void updateUi() {
 
-        Picasso.with(getActivity())
-                .load(NetworkUtils.buildMoviePosterUrlPath(mMovie.getPosterPath()))
-                .error(R.drawable.poster_placeholder)
-                .placeholder(R.drawable.poster_error)
-                .into(mPosterIv);
+        if (NetworkUtils.hasNetworkConnection(getActivity())) {
 
-        Picasso.with(getActivity())
-                .load(NetworkUtils.buildMovieBackdropUrlPath(mMovie.getBackdropPath()))
-                .error(R.drawable.backdrop_error)
-                .placeholder(R.drawable.poster_placeholder)
-                .into(mBackdropIv);
+            Picasso.with(getActivity())
+                    .load(NetworkUtils.buildMoviePosterUrlPath(mMovie.getPosterPath()))
+                    .error(R.drawable.poster_placeholder)
+                    .placeholder(R.drawable.poster_error)
+                    .into(mPosterIv);
+
+            Picasso.with(getActivity())
+                    .load(NetworkUtils.buildMovieBackdropUrlPath(mMovie.getBackdropPath()))
+                    .error(R.drawable.backdrop_error)
+                    .placeholder(R.drawable.poster_placeholder)
+                    .into(mBackdropIv);
+
+        } else {
+
+            Bitmap poster = BitmapFactory.decodeFile(mMovie.getPosterPath());
+            Bitmap backdrop = BitmapFactory.decodeFile(mMovie.getBackdropPath());
+
+            if (poster == null) {
+                mPosterIv.setImageResource(R.drawable.poster_placeholder);
+            } else {
+                mPosterIv.setImageBitmap(poster);
+            }
+
+            if (backdrop == null) {
+                mBackdropIv.setImageResource(R.drawable.backdrop_placeholder);
+            } else {
+                mBackdropIv.setImageBitmap(backdrop);
+            }
+
+        }
 
         mTitleTv.setText(mMovie.getOriginalTitle());
         mReleaseDateTv.setText(mMovie.getReleaseDate());

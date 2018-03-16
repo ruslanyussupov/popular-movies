@@ -13,6 +13,8 @@ public class Movie implements Parcelable {
     private double voteAverage;
     private String releaseDate;
     private String backdropPath;
+    private String posterDbPath;
+    private String backdropDbPath;
 
     public Movie(int id, String originalTitle, String posterPath, String overview, double voteAverage,
                  String releaseDate, String backdropPath) {
@@ -25,6 +27,15 @@ public class Movie implements Parcelable {
         this.backdropPath = backdropPath;
     }
 
+    public Movie(int id, String originalTitle, String overview, double voteAverage,
+                 String releaseDate) {
+        this.id = id;
+        this.originalTitle = originalTitle;
+        this.overview = overview;
+        this.voteAverage = voteAverage;
+        this.releaseDate = releaseDate;
+    }
+
     protected Movie(Parcel in) {
         id = in.readInt();
         originalTitle = in.readString();
@@ -33,6 +44,8 @@ public class Movie implements Parcelable {
         voteAverage = in.readDouble();
         releaseDate = in.readString();
         backdropPath = in.readString();
+        posterDbPath = in.readString();
+        backdropDbPath = in.readString();
     }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
@@ -76,6 +89,21 @@ public class Movie implements Parcelable {
         return backdropPath;
     }
 
+    public void setPosterDbPath(String posterDbPath) {
+        this.posterDbPath = posterDbPath;
+    }
+
+    public void setBackdropDbPath(String backdropDbPath) {
+        this.backdropDbPath = backdropDbPath;
+    }
+
+    public String getPosterDbPath() {
+        return posterDbPath;
+    }
+
+    public String getBackdropDbPath() {
+        return backdropDbPath;
+    }
 
     @Override
     public int describeContents() {
@@ -91,5 +119,7 @@ public class Movie implements Parcelable {
         dest.writeDouble(voteAverage);
         dest.writeString(releaseDate);
         dest.writeString(backdropPath);
+        dest.writeString(posterDbPath);
+        dest.writeString(backdropDbPath);
     }
 }

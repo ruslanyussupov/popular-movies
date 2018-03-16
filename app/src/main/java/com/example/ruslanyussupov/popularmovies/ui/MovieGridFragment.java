@@ -3,8 +3,6 @@ package com.example.ruslanyussupov.popularmovies.ui;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -107,7 +105,7 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
             Log.d(LOG_TAG, "savedInstanceState == null");
 
             // Check internet connection before loading data
-            if (hasNetworkConnection()) {
+            if (NetworkUtils.hasNetworkConnection(getActivity())) {
 
                 LoaderManager loaderManager = getActivity().getSupportLoaderManager();
 
@@ -134,7 +132,7 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
 
             if (mMovies == null || mMovies.isEmpty()) {
 
-                if (!hasNetworkConnection())  {
+                if (!NetworkUtils.hasNetworkConnection(getActivity()))  {
                     showNoNetworkConnectionState();
                 } else {
                     showEmptyState();
@@ -208,22 +206,6 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onLoaderReset(Loader<List<Movie>> loader) {
         mMovieAdapter.updateData(new ArrayList<Movie>());
-    }
-
-    private boolean hasNetworkConnection() {
-
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        if (connectivityManager != null) {
-
-            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-            return networkInfo != null && networkInfo.isConnectedOrConnecting();
-
-        }
-
-        return false;
-
     }
 
     private void showEmptyState() {

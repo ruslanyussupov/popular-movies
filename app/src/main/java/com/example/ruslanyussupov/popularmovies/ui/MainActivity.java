@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final int SORT_BY_POPULAR = 1;
     public static final int SORT_BY_TOP_RATED = 2;
+    public static final int SORT_BY_TOP_FAVOURITE = 3;
 
     private static final String BUNDLE_SORT_BY = "sort_by";
 
@@ -80,6 +81,10 @@ public class MainActivity extends AppCompatActivity {
                 menu.findItem(R.id.sort_by_top_rated).setChecked(true);
                 return true;
 
+            case SORT_BY_TOP_FAVOURITE:
+                menu.findItem(R.id.sort_by_favourite).setChecked(true);
+                return true;
+
             default:
                 throw new IllegalArgumentException("Sort by = " + mSortBy);
 
@@ -99,6 +104,10 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.sort_by_top_rated:
                 updateMoviesGrid(SORT_BY_TOP_RATED);
+                item.setChecked(true);
+                return true;
+            case R.id.sort_by_favourite:
+                updateMoviesGrid(SORT_BY_TOP_FAVOURITE);
                 item.setChecked(true);
                 return true;
             default:
@@ -128,12 +137,26 @@ public class MainActivity extends AppCompatActivity {
         switch (action) {
 
             case ADD_FRAGMENT:
-                getSupportFragmentManager().beginTransaction()
-                        .add(R.id.movies_grid_container, movieGridFragment).commit();
+                if (sortBy == SORT_BY_TOP_FAVOURITE) {
+                    getSupportFragmentManager().beginTransaction()
+                            .add(R.id.movies_grid_container, new FavouriteMovieFragment())
+                            .commit();
+                } else {
+                    getSupportFragmentManager().beginTransaction()
+                            .add(R.id.movies_grid_container, movieGridFragment)
+                            .commit();
+                }
                 break;
             case REPLACE_FRAGMENT:
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.movies_grid_container, movieGridFragment).commit();
+                if (sortBy == SORT_BY_TOP_FAVOURITE) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.movies_grid_container, new FavouriteMovieFragment())
+                            .commit();
+                } else {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.movies_grid_container, movieGridFragment)
+                            .commit();
+                }
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported action: " + action);

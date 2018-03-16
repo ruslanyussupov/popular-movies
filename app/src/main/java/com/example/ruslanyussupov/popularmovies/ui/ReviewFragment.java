@@ -1,10 +1,7 @@
 package com.example.ruslanyussupov.popularmovies.ui;
 
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -79,7 +76,7 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
 
             mMovieId = getArguments().getInt(DetailContentFragment.BUNDLE_MOVIE_ID);
 
-            if (hasNetworkConnection()) {
+            if (NetworkUtils.hasNetworkConnection(getActivity())) {
 
                 LoaderManager loaderManager = getLoaderManager();
 
@@ -156,22 +153,6 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
         if (openReviewIntent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivity(openReviewIntent);
         }
-    }
-
-    private boolean hasNetworkConnection() {
-
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        if (connectivityManager != null) {
-
-            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-            return networkInfo != null && networkInfo.isConnectedOrConnecting();
-
-        }
-
-        return false;
-
     }
 
     private void showNoNetworkConnectionState() {
