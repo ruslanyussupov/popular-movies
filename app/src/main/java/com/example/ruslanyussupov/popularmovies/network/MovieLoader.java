@@ -35,7 +35,7 @@ public class MovieLoader extends AsyncTaskLoader<List<Movie>> {
     public List<Movie> loadInBackground() {
         // Get JSON response from URL and parsing it
         String jsonResponse = NetworkUtils.getResponseFromUrl(mJsonUrl);
-        return JsonUtils.moviesJsonParser(jsonResponse);
+        return JsonUtils.moviesJsonParser(getContext(), jsonResponse);
 
     }
 

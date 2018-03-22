@@ -18,9 +18,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ruslanyussupov.popularmovies.R;
+import com.example.ruslanyussupov.popularmovies.db.MovieContract;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
 import com.example.ruslanyussupov.popularmovies.utils.DbUtils;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
+import com.example.ruslanyussupov.popularmovies.utils.StorageUtils;
 import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
@@ -104,10 +106,34 @@ public class DetailContentFragment extends Fragment {
     }
 
     @OnClick(R.id.favorite_ib)
-    public void addToFavourite() {
+    public void favouriteChangeState() {
 
-        Uri row = DbUtils.insertMovieIntoDb(getActivity(), mMovie);
-        Toast.makeText(getActivity(), "The movie added to favourite:\n" + row, Toast.LENGTH_SHORT).show();
+        if (mMovie.isFavourite()) {
+
+            int rowsDeleted = getActivity().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,
+                    MovieContract.MovieEntry.COLUMN_MOVIE_ID + "=?",
+                    new String[]{String.valueOf(mMovie.getId())});
+
+            StorageUtils.deleteFile(mMovie.getPosterLocalPath());
+            StorageUtils.deleteFile(mMovie.getBackdropLocalPath());
+
+            mMovie.setFavourite(false);
+            mFavouriteIb.setSelected(false);
+
+            Toast.makeText(getActivity(), "Deleted from favourite: " + rowsDeleted,
+                    Toast.LENGTH_SHORT).show();
+
+        } else {
+
+            Uri row = DbUtils.insertMovieIntoDb(getActivity(), mMovie);
+
+            mMovie.setFavourite(true);
+            mFavouriteIb.setSelected(true);
+
+            Toast.makeText(getActivity(), "Added to favourite:\n" + row,
+                    Toast.LENGTH_SHORT).show();
+
+        }
 
     }
 
@@ -134,24 +160,14 @@ public class DetailContentFragment extends Fragment {
 
     private void updateUi() {
 
-        if (NetworkUtils.hasNetworkConnection(getActivity())) {
+        Log.d(LOG_TAG, mMovie + " = " + mMovie.isFavourite());
 
-            Picasso.with(getActivity())
-                    .load(NetworkUtils.buildMoviePosterUrlPath(mMovie.getPosterPath()))
-                    .error(R.drawable.poster_placeholder)
-                    .placeholder(R.drawable.poster_error)
-                    .into(mPosterIv);
+        if (mMovie.isFavourite()) {
 
-            Picasso.with(getActivity())
-                    .load(NetworkUtils.buildMovieBackdropUrlPath(mMovie.getBackdropPath()))
-                    .error(R.drawable.backdrop_error)
-                    .placeholder(R.drawable.poster_placeholder)
-                    .into(mBackdropIv);
+            mFavouriteIb.setSelected(true);
 
-        } else {
-
-            Bitmap poster = BitmapFactory.decodeFile(mMovie.getPosterPath());
-            Bitmap backdrop = BitmapFactory.decodeFile(mMovie.getBackdropPath());
+            Bitmap poster = BitmapFactory.decodeFile(mMovie.getPosterLocalPath());
+            Bitmap backdrop = BitmapFactory.decodeFile(mMovie.getBackdropLocalPath());
 
             if (poster == null) {
                 mPosterIv.setImageResource(R.drawable.poster_placeholder);
@@ -164,6 +180,22 @@ public class DetailContentFragment extends Fragment {
             } else {
                 mBackdropIv.setImageBitmap(backdrop);
             }
+
+        } else {
+
+            mFavouriteIb.setSelected(false);
+
+            Picasso.with(getActivity())
+                    .load(NetworkUtils.buildMoviePosterUrlPath(mMovie.getPosterPath()))
+                    .error(R.drawable.poster_placeholder)
+                    .placeholder(R.drawable.poster_error)
+                    .into(mPosterIv);
+
+            Picasso.with(getActivity())
+                    .load(NetworkUtils.buildMovieBackdropUrlPath(mMovie.getBackdropPath()))
+                    .error(R.drawable.backdrop_error)
+                    .placeholder(R.drawable.poster_placeholder)
+                    .into(mBackdropIv);
 
         }
 

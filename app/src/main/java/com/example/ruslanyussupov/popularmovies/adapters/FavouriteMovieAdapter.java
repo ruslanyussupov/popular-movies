@@ -43,7 +43,7 @@ public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAd
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         Movie currentMovie = mFavMovies.get(position);
-        String posterPath = currentMovie.getPosterPath();
+        String posterPath = currentMovie.getPosterLocalPath();
         Log.d(LOG_TAG, "Poster path: " + posterPath);
         Bitmap poster = BitmapFactory.decodeFile(posterPath);
 
@@ -54,7 +54,7 @@ public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAd
         }
 
     }
-;
+
     @Override
     public int getItemCount() {
         if (mFavMovies == null) {

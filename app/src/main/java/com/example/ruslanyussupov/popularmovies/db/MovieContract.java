@@ -29,8 +29,10 @@ public class MovieContract {
         public static final String TABLE_NAME = "movie";
         public static final String COLUMN_MOVIE_ID = "movieId";
         public static final String COLUMN_TITLE = "title";
-        public static final String COLUMN_POSTER = "poster";
-        public static final String COLUMN_BACKDROP = "backdrop";
+        public static final String COLUMN_POSTER_PATH = "posterPath";
+        public static final String COLUMN_BACKDROP_PATH = "backdropPath";
+        public static final String COLUMN_POSTER_LOCAL_PATH = "posterLocalPath";
+        public static final String COLUMN_BACKDROP_LOCAL_PATH = "backdropLocalPath";
         public static final String COLUMN_OVERVIEW = "overview";
         public static final String COLUMN_VOTE_AVERAGE = "voteAverage";
         public static final String COLUMN_RELEASE_DATE = "releaseDate";

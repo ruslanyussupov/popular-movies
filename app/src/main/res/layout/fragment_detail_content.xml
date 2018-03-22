@@ -39,7 +39,7 @@
         android:id="@+id/favorite_ib"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:background="@drawable/ic_favorite"
+        android:background="@drawable/fav_btn"
         android:layout_marginTop="@dimen/detail_margin_vertical"
         android:layout_marginRight="16dp"
         android:layout_marginEnd="16dp"

@@ -13,11 +13,12 @@ public class Movie implements Parcelable {
     private double voteAverage;
     private String releaseDate;
     private String backdropPath;
-    private String posterDbPath;
-    private String backdropDbPath;
+    private String posterLocalPath;
+    private String backdropLocalPath;
+    private boolean isFavourite;
 
     public Movie(int id, String originalTitle, String posterPath, String overview, double voteAverage,
-                 String releaseDate, String backdropPath) {
+                 String releaseDate, String backdropPath, boolean isFavourite) {
         this.id = id;
         this.originalTitle = originalTitle;
         this.posterPath = posterPath;
@@ -25,16 +26,24 @@ public class Movie implements Parcelable {
         this.voteAverage = voteAverage;
         this.releaseDate = releaseDate;
         this.backdropPath = backdropPath;
+        this.isFavourite = isFavourite;
     }
 
-    public Movie(int id, String originalTitle, String overview, double voteAverage,
-                 String releaseDate) {
+    public Movie(int id, String originalTitle, String posterPath, String overview, double voteAverage,
+                 String releaseDate, String backdropPath, String posterDbPath, String backdropDbPath,
+                 boolean isFavourite) {
         this.id = id;
         this.originalTitle = originalTitle;
+        this.posterPath = posterPath;
         this.overview = overview;
         this.voteAverage = voteAverage;
         this.releaseDate = releaseDate;
+        this.backdropPath = backdropPath;
+        this.posterLocalPath = posterDbPath;
+        this.backdropLocalPath = backdropDbPath;
+        this.isFavourite = isFavourite;
     }
+
 
     protected Movie(Parcel in) {
         id = in.readInt();
@@ -44,8 +53,9 @@ public class Movie implements Parcelable {
         voteAverage = in.readDouble();
         releaseDate = in.readString();
         backdropPath = in.readString();
-        posterDbPath = in.readString();
-        backdropDbPath = in.readString();
+        posterLocalPath = in.readString();
+        backdropLocalPath = in.readString();
+        isFavourite = in.readInt() == 1;
     }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
@@ -89,20 +99,28 @@ public class Movie implements Parcelable {
         return backdropPath;
     }
 
-    public void setPosterDbPath(String posterDbPath) {
-        this.posterDbPath = posterDbPath;
+    public String getPosterLocalPath() {
+        return posterLocalPath;
     }
 
-    public void setBackdropDbPath(String backdropDbPath) {
-        this.backdropDbPath = backdropDbPath;
+    public String getBackdropLocalPath() {
+        return backdropLocalPath;
     }
 
-    public String getPosterDbPath() {
-        return posterDbPath;
+    public boolean isFavourite() {
+        return isFavourite;
     }
 
-    public String getBackdropDbPath() {
-        return backdropDbPath;
+    public void setFavourite(boolean favourite) {
+        isFavourite = favourite;
+    }
+
+    public void setPosterLocalPath(String posterLocalPath) {
+        this.posterLocalPath = posterLocalPath;
+    }
+
+    public void setBackdropLocalPath(String backdropLocalPath) {
+        this.backdropLocalPath = backdropLocalPath;
     }
 
     @Override
@@ -119,7 +137,8 @@ public class Movie implements Parcelable {
         dest.writeDouble(voteAverage);
         dest.writeString(releaseDate);
         dest.writeString(backdropPath);
-        dest.writeString(posterDbPath);
-        dest.writeString(backdropDbPath);
+        dest.writeString(posterLocalPath);
+        dest.writeString(backdropLocalPath);
+        dest.writeInt(isFavourite ? 1 : 0);
     }
 }

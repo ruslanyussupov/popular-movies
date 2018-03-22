@@ -1,8 +1,11 @@
 package com.example.ruslanyussupov.popularmovies.utils;
 
 
+import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 
+import com.example.ruslanyussupov.popularmovies.db.MovieContract;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
 import com.example.ruslanyussupov.popularmovies.model.Review;
 import com.example.ruslanyussupov.popularmovies.model.Video;
@@ -40,7 +43,7 @@ public class JsonUtils {
      *
      *@param json JSON String contains movies data
      * */
-    public static List<Movie> moviesJsonParser(String json) {
+    public static List<Movie> moviesJsonParser(Context context, String json) {
 
         ArrayList<Movie> movies = null;
 
@@ -73,13 +76,28 @@ public class JsonUtils {
                 String releaseDate = currentMovie.getString(RELEASE_DATE);
                 String backdropPath = currentMovie.getString(BACKDROP_PATH);
 
+                Cursor cursor = DbUtils.getMovieFromDb(context, id);
+                boolean isFavourite = cursor != null && cursor.getCount() != 0;
+
                 Movie movie = new Movie(id,
                         originalTitle,
                         posterPath,
                         overview,
                         voteAverage,
                         releaseDate,
-                        backdropPath);
+                        backdropPath,
+                        isFavourite);
+
+                if (isFavourite) {
+                    cursor.moveToFirst();
+                    movie.setPosterLocalPath(cursor.getString(
+                            cursor.getColumnIndex(
+                                    MovieContract.MovieEntry.COLUMN_POSTER_LOCAL_PATH)));
+                    movie.setBackdropLocalPath(cursor.getString(
+                            cursor.getColumnIndex(
+                                    MovieContract.MovieEntry.COLUMN_BACKDROP_LOCAL_PATH)));
+                    cursor.close();
+                }
 
                 movies.add(movie);
 
