@@ -31,13 +31,16 @@ import butterknife.ButterKnife;
 
 public class FavouriteMovieFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>,
-        FavouriteMovieAdapter.OnFavMovieClickListener {
+        FavouriteMovieAdapter.OnFavMovieClickListener,
+        DetailContentFragment.OnMovieDeletedListener {
 
     private static final int FAV_LOADER = 444;
     private static final String EXTRA_MOVIE = "movie";
+    private static final int MOVIE_GRID_COLUMNS = 2;
 
     private FavouriteMovieAdapter mAdapter;
     private List<Movie> mMovies;
+    private LoaderManager mLoaderManager;
 
     private boolean mIsTwoPane;
 
@@ -62,26 +65,36 @@ public class FavouriteMovieFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        // If layout contains detail container, then it's two pane mode
         View movieDetailContainer = getActivity().findViewById(R.id.movie_detail_container);
         mIsTwoPane = movieDetailContainer != null
                 && movieDetailContainer.getVisibility() == View.VISIBLE;
 
         mAdapter = new FavouriteMovieAdapter(new ArrayList<Movie>(), this);
         mMoviesRv.setAdapter(mAdapter);
-        mMoviesRv.setLayoutManager(new GridLayoutManager(getActivity(), 2));
+        mMoviesRv.setLayoutManager(new GridLayoutManager(getActivity(), MOVIE_GRID_COLUMNS));
+        int offset = getResources().getDimensionPixelOffset(R.dimen.movie_item_offset);
+        mMoviesRv.addItemDecoration(new ItemDecoration(offset, offset, offset, offset));
 
-        LoaderManager loaderManager = getLoaderManager();
-        if (loaderManager.getLoader(FAV_LOADER) == null) {
-            loaderManager.initLoader(FAV_LOADER, null, this);
+        mLoaderManager = getLoaderManager();
+        if (mLoaderManager.getLoader(FAV_LOADER) == null) {
+            mLoaderManager.initLoader(FAV_LOADER, null, this);
         } else {
-            loaderManager.restartLoader(FAV_LOADER, null, this);
+            mLoaderManager.restartLoader(FAV_LOADER, null, this);
         }
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        mLoaderManager.restartLoader(FAV_LOADER, null, this);
+    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        mLoadingPb.setVisibility(View.VISIBLE);
 
         return new CursorLoader(getActivity(),
                 MovieContract.MovieEntry.CONTENT_URI,
@@ -94,7 +107,10 @@ public class FavouriteMovieFragment extends Fragment
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
+        mLoadingPb.setVisibility(View.GONE);
+
         if (data == null || data.getCount() == 0) {
+            showEmptyState();
             return;
         }
 
@@ -110,15 +126,37 @@ public class FavouriteMovieFragment extends Fragment
 
     @Override
     public void onFavMovieClick(int position) {
+
+        Movie movie = mMovies.get(position);
+
         if (mIsTwoPane) {
+
+            DetailContentFragment detailContentFragment = DetailContentFragment.create(movie);
+            detailContentFragment.setOnMovieDeletedListener(this);
+
             getFragmentManager().beginTransaction()
-                    .replace(R.id.movie_detail_container, new DetailContentFragment())
+                    .replace(R.id.movie_detail_container, detailContentFragment)
                     .commit();
+
         } else {
+
             Intent openDetailActivity = new Intent(getActivity(), DetailActivity.class);
-            Movie movie = mMovies.get(position);
             openDetailActivity.putExtra(EXTRA_MOVIE, movie);
             startActivity(openDetailActivity);
+
         }
+    }
+
+    private void showEmptyState() {
+
+        mLoadingPb.setVisibility(View.GONE);
+        mStateTv.setVisibility(View.VISIBLE);
+        mStateTv.setText(R.string.empty_state);
+
+    }
+
+    @Override
+    public void onMovieDeleted() {
+        mLoaderManager.restartLoader(FAV_LOADER, null, this);
     }
 }

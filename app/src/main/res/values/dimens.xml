@@ -7,4 +7,8 @@
     <dimen name="detail_label_margin_left">8dp</dimen>
     <dimen name="detail_poster_margin_left">16dp</dimen>
     <dimen name="detail_poster_width">120dp</dimen>
+
+    <dimen name="movie_item_offset">4dp</dimen>
+    <dimen name="video_item_offset">4dp</dimen>
+    <dimen name="review_item_offset">8dp</dimen>
 </resources>

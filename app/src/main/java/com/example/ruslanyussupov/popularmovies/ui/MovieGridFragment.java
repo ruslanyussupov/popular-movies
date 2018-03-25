@@ -39,15 +39,13 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
     private static final int MOVIE_LOADER_ID = 111;
 
     // Bundle keys for saving instance state
-    public static final String BUNDLE_SORT_BY = "sort_by";
+    public static final String BUNDLE_SORT_BY = "sortBy";
     private static final String BUNDLE_MOVIES = "movies";
-    private static final String BUNDLE_CURRENT_POSITION = "current_position";
-
     public static final String EXTRA_MOVIE = "movie";
 
-    private int mSortBy;
+    private static final int MOVIE_GRID_COLUMNS = 2;
 
-    private int mCurrentPosition;
+    private int mSortBy;
 
     private boolean mIsTwoPane;
 
@@ -97,7 +95,9 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
         // Set up MovieAdapter and GridLayoutManager to RV
         mMovieAdapter = new MovieAdapter(new ArrayList<Movie>(), this);
         mMoviesRecyclerView.setAdapter(mMovieAdapter);
-        mMoviesRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
+        mMoviesRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), MOVIE_GRID_COLUMNS));
+        int offset = getResources().getDimensionPixelOffset(R.dimen.movie_item_offset);
+        mMoviesRecyclerView.addItemDecoration(new ItemDecoration(offset, offset, offset, offset));
 
         // If there is nothing to restore start loading, else restore from Bundle
         if (savedInstanceState == null) {
@@ -127,8 +127,6 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
 
             mSortBy = savedInstanceState.getInt(BUNDLE_SORT_BY);
             mMovies = savedInstanceState.getParcelableArrayList(BUNDLE_MOVIES);
-            mCurrentPosition = savedInstanceState.getInt(BUNDLE_CURRENT_POSITION);
-            Log.d(LOG_TAG, "Saved pos state: " + mCurrentPosition);
 
             if (mMovies == null || mMovies.isEmpty()) {
 
@@ -152,7 +150,6 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
         Log.d(LOG_TAG, "onSaveInstanceState");
         outState.putInt(BUNDLE_SORT_BY, mSortBy);
         outState.putParcelableArrayList(BUNDLE_MOVIES, (ArrayList<Movie>) mMovies);
-        outState.putInt(BUNDLE_CURRENT_POSITION, mCurrentPosition);
         super.onSaveInstanceState(outState);
     }
 
@@ -208,6 +205,14 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
         mMovieAdapter.updateData(new ArrayList<Movie>());
     }
 
+    public static MovieGridFragment create(int sortBy) {
+        MovieGridFragment movieGridFragment = new MovieGridFragment();
+        Bundle args = new Bundle();
+        args.putInt(BUNDLE_SORT_BY, sortBy);
+        movieGridFragment.setArguments(args);
+        return movieGridFragment;
+    }
+
     private void showEmptyState() {
 
         mLoadingPb.setVisibility(View.GONE);
@@ -227,35 +232,21 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onClick(int position) {
 
-        mCurrentPosition = position;
+        Movie movie = mMovies.get(position);
 
         if (mIsTwoPane) {
 
-            showDetailMovieFragment(mCurrentPosition);
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.movie_detail_container, DetailContentFragment.create(movie))
+                    .commit();
 
         } else {
 
-            Movie movie = mMovies.get(position);
             Intent openDetailActivity = new Intent(getActivity(), DetailActivity.class);
             openDetailActivity.putExtra(EXTRA_MOVIE, movie);
             startActivity(openDetailActivity);
 
         }
-
-    }
-
-    private void showDetailMovieFragment(int position) {
-
-        Movie movie = mMovies.get(position);
-
-        DetailContentFragment detailContentFragment = new DetailContentFragment();
-        Bundle args = new Bundle();
-        args.putParcelable(EXTRA_MOVIE, movie);
-        detailContentFragment.setArguments(args);
-
-        getFragmentManager().beginTransaction()
-                .replace(R.id.movie_detail_container, detailContentFragment)
-                .commit();
 
     }
 

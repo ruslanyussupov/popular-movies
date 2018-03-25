@@ -2,9 +2,9 @@ package com.example.ruslanyussupov.popularmovies.ui;
 
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -22,7 +22,6 @@ import com.example.ruslanyussupov.popularmovies.db.MovieContract;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
 import com.example.ruslanyussupov.popularmovies.utils.DbUtils;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
-import com.example.ruslanyussupov.popularmovies.utils.StorageUtils;
 import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
@@ -32,10 +31,16 @@ import butterknife.OnClick;
 public class DetailContentFragment extends Fragment {
 
     private static final String LOG_TAG = DetailContentFragment.class.getSimpleName();
-    public static final String BUNDLE_MOVIE_ID = "movie_id";
     public static final String BUNDLE_MOVIE = "movie";
+    public static final String BUNDLE_POSTER_LOCAL_PATH = "posterLocalPath";
+    public static final String BUNDLE_BACKDROP_LOCAL_PATH = "backdropLocalPath";
+    public static final String BUNDLE_IS_FAVOURITE = "isFavourite";
 
     private Movie mMovie;
+    private boolean mIsFavourite;
+    private String mPosterLocalPath;
+    private String mBackdropLocalPath;
+    private OnMovieDeletedListener mOnMovieDeletedListener;
 
     @BindView(R.id.title_tv)TextView mTitleTv;
     @BindView(R.id.poster_iv)ImageView mPosterIv;
@@ -44,6 +49,10 @@ public class DetailContentFragment extends Fragment {
     @BindView(R.id.overview_tv)TextView mOverviewTv;
     @BindView(R.id.backdrop_iv)ImageView mBackdropIv;
     @BindView(R.id.favorite_ib)ImageButton mFavouriteIb;
+
+    public interface OnMovieDeletedListener {
+        void onMovieDeleted();
+    }
 
     public DetailContentFragment() {}
 
@@ -66,6 +75,7 @@ public class DetailContentFragment extends Fragment {
 
         Log.d(LOG_TAG, "onActivityCreated");
 
+
         if (savedInstanceState == null) {
 
             Intent intent = getActivity().getIntent();
@@ -77,6 +87,7 @@ public class DetailContentFragment extends Fragment {
             }
 
             if (mMovie != null) {
+                checkIsFavourite();
                 addFragments();
                 updateUi();
             }
@@ -84,6 +95,9 @@ public class DetailContentFragment extends Fragment {
         } else {
 
             mMovie = savedInstanceState.getParcelable(BUNDLE_MOVIE);
+            mPosterLocalPath = savedInstanceState.getString(BUNDLE_POSTER_LOCAL_PATH);
+            mBackdropLocalPath = savedInstanceState.getString(BUNDLE_BACKDROP_LOCAL_PATH);
+            mIsFavourite = savedInstanceState.getBoolean(BUNDLE_IS_FAVOURITE);
 
             if (mMovie != null) {
                 updateUi();
@@ -96,6 +110,9 @@ public class DetailContentFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putParcelable(BUNDLE_MOVIE, mMovie);
+        outState.putString(BUNDLE_POSTER_LOCAL_PATH, mPosterLocalPath);
+        outState.putString(BUNDLE_BACKDROP_LOCAL_PATH, mBackdropLocalPath);
+        outState.putBoolean(BUNDLE_IS_FAVOURITE, mIsFavourite);
         super.onSaveInstanceState(outState);
     }
 
@@ -108,66 +125,67 @@ public class DetailContentFragment extends Fragment {
     @OnClick(R.id.favorite_ib)
     public void favouriteChangeState() {
 
-        if (mMovie.isFavourite()) {
+        if (mIsFavourite) {
 
-            int rowsDeleted = getActivity().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,
-                    MovieContract.MovieEntry.COLUMN_MOVIE_ID + "=?",
-                    new String[]{String.valueOf(mMovie.getId())});
+            DbUtils.deleteMovieFromFavourite(getActivity(), mMovie);
 
-            StorageUtils.deleteFile(mMovie.getPosterLocalPath());
-            StorageUtils.deleteFile(mMovie.getBackdropLocalPath());
+            if (mOnMovieDeletedListener != null) {
+                mOnMovieDeletedListener.onMovieDeleted();
+            }
 
-            mMovie.setFavourite(false);
             mFavouriteIb.setSelected(false);
+            mIsFavourite = false;
 
-            Toast.makeText(getActivity(), "Deleted from favourite: " + rowsDeleted,
+            Toast.makeText(getActivity(), getString(R.string.removed_from_favourite),
                     Toast.LENGTH_SHORT).show();
 
         } else {
 
-            Uri row = DbUtils.insertMovieIntoDb(getActivity(), mMovie);
+            DbUtils.addMovieToFavourite(getActivity(), mMovie);
 
-            mMovie.setFavourite(true);
             mFavouriteIb.setSelected(true);
+            mIsFavourite = true;
 
-            Toast.makeText(getActivity(), "Added to favourite:\n" + row,
+            Toast.makeText(getActivity(), getString(R.string.added_to_favourite),
                     Toast.LENGTH_SHORT).show();
 
         }
 
     }
 
+    // Create detail fragment with args
+    public static DetailContentFragment create(Movie movie) {
+        DetailContentFragment detailContentFragment = new DetailContentFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(BUNDLE_MOVIE, movie);
+        detailContentFragment.setArguments(args);
+        return detailContentFragment;
+    }
+
+    public void setOnMovieDeletedListener(OnMovieDeletedListener listener) {
+        mOnMovieDeletedListener = listener;
+    }
+
     private void addFragments() {
 
-        VideoFragment videoFragment = new VideoFragment();
-        ReviewFragment reviewFragment = new ReviewFragment();
-
-        Bundle args = new Bundle();
-        args.putInt(BUNDLE_MOVIE_ID, mMovie.getId());
-
-        videoFragment.setArguments(args);
-        reviewFragment.setArguments(args);
-
         getFragmentManager().beginTransaction()
-                .add(R.id.videos_container, videoFragment)
+                .add(R.id.videos_container, VideoFragment.create(mMovie.getId()))
                 .commit();
 
         getFragmentManager().beginTransaction()
-                .add(R.id.reviews_container, reviewFragment)
+                .add(R.id.reviews_container, ReviewFragment.create(mMovie.getId()))
                 .commit();
 
     }
 
     private void updateUi() {
 
-        Log.d(LOG_TAG, mMovie + " = " + mMovie.isFavourite());
-
-        if (mMovie.isFavourite()) {
+        if (mIsFavourite) {
 
             mFavouriteIb.setSelected(true);
 
-            Bitmap poster = BitmapFactory.decodeFile(mMovie.getPosterLocalPath());
-            Bitmap backdrop = BitmapFactory.decodeFile(mMovie.getBackdropLocalPath());
+            Bitmap poster = BitmapFactory.decodeFile(mPosterLocalPath);
+            Bitmap backdrop = BitmapFactory.decodeFile(mBackdropLocalPath);
 
             if (poster == null) {
                 mPosterIv.setImageResource(R.drawable.poster_placeholder);
@@ -203,6 +221,27 @@ public class DetailContentFragment extends Fragment {
         mReleaseDateTv.setText(mMovie.getReleaseDate());
         mVoteAverageTv.setText(String.valueOf(mMovie.getVoteAverage()));
         mOverviewTv.setText(mMovie.getOverview());
+
+    }
+
+    private void checkIsFavourite() {
+
+        Cursor movieCursor = DbUtils.getMovieFromDb(getActivity(), mMovie.getId());
+        mIsFavourite = movieCursor != null && movieCursor.getCount() != 0;
+
+        if (mIsFavourite) {
+
+            movieCursor.moveToFirst();
+
+            mPosterLocalPath = movieCursor.getString(
+                    movieCursor.getColumnIndex(
+                            MovieContract.MovieEntry.COLUMN_POSTER_LOCAL_PATH));
+            mBackdropLocalPath = movieCursor.getString(
+                    movieCursor.getColumnIndex(
+                            MovieContract.MovieEntry.COLUMN_BACKDROP_LOCAL_PATH));
+
+            movieCursor.close();
+        }
 
     }
 

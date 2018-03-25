@@ -73,10 +73,12 @@ public class VideoFragment extends Fragment implements LoaderManager.LoaderCallb
         mVideosRv.setAdapter(mVideoAdapter);
         mVideosRv.setLayoutManager(new LinearLayoutManager(getActivity(),
                 LinearLayoutManager.HORIZONTAL, false));
+        int offset = getResources().getDimensionPixelOffset(R.dimen.video_item_offset);
+        mVideosRv.addItemDecoration(new ItemDecoration(0, 0, offset, 0));
 
         if (savedInstanceState == null) {
 
-            mMovieId = getArguments().getInt(DetailContentFragment.BUNDLE_MOVIE_ID);
+            mMovieId = getArguments().getInt(BUNDLE_MOVIE_ID);
 
             if (NetworkUtils.hasNetworkConnection(getActivity())) {
 
@@ -156,6 +158,17 @@ public class VideoFragment extends Fragment implements LoaderManager.LoaderCallb
         if (openVideoIntent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivity(openVideoIntent);
         }
+    }
+
+    // Create video fragment with args
+    public static VideoFragment create(int movieId) {
+
+        VideoFragment videoFragment = new VideoFragment();
+        Bundle args = new Bundle();
+        args.putInt(BUNDLE_MOVIE_ID, movieId);
+        videoFragment.setArguments(args);
+        return videoFragment;
+
     }
 
     private void showNoNetworkConnectionState() {

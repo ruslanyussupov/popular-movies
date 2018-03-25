@@ -15,10 +15,9 @@ public class Movie implements Parcelable {
     private String backdropPath;
     private String posterLocalPath;
     private String backdropLocalPath;
-    private boolean isFavourite;
 
     public Movie(int id, String originalTitle, String posterPath, String overview, double voteAverage,
-                 String releaseDate, String backdropPath, boolean isFavourite) {
+                 String releaseDate, String backdropPath) {
         this.id = id;
         this.originalTitle = originalTitle;
         this.posterPath = posterPath;
@@ -26,12 +25,10 @@ public class Movie implements Parcelable {
         this.voteAverage = voteAverage;
         this.releaseDate = releaseDate;
         this.backdropPath = backdropPath;
-        this.isFavourite = isFavourite;
     }
 
     public Movie(int id, String originalTitle, String posterPath, String overview, double voteAverage,
-                 String releaseDate, String backdropPath, String posterDbPath, String backdropDbPath,
-                 boolean isFavourite) {
+                 String releaseDate, String backdropPath, String posterDbPath, String backdropDbPath) {
         this.id = id;
         this.originalTitle = originalTitle;
         this.posterPath = posterPath;
@@ -41,7 +38,6 @@ public class Movie implements Parcelable {
         this.backdropPath = backdropPath;
         this.posterLocalPath = posterDbPath;
         this.backdropLocalPath = backdropDbPath;
-        this.isFavourite = isFavourite;
     }
 
 
@@ -55,7 +51,6 @@ public class Movie implements Parcelable {
         backdropPath = in.readString();
         posterLocalPath = in.readString();
         backdropLocalPath = in.readString();
-        isFavourite = in.readInt() == 1;
     }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
@@ -107,22 +102,6 @@ public class Movie implements Parcelable {
         return backdropLocalPath;
     }
 
-    public boolean isFavourite() {
-        return isFavourite;
-    }
-
-    public void setFavourite(boolean favourite) {
-        isFavourite = favourite;
-    }
-
-    public void setPosterLocalPath(String posterLocalPath) {
-        this.posterLocalPath = posterLocalPath;
-    }
-
-    public void setBackdropLocalPath(String backdropLocalPath) {
-        this.backdropLocalPath = backdropLocalPath;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -139,6 +118,5 @@ public class Movie implements Parcelable {
         dest.writeString(backdropPath);
         dest.writeString(posterLocalPath);
         dest.writeString(backdropLocalPath);
-        dest.writeInt(isFavourite ? 1 : 0);
     }
 }

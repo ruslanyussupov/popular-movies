@@ -71,10 +71,12 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
         mReviewsRv.setAdapter(mAdapter);
         mReviewsRv.setLayoutManager(new LinearLayoutManager(getActivity(),
                 LinearLayoutManager.HORIZONTAL, false));
+        int offset = getResources().getDimensionPixelOffset(R.dimen.review_item_offset);
+        mReviewsRv.addItemDecoration(new ItemDecoration(0,0, offset, 0));
 
         if (savedInstanceState == null) {
 
-            mMovieId = getArguments().getInt(DetailContentFragment.BUNDLE_MOVIE_ID);
+            mMovieId = getArguments().getInt(BUNDLE_MOVIE_ID);
 
             if (NetworkUtils.hasNetworkConnection(getActivity())) {
 
@@ -153,6 +155,17 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
         if (openReviewIntent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivity(openReviewIntent);
         }
+    }
+
+    // Create review fragment with args
+    public static ReviewFragment create(int movieId) {
+
+        ReviewFragment reviewFragment = new ReviewFragment();
+        Bundle args = new Bundle();
+        args.putInt(BUNDLE_MOVIE_ID, movieId);
+        reviewFragment.setArguments(args);
+        return reviewFragment;
+
     }
 
     private void showNoNetworkConnectionState() {

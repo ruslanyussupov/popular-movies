@@ -85,6 +85,7 @@ public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAd
     public void updateData(List<Movie> movies) {
         mFavMovies = movies;
         notifyDataSetChanged();
+        Log.d(LOG_TAG, "notifyDataSetChanged()");
     }
 
     public interface OnFavMovieClickListener {

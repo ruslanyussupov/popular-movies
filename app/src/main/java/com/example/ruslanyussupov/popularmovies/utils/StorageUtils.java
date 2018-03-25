@@ -16,6 +16,7 @@ public class StorageUtils {
 
     private static final String LOG_TAG = StorageUtils.class.getSimpleName();
 
+    // Save bitmap as image file in private external storage and return it's path
     public static String saveBitmap(Context context, Bitmap bitmap, String imageName) {
 
         File imageFile = new File( getPrivateStorageDir(context)
@@ -46,6 +47,7 @@ public class StorageUtils {
 
     }
 
+    // Return private external storage path
     private static File getPrivateStorageDir(Context context) {
 
         File imagesDir = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
@@ -63,6 +65,7 @@ public class StorageUtils {
 
     }
 
+    // Delete file by it's path
     public static boolean deleteFile(String path) {
 
         if (TextUtils.isEmpty(path)) {

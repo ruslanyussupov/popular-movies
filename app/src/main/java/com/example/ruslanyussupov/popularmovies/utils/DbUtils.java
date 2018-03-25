@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.util.Log;
 
 import com.example.ruslanyussupov.popularmovies.db.MovieContract;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
@@ -23,7 +22,8 @@ public class DbUtils {
     private static final String POSTER_FILE_PREFIX = "poster-";
     private static final String BACKDROP_FILE_PREFIX = "backdrop-";
 
-    public static Uri insertMovieIntoDb(final Context context, final Movie movie) {
+    // Insert movie into DB and save images in external storage
+    public static Uri addMovieToFavourite(final Context context, final Movie movie) {
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, movie.getId());
@@ -33,57 +33,30 @@ public class DbUtils {
         contentValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, movie.getVoteAverage());
         contentValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, movie.getPosterPath());
         contentValues.put(MovieContract.MovieEntry.COLUMN_BACKDROP_PATH, movie.getBackdropPath());
-        final Uri dbRowUri = context.getContentResolver()
+        Uri dbRowUri = context.getContentResolver()
                 .insert(MovieContract.MovieEntry.CONTENT_URI, contentValues);
 
-        Picasso.with(context).load(NetworkUtils.buildMoviePosterUrlPath(movie.getPosterPath())).into(new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                ContentValues bitmapCv = new ContentValues();
-                String posterName = POSTER_FILE_PREFIX + movie.getId();
-                String posterPath = StorageUtils.saveBitmap(context, bitmap, posterName);
-                bitmapCv.put(MovieContract.MovieEntry.COLUMN_POSTER_LOCAL_PATH, posterPath);
-                context.getContentResolver().update(dbRowUri, bitmapCv, null, null);
-                Log.d(LOG_TAG, "Poster put into cv");
-            }
+        if (dbRowUri != null) {
 
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
+            Picasso.with(context).load(NetworkUtils.buildMoviePosterUrlPath(movie.getPosterPath()))
+                    .into(new DbTarget(context,
+                            POSTER_FILE_PREFIX + movie.getId(),
+                            MovieContract.MovieEntry.COLUMN_POSTER_LOCAL_PATH,
+                            dbRowUri));
 
-            }
+            Picasso.with(context).load(NetworkUtils.buildMovieBackdropUrlPath(movie.getBackdropPath()))
+                    .into(new DbTarget(context,
+                            BACKDROP_FILE_PREFIX + movie.getId(),
+                            MovieContract.MovieEntry.COLUMN_BACKDROP_LOCAL_PATH,
+                            dbRowUri));
 
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-            }
-        });
-
-        Picasso.with(context).load(NetworkUtils.buildMovieBackdropUrlPath(movie.getBackdropPath())).into(new Target() {
-            @Override
-            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                ContentValues bitmapCv = new ContentValues();
-                String backdropName = BACKDROP_FILE_PREFIX + movie.getId();
-                String backdropPath = StorageUtils.saveBitmap(context, bitmap, backdropName);
-                bitmapCv.put(MovieContract.MovieEntry.COLUMN_BACKDROP_LOCAL_PATH, backdropPath);
-                context.getContentResolver().update(dbRowUri, bitmapCv, null, null);
-                Log.d(LOG_TAG, "Backdrop put into cv");
-            }
-
-            @Override
-            public void onBitmapFailed(Drawable errorDrawable) {
-
-            }
-
-            @Override
-            public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-            }
-        });
+        }
 
         return dbRowUri;
 
     }
 
+    // Read movies from a Cursor and returns ArrayList
     public static ArrayList<Movie> getMoviesFromCursor(Cursor cursor) {
 
         if (cursor == null || cursor.getCount() == 0) {
@@ -114,17 +87,19 @@ public class DbUtils {
                     releaseDate,
                     backdropPath,
                     posterLocalPath,
-                    backdropLocalPath,
-                    true);
+                    backdropLocalPath);
 
             movies.add(movie);
 
         } while (cursor.moveToNext());
 
+        cursor.close();
+
         return movies;
 
     }
 
+    // Get movie from DB by the movie id
     public static Cursor getMovieFromDb(Context context, int movieId) {
 
         return context.getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI,
@@ -134,6 +109,52 @@ public class DbUtils {
                     new String[]{String.valueOf(movieId)},
                     null);
 
+    }
+
+    // Delete movie from DB and related images in external storage
+    public static int deleteMovieFromFavourite(Context context, Movie movie) {
+
+        StorageUtils.deleteFile(movie.getPosterLocalPath());
+        StorageUtils.deleteFile(movie.getBackdropLocalPath());
+
+        return context.getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,
+                MovieContract.MovieEntry.COLUMN_MOVIE_ID + "=?",
+                new String[]{String.valueOf(movie.getId())});
+
+    }
+
+    // Save image in external storage and insert path into DB
+    private static class DbTarget implements Target {
+
+        private Context context;
+        private String cvKey;
+        private String name;
+        private Uri uri;
+
+        DbTarget(Context context, String name, String cvKey, Uri uri) {
+            this.context = context;
+            this.cvKey = cvKey;
+            this.name = name;
+            this.uri = uri;
+        }
+
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            ContentValues bitmapCv = new ContentValues();
+            String localPath = StorageUtils.saveBitmap(context, bitmap, name);
+            bitmapCv.put(cvKey, localPath);
+            context.getContentResolver().update(uri, bitmapCv, null, null);
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+        }
     }
 
 

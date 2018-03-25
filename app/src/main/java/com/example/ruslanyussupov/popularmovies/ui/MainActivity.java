@@ -129,10 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showMoviesGrid(int sortBy, int action) {
 
-        MovieGridFragment movieGridFragment = new MovieGridFragment();
-        Bundle args = new Bundle();
-        args.putInt(MovieGridFragment.BUNDLE_SORT_BY, sortBy);
-        movieGridFragment.setArguments(args);
+        MovieGridFragment movieGridFragment = MovieGridFragment.create(sortBy);
 
         switch (action) {
 
