@@ -20,7 +20,7 @@ import butterknife.ButterKnife;
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> {
 
     private List<Video> mVideos;
-    private OnVideoClickListener mOnVideoClickListener;
+    private final OnVideoClickListener mOnVideoClickListener;
 
     public VideoAdapter(List<Video> videos, OnVideoClickListener onVideoClickListener) {
         mVideos = videos;

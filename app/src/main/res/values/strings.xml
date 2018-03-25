@@ -19,6 +19,10 @@
     <string name="empty_state_reviews">There are no reviews…</string>
 
     <string name="movie_poster_content_description">The movie poster</string>
+    <string name="backdrop_content_description">The movie backdrop</string>
+    <string name="favourite_button_content_description">Add to favourite button</string>
+    <string name="video_preview_content_description">Video preview</string>
+    <string name="play_button_content_description">Play video button</string>
 
     <string name="no_information">No information</string>
 

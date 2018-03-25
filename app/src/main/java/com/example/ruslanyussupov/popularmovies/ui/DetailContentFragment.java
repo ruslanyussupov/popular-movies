@@ -1,6 +1,7 @@
 package com.example.ruslanyussupov.popularmovies.ui;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -31,16 +32,16 @@ import butterknife.OnClick;
 public class DetailContentFragment extends Fragment {
 
     private static final String LOG_TAG = DetailContentFragment.class.getSimpleName();
-    public static final String BUNDLE_MOVIE = "movie";
-    public static final String BUNDLE_POSTER_LOCAL_PATH = "posterLocalPath";
-    public static final String BUNDLE_BACKDROP_LOCAL_PATH = "backdropLocalPath";
-    public static final String BUNDLE_IS_FAVOURITE = "isFavourite";
+    private static final String BUNDLE_MOVIE = "movie";
+    private static final String BUNDLE_POSTER_LOCAL_PATH = "posterLocalPath";
+    private static final String BUNDLE_BACKDROP_LOCAL_PATH = "backdropLocalPath";
+    private static final String BUNDLE_IS_FAVOURITE = "isFavourite";
 
     private Movie mMovie;
     private boolean mIsFavourite;
     private String mPosterLocalPath;
     private String mBackdropLocalPath;
-    private OnMovieDeletedListener mOnMovieDeletedListener;
+    private OnFavouriteChangedListener mFavouriteChangedListener;
 
     @BindView(R.id.title_tv)TextView mTitleTv;
     @BindView(R.id.poster_iv)ImageView mPosterIv;
@@ -50,11 +51,19 @@ public class DetailContentFragment extends Fragment {
     @BindView(R.id.backdrop_iv)ImageView mBackdropIv;
     @BindView(R.id.favorite_ib)ImageButton mFavouriteIb;
 
-    public interface OnMovieDeletedListener {
-        void onMovieDeleted();
+    public interface OnFavouriteChangedListener {
+        void onFavouriteChanged();
     }
 
     public DetailContentFragment() {}
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFavouriteChangedListener) {
+            mFavouriteChangedListener = (OnFavouriteChangedListener) context;
+        }
+    }
 
     @Nullable
     @Override
@@ -129,10 +138,6 @@ public class DetailContentFragment extends Fragment {
 
             DbUtils.deleteMovieFromFavourite(getActivity(), mMovie);
 
-            if (mOnMovieDeletedListener != null) {
-                mOnMovieDeletedListener.onMovieDeleted();
-            }
-
             mFavouriteIb.setSelected(false);
             mIsFavourite = false;
 
@@ -151,6 +156,10 @@ public class DetailContentFragment extends Fragment {
 
         }
 
+        if (mFavouriteChangedListener != null) {
+            mFavouriteChangedListener.onFavouriteChanged();
+        }
+
     }
 
     // Create detail fragment with args
@@ -160,10 +169,6 @@ public class DetailContentFragment extends Fragment {
         args.putParcelable(BUNDLE_MOVIE, movie);
         detailContentFragment.setArguments(args);
         return detailContentFragment;
-    }
-
-    public void setOnMovieDeletedListener(OnMovieDeletedListener listener) {
-        mOnMovieDeletedListener = listener;
     }
 
     private void addFragments() {

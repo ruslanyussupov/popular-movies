@@ -12,7 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class StorageUtils {
+class StorageUtils {
 
     private static final String LOG_TAG = StorageUtils.class.getSimpleName();
 

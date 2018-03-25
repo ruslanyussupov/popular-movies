@@ -8,5 +8,15 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="Label">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/label_text_size</item>
+    </style>
+
+    <style name="LabelUnderline">
+        <item name="android:layout_width">@dimen/label_underline_width</item>
+        <item name="android:layout_height">@dimen/label_underline_height</item>
+        <item name="android:background">@color/colorPrimary</item>
+    </style>
 
 </resources>

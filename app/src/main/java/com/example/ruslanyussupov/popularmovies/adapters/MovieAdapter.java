@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
@@ -22,11 +23,11 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
 
     private List<Movie> mMovies;
-    private OnItemClickListener mOnItemClickListener;
+    private final OnMovieClickListener mMovieClickListener;
 
-    public MovieAdapter(List<Movie> movies, OnItemClickListener onItemClickListener) {
+    public MovieAdapter(List<Movie> movies, OnMovieClickListener onMovieClickListener) {
         mMovies = movies;
-        mOnItemClickListener = onItemClickListener;
+        mMovieClickListener = onMovieClickListener;
     }
 
     @Override
@@ -77,7 +78,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mOnItemClickListener.onClick(getAdapterPosition());
+                    mMovieClickListener.onMovieClick(mMovies.get(getAdapterPosition()));
                 }
             });
 
@@ -88,10 +89,5 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         mMovies = movies;
         notifyDataSetChanged();
     }
-
-    public interface OnItemClickListener {
-        void onClick(int position);
-    }
-
 
 }

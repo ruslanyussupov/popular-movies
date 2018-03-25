@@ -126,10 +126,10 @@ public class DbUtils {
     // Save image in external storage and insert path into DB
     private static class DbTarget implements Target {
 
-        private Context context;
-        private String cvKey;
-        private String name;
-        private Uri uri;
+        private final Context context;
+        private final String cvKey;
+        private final String name;
+        private final Uri uri;
 
         DbTarget(Context context, String name, String cvKey, Uri uri) {
             this.context = context;

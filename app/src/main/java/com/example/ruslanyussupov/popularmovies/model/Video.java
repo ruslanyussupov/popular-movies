@@ -37,22 +37,6 @@ public class Video implements Parcelable {
         }
     };
 
-    public String getKey() {
-        return key;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getSite() {
-        return site;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
     public String getPreviewImagePath() {
         return "https://img.youtube.com/vi/" + key + "/1.jpg";
     }

@@ -5,14 +5,14 @@ import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-public class ItemDecoration extends RecyclerView.ItemDecoration {
+class ItemDecoration extends RecyclerView.ItemDecoration {
 
-    private int offsetLeft;
-    private int offsetTop;
-    private int offsetRight;
-    private int offsetBottom;
+    private final int offsetLeft;
+    private final int offsetTop;
+    private final int offsetRight;
+    private final int offsetBottom;
 
-    public ItemDecoration(int offsetLeft, int offsetTop, int offsetRight, int offsetBottom) {
+    ItemDecoration(int offsetLeft, int offsetTop, int offsetRight, int offsetBottom) {
         this.offsetLeft = offsetLeft;
         this.offsetTop = offsetTop;
         this.offsetRight = offsetRight;

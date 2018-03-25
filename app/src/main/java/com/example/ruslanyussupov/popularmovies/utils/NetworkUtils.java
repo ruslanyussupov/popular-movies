@@ -104,7 +104,7 @@ public class NetworkUtils {
     }
 
     // Takes URL as String and returns URL object
-    public static URL makeUrl(String urlString) {
+    private static URL makeUrl(String urlString) {
 
         // If URL is empty then return null
         if (TextUtils.isEmpty(urlString)) {

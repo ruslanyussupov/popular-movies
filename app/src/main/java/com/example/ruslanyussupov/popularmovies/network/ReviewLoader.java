@@ -14,7 +14,7 @@ import java.util.List;
 public class ReviewLoader extends AsyncTaskLoader<List<Review>> {
 
     private List<Review> mReviews;
-    private URL mJsonUrl;
+    private final URL mJsonUrl;
 
     public ReviewLoader(Context context, URL jsonUrl) {
         super(context);

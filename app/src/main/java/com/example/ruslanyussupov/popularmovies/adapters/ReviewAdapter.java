@@ -18,7 +18,7 @@ import butterknife.ButterKnife;
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder> {
 
     private List<Review> mReviews;
-    private OnReviewClickListener mOnReviewClickListener;
+    private final OnReviewClickListener mOnReviewClickListener;
 
     public ReviewAdapter(List<Review> reviews, OnReviewClickListener onReviewClickListener) {
         mReviews = reviews;

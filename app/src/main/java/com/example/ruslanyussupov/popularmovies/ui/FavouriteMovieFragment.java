@@ -1,7 +1,7 @@
 package com.example.ruslanyussupov.popularmovies.ui;
 
 
-import android.content.Intent;
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.FavouriteMovieAdapter;
 import com.example.ruslanyussupov.popularmovies.db.MovieContract;
@@ -30,19 +31,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class FavouriteMovieFragment extends Fragment
-        implements LoaderManager.LoaderCallbacks<Cursor>,
-        FavouriteMovieAdapter.OnFavMovieClickListener,
-        DetailContentFragment.OnMovieDeletedListener {
+        implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int FAV_LOADER = 444;
-    private static final String EXTRA_MOVIE = "movie";
     private static final int MOVIE_GRID_COLUMNS = 2;
 
     private FavouriteMovieAdapter mAdapter;
-    private List<Movie> mMovies;
+    private OnMovieClickListener mMovieClickListener;
     private LoaderManager mLoaderManager;
-
-    private boolean mIsTwoPane;
 
     // Define views for binding
     @BindView(R.id.rv_movies)RecyclerView mMoviesRv;
@@ -50,6 +46,16 @@ public class FavouriteMovieFragment extends Fragment
     @BindView(R.id.loading_pb)ProgressBar mLoadingPb;
 
     public FavouriteMovieFragment() {}
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            mMovieClickListener = (OnMovieClickListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + "  must implement OnMovieClickListener");
+        }
+    }
 
     @Nullable
     @Override
@@ -65,12 +71,7 @@ public class FavouriteMovieFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        // If layout contains detail container, then it's two pane mode
-        View movieDetailContainer = getActivity().findViewById(R.id.movie_detail_container);
-        mIsTwoPane = movieDetailContainer != null
-                && movieDetailContainer.getVisibility() == View.VISIBLE;
-
-        mAdapter = new FavouriteMovieAdapter(new ArrayList<Movie>(), this);
+        mAdapter = new FavouriteMovieAdapter(new ArrayList<Movie>(), mMovieClickListener);
         mMoviesRv.setAdapter(mAdapter);
         mMoviesRv.setLayoutManager(new GridLayoutManager(getActivity(), MOVIE_GRID_COLUMNS));
         int offset = getResources().getDimensionPixelOffset(R.dimen.movie_item_offset);
@@ -114,37 +115,14 @@ public class FavouriteMovieFragment extends Fragment
             return;
         }
 
-        mMovies = DbUtils.getMoviesFromCursor(data);
-        mAdapter.updateData(mMovies);
+        List<Movie> movies = DbUtils.getMoviesFromCursor(data);
+        mAdapter.updateData(movies);
 
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.updateData(new ArrayList<Movie>());
-    }
-
-    @Override
-    public void onFavMovieClick(int position) {
-
-        Movie movie = mMovies.get(position);
-
-        if (mIsTwoPane) {
-
-            DetailContentFragment detailContentFragment = DetailContentFragment.create(movie);
-            detailContentFragment.setOnMovieDeletedListener(this);
-
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.movie_detail_container, detailContentFragment)
-                    .commit();
-
-        } else {
-
-            Intent openDetailActivity = new Intent(getActivity(), DetailActivity.class);
-            openDetailActivity.putExtra(EXTRA_MOVIE, movie);
-            startActivity(openDetailActivity);
-
-        }
     }
 
     private void showEmptyState() {
@@ -155,8 +133,4 @@ public class FavouriteMovieFragment extends Fragment
 
     }
 
-    @Override
-    public void onMovieDeleted() {
-        mLoaderManager.restartLoader(FAV_LOADER, null, this);
-    }
 }

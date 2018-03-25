@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
 
@@ -23,11 +24,11 @@ public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAd
     private static final String LOG_TAG = FavouriteMovieAdapter.class.getSimpleName();
 
     private List<Movie> mFavMovies;
-    private OnFavMovieClickListener mOnFavMovieClickListener;
+    private final OnMovieClickListener mMovieClickListener;
 
-    public FavouriteMovieAdapter(List<Movie> movies, OnFavMovieClickListener listener) {
+    public FavouriteMovieAdapter(List<Movie> movies, OnMovieClickListener movieClickListener) {
         mFavMovies = movies;
-        mOnFavMovieClickListener = listener;
+        mMovieClickListener = movieClickListener;
     }
 
     @Override
@@ -75,7 +76,7 @@ public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAd
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mOnFavMovieClickListener.onFavMovieClick(getAdapterPosition());
+                    mMovieClickListener.onMovieClick(mFavMovies.get(getAdapterPosition()));
                 }
             });
 
@@ -86,10 +87,6 @@ public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAd
         mFavMovies = movies;
         notifyDataSetChanged();
         Log.d(LOG_TAG, "notifyDataSetChanged()");
-    }
-
-    public interface OnFavMovieClickListener {
-        void onFavMovieClick(int position);
     }
 
 }

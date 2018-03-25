@@ -13,7 +13,7 @@ import java.util.List;
 
 public class MovieLoader extends AsyncTaskLoader<List<Movie>> {
 
-    private URL mJsonUrl;
+    private final URL mJsonUrl;
     private List<Movie> mMovies;
 
     public MovieLoader(Context context, URL jsonUrl) {

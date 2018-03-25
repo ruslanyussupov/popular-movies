@@ -2,7 +2,6 @@ package com.example.ruslanyussupov.popularmovies.ui;
 
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -17,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.MovieAdapter;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
@@ -30,8 +30,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MovieGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Movie>>,
-        MovieAdapter.OnItemClickListener {
+public class MovieGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Movie>> {
 
     private static final String LOG_TAG = MovieGridFragment.class.getSimpleName();
 
@@ -39,7 +38,7 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
     private static final int MOVIE_LOADER_ID = 111;
 
     // Bundle keys for saving instance state
-    public static final String BUNDLE_SORT_BY = "sortBy";
+    private static final String BUNDLE_SORT_BY = "sortBy";
     private static final String BUNDLE_MOVIES = "movies";
     public static final String EXTRA_MOVIE = "movie";
 
@@ -47,10 +46,9 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
 
     private int mSortBy;
 
-    private boolean mIsTwoPane;
-
     private MovieAdapter mMovieAdapter;
     private List<Movie> mMovies;
+    private OnMovieClickListener mMovieClickListener;
 
     // Define views for binding
     @BindView(R.id.rv_movies)RecyclerView mMoviesRecyclerView;
@@ -62,6 +60,11 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        try {
+            mMovieClickListener = (OnMovieClickListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnMovieClickListener");
+        }
     }
 
     @Nullable
@@ -87,13 +90,8 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
 
         mSortBy = getArguments().getInt(BUNDLE_SORT_BY, MainActivity.SORT_BY_POPULAR);
 
-        View movieDetailContainer = getActivity().findViewById(R.id.movie_detail_container);
-        mIsTwoPane = movieDetailContainer != null
-                && movieDetailContainer.getVisibility() == View.VISIBLE;
-        Log.d(LOG_TAG, "Is two pane: " + mIsTwoPane);
-
         // Set up MovieAdapter and GridLayoutManager to RV
-        mMovieAdapter = new MovieAdapter(new ArrayList<Movie>(), this);
+        mMovieAdapter = new MovieAdapter(new ArrayList<Movie>(), mMovieClickListener);
         mMoviesRecyclerView.setAdapter(mMovieAdapter);
         mMoviesRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), MOVIE_GRID_COLUMNS));
         int offset = getResources().getDimensionPixelOffset(R.dimen.movie_item_offset);
@@ -226,27 +224,6 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
         mLoadingPb.setVisibility(View.GONE);
         mStateTv.setVisibility(View.VISIBLE);
         mStateTv.setText(R.string.no_network_connection_state);
-
-    }
-
-    @Override
-    public void onClick(int position) {
-
-        Movie movie = mMovies.get(position);
-
-        if (mIsTwoPane) {
-
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.movie_detail_container, DetailContentFragment.create(movie))
-                    .commit();
-
-        } else {
-
-            Intent openDetailActivity = new Intent(getActivity(), DetailActivity.class);
-            openDetailActivity.putExtra(EXTRA_MOVIE, movie);
-            startActivity(openDetailActivity);
-
-        }
 
     }
 

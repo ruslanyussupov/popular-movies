@@ -13,7 +13,7 @@ import java.util.List;
 
 public class VideoLoader extends AsyncTaskLoader<List<Video>> {
 
-    private URL mJsonUrl;
+    private final URL mJsonUrl;
     private List<Video> mVideos;
 
     public VideoLoader(Context context, URL jsonUrl) {
