@@ -119,4 +119,13 @@ public class Movie implements Parcelable {
         dest.writeString(posterLocalPath);
         dest.writeString(backdropLocalPath);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Movie) {
+            Movie movie = (Movie) obj;
+            return id == movie.getId();
+        }
+        return false;
+    }
 }

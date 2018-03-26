@@ -76,7 +76,8 @@ public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAd
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mMovieClickListener.onMovieClick(mFavMovies.get(getAdapterPosition()));
+                    int position = getAdapterPosition();
+                    mMovieClickListener.onMovieClick(mFavMovies.get(position));
                 }
             });
 

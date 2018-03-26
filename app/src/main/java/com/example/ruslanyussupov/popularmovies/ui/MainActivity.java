@@ -13,12 +13,10 @@ import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
 
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements OnMovieClickListener,
-        DetailContentFragment.OnFavouriteChangedListener {
+public class MainActivity extends AppCompatActivity implements OnMovieClickListener {
 
     public static final int SORT_BY_POPULAR = 1;
     public static final int SORT_BY_TOP_RATED = 2;
@@ -188,10 +186,4 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
 
     }
 
-    @Override
-    public void onFavouriteChanged() {
-        if (mSortBy == SORT_BY_TOP_FAVOURITE) {
-            showMoviesGrid(mSortBy, REPLACE_FRAGMENT);
-        }
-    }
 }

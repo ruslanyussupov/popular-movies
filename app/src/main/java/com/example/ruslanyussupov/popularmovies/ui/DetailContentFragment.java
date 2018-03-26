@@ -1,7 +1,6 @@
 package com.example.ruslanyussupov.popularmovies.ui;
 
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -20,10 +19,14 @@ import android.widget.Toast;
 
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.db.MovieContract;
+import com.example.ruslanyussupov.popularmovies.events.AddFavouriteEvent;
+import com.example.ruslanyussupov.popularmovies.events.RemoveFavouriteEvent;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
 import com.example.ruslanyussupov.popularmovies.utils.DbUtils;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
+
+import org.greenrobot.eventbus.EventBus;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,7 +44,6 @@ public class DetailContentFragment extends Fragment {
     private boolean mIsFavourite;
     private String mPosterLocalPath;
     private String mBackdropLocalPath;
-    private OnFavouriteChangedListener mFavouriteChangedListener;
 
     @BindView(R.id.title_tv)TextView mTitleTv;
     @BindView(R.id.poster_iv)ImageView mPosterIv;
@@ -51,19 +53,7 @@ public class DetailContentFragment extends Fragment {
     @BindView(R.id.backdrop_iv)ImageView mBackdropIv;
     @BindView(R.id.favorite_ib)ImageButton mFavouriteIb;
 
-    public interface OnFavouriteChangedListener {
-        void onFavouriteChanged();
-    }
-
     public DetailContentFragment() {}
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFavouriteChangedListener) {
-            mFavouriteChangedListener = (OnFavouriteChangedListener) context;
-        }
-    }
 
     @Nullable
     @Override
@@ -109,6 +99,7 @@ public class DetailContentFragment extends Fragment {
             mIsFavourite = savedInstanceState.getBoolean(BUNDLE_IS_FAVOURITE);
 
             if (mMovie != null) {
+                checkIsFavourite();
                 updateUi();
             }
 
@@ -141,6 +132,8 @@ public class DetailContentFragment extends Fragment {
             mFavouriteIb.setSelected(false);
             mIsFavourite = false;
 
+            EventBus.getDefault().post(new RemoveFavouriteEvent(mMovie));
+
             Toast.makeText(getActivity(), getString(R.string.removed_from_favourite),
                     Toast.LENGTH_SHORT).show();
 
@@ -151,13 +144,11 @@ public class DetailContentFragment extends Fragment {
             mFavouriteIb.setSelected(true);
             mIsFavourite = true;
 
+            EventBus.getDefault().post(new AddFavouriteEvent(mMovie));
+
             Toast.makeText(getActivity(), getString(R.string.added_to_favourite),
                     Toast.LENGTH_SHORT).show();
 
-        }
-
-        if (mFavouriteChangedListener != null) {
-            mFavouriteChangedListener.onFavouriteChanged();
         }
 
     }
@@ -171,6 +162,7 @@ public class DetailContentFragment extends Fragment {
         return detailContentFragment;
     }
 
+    // Add trailers and reviews fragments
     private void addFragments() {
 
         getFragmentManager().beginTransaction()

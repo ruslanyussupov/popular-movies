@@ -21,8 +21,13 @@ import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.FavouriteMovieAdapter;
 import com.example.ruslanyussupov.popularmovies.db.MovieContract;
+import com.example.ruslanyussupov.popularmovies.events.AddFavouriteEvent;
+import com.example.ruslanyussupov.popularmovies.events.RemoveFavouriteEvent;
 import com.example.ruslanyussupov.popularmovies.model.Movie;
 import com.example.ruslanyussupov.popularmovies.utils.DbUtils;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +43,7 @@ public class FavouriteMovieFragment extends Fragment
 
     private FavouriteMovieAdapter mAdapter;
     private OnMovieClickListener mMovieClickListener;
-    private LoaderManager mLoaderManager;
+    private List<Movie> mMovies;
 
     // Define views for binding
     @BindView(R.id.rv_movies)RecyclerView mMoviesRv;
@@ -54,6 +59,29 @@ public class FavouriteMovieFragment extends Fragment
             mMovieClickListener = (OnMovieClickListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + "  must implement OnMovieClickListener");
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        LoaderManager loaderManager = getLoaderManager();
+        if (loaderManager.getLoader(FAV_LOADER) == null) {
+            loaderManager.initLoader(FAV_LOADER, null, this);
+        } else {
+            loaderManager.restartLoader(FAV_LOADER, null, this);
         }
     }
 
@@ -77,19 +105,6 @@ public class FavouriteMovieFragment extends Fragment
         int offset = getResources().getDimensionPixelOffset(R.dimen.movie_item_offset);
         mMoviesRv.addItemDecoration(new ItemDecoration(offset, offset, offset, offset));
 
-        mLoaderManager = getLoaderManager();
-        if (mLoaderManager.getLoader(FAV_LOADER) == null) {
-            mLoaderManager.initLoader(FAV_LOADER, null, this);
-        } else {
-            mLoaderManager.restartLoader(FAV_LOADER, null, this);
-        }
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mLoaderManager.restartLoader(FAV_LOADER, null, this);
     }
 
     @Override
@@ -115,8 +130,8 @@ public class FavouriteMovieFragment extends Fragment
             return;
         }
 
-        List<Movie> movies = DbUtils.getMoviesFromCursor(data);
-        mAdapter.updateData(movies);
+        mMovies = DbUtils.getMoviesFromCursor(data);
+        mAdapter.updateData(mMovies);
 
     }
 
@@ -131,6 +146,18 @@ public class FavouriteMovieFragment extends Fragment
         mStateTv.setVisibility(View.VISIBLE);
         mStateTv.setText(R.string.empty_state);
 
+    }
+
+    @Subscribe
+    public void onFavouriteAdd(AddFavouriteEvent event) {
+        mMovies.add(event.getMovie());
+        mAdapter.updateData(mMovies);
+    }
+
+    @Subscribe
+    public void onFavouriteRemoved(RemoveFavouriteEvent event) {
+        mMovies.remove(event.getMovie());
+        mAdapter.updateData(mMovies);
     }
 
 }
