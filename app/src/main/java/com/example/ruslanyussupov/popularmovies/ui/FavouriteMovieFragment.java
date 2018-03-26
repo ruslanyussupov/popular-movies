@@ -150,6 +150,7 @@ public class FavouriteMovieFragment extends Fragment
 
     @Subscribe
     public void onFavouriteAdd(AddFavouriteEvent event) {
+        mStateTv.setVisibility(View.GONE);
         mMovies.add(event.getMovie());
         mAdapter.updateData(mMovies);
     }
@@ -158,6 +159,9 @@ public class FavouriteMovieFragment extends Fragment
     public void onFavouriteRemoved(RemoveFavouriteEvent event) {
         mMovies.remove(event.getMovie());
         mAdapter.updateData(mMovies);
+        if (mMovies.isEmpty()) {
+            showEmptyState();
+        }
     }
 
 }

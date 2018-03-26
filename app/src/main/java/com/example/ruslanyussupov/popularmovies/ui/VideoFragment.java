@@ -16,12 +16,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.VideoAdapter;
+import com.example.ruslanyussupov.popularmovies.events.ShareEvent;
 import com.example.ruslanyussupov.popularmovies.model.Video;
 import com.example.ruslanyussupov.popularmovies.network.VideoLoader;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -110,8 +115,18 @@ public class VideoFragment extends Fragment implements LoaderManager.LoaderCallb
 
         }
 
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
 
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override
@@ -143,7 +158,6 @@ public class VideoFragment extends Fragment implements LoaderManager.LoaderCallb
         mStateTv.setVisibility(View.GONE);
         mVideos = data;
         mVideoAdapter.updateData(mVideos);
-
     }
 
     @Override
@@ -157,6 +171,20 @@ public class VideoFragment extends Fragment implements LoaderManager.LoaderCallb
                 Uri.parse(mVideos.get(position).getUrl()));
         if (openVideoIntent.resolveActivity(getActivity().getPackageManager()) != null) {
             startActivity(openVideoIntent);
+        }
+    }
+
+    @Subscribe
+    public void onShare(ShareEvent event) {
+        if (mVideos != null && !mVideos.isEmpty()) {
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.action_share_subject));
+            shareIntent.putExtra(Intent.EXTRA_TEXT, mVideos.get(0).getUrl());
+            startActivity(Intent.createChooser(shareIntent, getString(R.string.action_share_subject)));
+        } else {
+            Toast.makeText(getActivity(), getString(R.string.nothing_to_share), Toast.LENGTH_SHORT)
+                    .show();
         }
     }
 
