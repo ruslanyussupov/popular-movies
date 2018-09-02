@@ -1,4 +1,4 @@
-package com.example.ruslanyussupov.popularmovies.model;
+package com.example.ruslanyussupov.popularmovies.data.model;
 
 
 import android.os.Parcel;

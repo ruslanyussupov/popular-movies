@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.example.ruslanyussupov.popularmovies.R;
-import com.example.ruslanyussupov.popularmovies.model.Video;
+import com.example.ruslanyussupov.popularmovies.data.model.Video;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -43,7 +43,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
 
         Video currentVideo = mVideos.get(position);
 
-        Picasso.with(context).load(currentVideo.getPreviewImagePath())
+        Picasso.get().load(currentVideo.getPreviewImagePath())
                 .placeholder(R.drawable.video_preview_placeholder)
                 .error(R.drawable.video_preview_placeholder)
                 .into(holder.mVideoPreviewIv);

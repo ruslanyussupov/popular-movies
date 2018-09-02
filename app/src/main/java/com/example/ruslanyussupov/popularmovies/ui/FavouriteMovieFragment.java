@@ -23,7 +23,7 @@ import com.example.ruslanyussupov.popularmovies.adapters.FavouriteMovieAdapter;
 import com.example.ruslanyussupov.popularmovies.db.MovieContract;
 import com.example.ruslanyussupov.popularmovies.events.AddFavouriteEvent;
 import com.example.ruslanyussupov.popularmovies.events.RemoveFavouriteEvent;
-import com.example.ruslanyussupov.popularmovies.model.Movie;
+import com.example.ruslanyussupov.popularmovies.data.model.Movie;
 import com.example.ruslanyussupov.popularmovies.utils.DbUtils;
 
 import org.greenrobot.eventbus.EventBus;

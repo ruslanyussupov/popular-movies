@@ -19,7 +19,7 @@ import android.widget.TextView;
 
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.ReviewAdapter;
-import com.example.ruslanyussupov.popularmovies.model.Review;
+import com.example.ruslanyussupov.popularmovies.data.model.Review;
 import com.example.ruslanyussupov.popularmovies.network.ReviewLoader;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 

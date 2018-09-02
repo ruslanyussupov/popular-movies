@@ -1,6 +1,6 @@
 package com.example.ruslanyussupov.popularmovies;
 
-import com.example.ruslanyussupov.popularmovies.model.Movie;
+import com.example.ruslanyussupov.popularmovies.data.model.Movie;
 
 public interface OnMovieClickListener {
 

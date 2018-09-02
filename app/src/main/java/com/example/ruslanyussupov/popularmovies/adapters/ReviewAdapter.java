@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.ruslanyussupov.popularmovies.R;
-import com.example.ruslanyussupov.popularmovies.model.Review;
+import com.example.ruslanyussupov.popularmovies.data.model.Review;
 
 import java.util.List;
 

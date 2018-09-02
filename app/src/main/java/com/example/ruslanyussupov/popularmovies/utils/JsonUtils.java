@@ -3,9 +3,9 @@ package com.example.ruslanyussupov.popularmovies.utils;
 
 import android.util.Log;
 
-import com.example.ruslanyussupov.popularmovies.model.Movie;
-import com.example.ruslanyussupov.popularmovies.model.Review;
-import com.example.ruslanyussupov.popularmovies.model.Video;
+import com.example.ruslanyussupov.popularmovies.data.model.Movie;
+import com.example.ruslanyussupov.popularmovies.data.model.Review;
+import com.example.ruslanyussupov.popularmovies.data.model.Video;
 
 import org.json.JSONArray;
 import org.json.JSONException;

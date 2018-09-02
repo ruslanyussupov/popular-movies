@@ -21,7 +21,7 @@ import android.widget.Toast;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.VideoAdapter;
 import com.example.ruslanyussupov.popularmovies.events.ShareEvent;
-import com.example.ruslanyussupov.popularmovies.model.Video;
+import com.example.ruslanyussupov.popularmovies.data.model.Video;
 import com.example.ruslanyussupov.popularmovies.network.VideoLoader;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 

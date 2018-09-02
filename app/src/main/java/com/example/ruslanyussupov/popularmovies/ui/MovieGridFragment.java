@@ -3,10 +3,9 @@ package com.example.ruslanyussupov.popularmovies.ui;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -16,26 +15,34 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.ruslanyussupov.popularmovies.BuildConfig;
 import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.MovieAdapter;
-import com.example.ruslanyussupov.popularmovies.model.Movie;
-import com.example.ruslanyussupov.popularmovies.network.MovieLoader;
+import com.example.ruslanyussupov.popularmovies.data.model.Movie;
+import com.example.ruslanyussupov.popularmovies.data.model.MoviesResponse;
+import com.example.ruslanyussupov.popularmovies.data.remote.TheMovieDbAPI;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 
-import java.net.URL;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MovieGridFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Movie>> {
+public class MovieGridFragment extends Fragment {
 
     private static final String LOG_TAG = MovieGridFragment.class.getSimpleName();
-
-    // Id for MovieLoader
-    private static final int MOVIE_LOADER_ID = 111;
 
     // Bundle keys for saving instance state
     private static final String BUNDLE_SORT_BY = "sortBy";
@@ -45,7 +52,7 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
     private static final int MOVIE_GRID_COLUMNS = 2;
 
     private int mSortBy;
-
+    private TheMovieDbAPI mTheMovieDbAPI;
     private MovieAdapter mMovieAdapter;
     private List<Movie> mMovies;
     private OnMovieClickListener mMovieClickListener;
@@ -102,15 +109,17 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
 
             Log.d(LOG_TAG, "savedInstanceState == null");
 
+            createMovieDbApi();
+
             // Check internet connection before loading data
             if (NetworkUtils.hasNetworkConnection(getActivity())) {
 
-                LoaderManager loaderManager = getActivity().getSupportLoaderManager();
+                MoviesCallback callback = new MoviesCallback();
 
-                if (loaderManager.getLoader(MOVIE_LOADER_ID) == null) {
-                    loaderManager.initLoader(MOVIE_LOADER_ID, null, this);
+                if (mSortBy == MainActivity.SORT_BY_TOP_RATED) {
+                    mTheMovieDbAPI.getTopRatedMovies().enqueue(callback);
                 } else {
-                    loaderManager.restartLoader(MOVIE_LOADER_ID, null, this);
+                    mTheMovieDbAPI.getPopularMovies().enqueue(callback);
                 }
 
             } else {
@@ -135,9 +144,8 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
                 }
 
             } else {
-
+                showMovies();
                 mMovieAdapter.updateData(mMovies);
-
             }
         }
 
@@ -157,52 +165,6 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
         super.onDestroy();
     }
 
-    @Override
-    public Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
-        // Show the progress bar
-        mLoadingPb.setVisibility(View.VISIBLE);
-
-        URL jsonUrl;
-
-        // Get appropriate URL to fetch movies data
-        switch (mSortBy) {
-            case MainActivity.SORT_BY_POPULAR:
-                jsonUrl = NetworkUtils.getPopularMoviesUrl();
-                break;
-            case MainActivity.SORT_BY_TOP_RATED:
-                jsonUrl = NetworkUtils.getTopRatedMoviesUrl();
-                break;
-            default:
-                throw new IllegalArgumentException("Sort by = " + mSortBy);
-        }
-
-        return new MovieLoader(getActivity(), jsonUrl);
-
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
-        // Hide the progress bar
-        mLoadingPb.setVisibility(View.GONE);
-
-        // If there is no data show empty state view otherwise hide empty state view
-        // and update the adapter with new data
-        if (data == null || data.size() == 0) {
-            showEmptyState();
-            return;
-        }
-
-        mStateTv.setVisibility(View.GONE);
-        mMovies = data;
-        mMovieAdapter.updateData(data);
-
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<Movie>> loader) {
-        mMovieAdapter.updateData(new ArrayList<Movie>());
-    }
-
     public static MovieGridFragment create(int sortBy) {
         MovieGridFragment movieGridFragment = new MovieGridFragment();
         Bundle args = new Bundle();
@@ -211,20 +173,78 @@ public class MovieGridFragment extends Fragment implements LoaderManager.LoaderC
         return movieGridFragment;
     }
 
-    private void showEmptyState() {
+    private void createMovieDbApi() {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public okhttp3.Response intercept(@NonNull Chain chain) throws IOException {
+                        Request request = chain.request();
 
+                        HttpUrl url = request.url().newBuilder()
+                                .addQueryParameter("api_key", BuildConfig.THEMOVIEDB_API_KEY)
+                                .addQueryParameter("language", "en-US")
+                                .build();
+
+                        return chain.proceed(request.newBuilder().url(url).build());
+                    }
+                }).build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(TheMovieDbAPI.ENDPOINT)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        mTheMovieDbAPI = retrofit.create(TheMovieDbAPI.class);
+    }
+
+    private void showEmptyState() {
         mLoadingPb.setVisibility(View.GONE);
+        mMoviesRecyclerView.setVisibility(View.GONE);
         mStateTv.setVisibility(View.VISIBLE);
         mStateTv.setText(R.string.empty_state);
+    }
 
+    private void showMovies() {
+        mLoadingPb.setVisibility(View.GONE);
+        mStateTv.setVisibility(View.GONE);
+        mMoviesRecyclerView.setVisibility(View.VISIBLE);
     }
 
     private void showNoNetworkConnectionState() {
-
         mLoadingPb.setVisibility(View.GONE);
+        mMoviesRecyclerView.setVisibility(View.GONE);
         mStateTv.setVisibility(View.VISIBLE);
         mStateTv.setText(R.string.no_network_connection_state);
+    }
 
+    private class MoviesCallback implements Callback<MoviesResponse> {
+
+        @Override
+        public void onResponse(@NonNull Call<MoviesResponse> call, @NonNull Response<MoviesResponse> response) {
+            if (response.isSuccessful()) {
+                MoviesResponse moviesResponse = response.body();
+                if (moviesResponse == null) {
+                    showEmptyState();
+                } else {
+                    List<Movie> movies = moviesResponse.getResults();
+                    if (movies == null || movies.size() == 0) {
+                        showEmptyState();
+                    } else {
+                        showMovies();
+                        mMovieAdapter.updateData(movies);
+                    }
+                }
+            } else {
+                showEmptyState();
+                Log.d(LOG_TAG, "Code: " + response.code() + " Message: " + response.message());
+            }
+        }
+
+        @Override
+        public void onFailure(@NonNull Call<MoviesResponse> call, @NonNull Throwable t) {
+            showEmptyState();
+            Log.e(LOG_TAG, "Can't fetch popular movies.", t);
+        }
     }
 
 }

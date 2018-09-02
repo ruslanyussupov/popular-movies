@@ -1,20 +1,32 @@
-package com.example.ruslanyussupov.popularmovies.model;
+package com.example.ruslanyussupov.popularmovies.data.model;
 
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Movie implements Parcelable {
 
     private int id;
-    private String originalTitle;
-    private String posterPath;
     private String overview;
-    private double voteAverage;
-    private String releaseDate;
-    private String backdropPath;
     private String posterLocalPath;
     private String backdropLocalPath;
+
+    @SerializedName("original_title")
+    private String originalTitle;
+
+    @SerializedName("poster_path")
+    private String posterPath;
+
+    @SerializedName("vote_average")
+    private double voteAverage;
+
+    @SerializedName("release_date")
+    private String releaseDate;
+
+    @SerializedName("backdrop_path")
+    private String backdropPath;
 
     public Movie(int id, String originalTitle, String posterPath, String overview, double voteAverage,
                  String releaseDate, String backdropPath) {
@@ -127,5 +139,10 @@ public class Movie implements Parcelable {
             return id == movie.getId();
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return id + ": " + originalTitle;
     }
 }

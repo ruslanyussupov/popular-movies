@@ -11,7 +11,7 @@ import android.view.View;
 
 import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
-import com.example.ruslanyussupov.popularmovies.model.Movie;
+import com.example.ruslanyussupov.popularmovies.data.model.Movie;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

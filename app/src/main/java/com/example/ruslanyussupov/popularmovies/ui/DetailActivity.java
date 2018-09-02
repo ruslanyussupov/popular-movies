@@ -10,7 +10,7 @@ import android.view.MenuItem;
 
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.events.ShareEvent;
-import com.example.ruslanyussupov.popularmovies.model.Movie;
+import com.example.ruslanyussupov.popularmovies.data.model.Movie;
 
 import org.greenrobot.eventbus.EventBus;
 

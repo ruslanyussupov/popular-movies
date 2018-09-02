@@ -4,7 +4,7 @@ package com.example.ruslanyussupov.popularmovies.network;
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 
-import com.example.ruslanyussupov.popularmovies.model.Video;
+import com.example.ruslanyussupov.popularmovies.data.model.Video;
 import com.example.ruslanyussupov.popularmovies.utils.JsonUtils;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 

@@ -21,7 +21,7 @@ import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.db.MovieContract;
 import com.example.ruslanyussupov.popularmovies.events.AddFavouriteEvent;
 import com.example.ruslanyussupov.popularmovies.events.RemoveFavouriteEvent;
-import com.example.ruslanyussupov.popularmovies.model.Movie;
+import com.example.ruslanyussupov.popularmovies.data.model.Movie;
 import com.example.ruslanyussupov.popularmovies.utils.DbUtils;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
@@ -200,13 +200,13 @@ public class DetailContentFragment extends Fragment {
 
             mFavouriteIb.setSelected(false);
 
-            Picasso.with(getActivity())
+            Picasso.get()
                     .load(NetworkUtils.buildMoviePosterUrlPath(mMovie.getPosterPath()))
                     .error(R.drawable.poster_placeholder)
                     .placeholder(R.drawable.poster_error)
                     .into(mPosterIv);
 
-            Picasso.with(getActivity())
+            Picasso.get()
                     .load(NetworkUtils.buildMovieBackdropUrlPath(mMovie.getBackdropPath()))
                     .error(R.drawable.backdrop_error)
                     .placeholder(R.drawable.poster_placeholder)

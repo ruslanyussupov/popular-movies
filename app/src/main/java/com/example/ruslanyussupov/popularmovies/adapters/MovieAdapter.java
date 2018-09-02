@@ -10,7 +10,7 @@ import android.widget.ImageView;
 
 import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
-import com.example.ruslanyussupov.popularmovies.model.Movie;
+import com.example.ruslanyussupov.popularmovies.data.model.Movie;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
@@ -50,7 +50,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
         // Load movie poster into ImageView
         String posterPath = NetworkUtils.buildMoviePosterUrlPath(currentMovie.getPosterPath());
-        Picasso.with(context).load(posterPath).placeholder(R.drawable.poster_placeholder)
+        Picasso.get().load(posterPath).placeholder(R.drawable.poster_placeholder)
                 .error(R.drawable.poster_error)
                 .into(holder.posterImageView);
 

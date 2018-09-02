@@ -9,7 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 
 import com.example.ruslanyussupov.popularmovies.db.MovieContract;
-import com.example.ruslanyussupov.popularmovies.model.Movie;
+import com.example.ruslanyussupov.popularmovies.data.model.Movie;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -38,13 +38,13 @@ public class DbUtils {
 
         if (dbRowUri != null) {
 
-            Picasso.with(context).load(NetworkUtils.buildMoviePosterUrlPath(movie.getPosterPath()))
+            Picasso.get().load(NetworkUtils.buildMoviePosterUrlPath(movie.getPosterPath()))
                     .into(new DbTarget(context,
                             POSTER_FILE_PREFIX + movie.getId(),
                             MovieContract.MovieEntry.COLUMN_POSTER_LOCAL_PATH,
                             dbRowUri));
 
-            Picasso.with(context).load(NetworkUtils.buildMovieBackdropUrlPath(movie.getBackdropPath()))
+            Picasso.get().load(NetworkUtils.buildMovieBackdropUrlPath(movie.getBackdropPath()))
                     .into(new DbTarget(context,
                             BACKDROP_FILE_PREFIX + movie.getId(),
                             MovieContract.MovieEntry.COLUMN_BACKDROP_LOCAL_PATH,
@@ -147,7 +147,7 @@ public class DbUtils {
         }
 
         @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
+        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
 
         }
 
