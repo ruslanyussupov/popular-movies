@@ -5,10 +5,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,29 +16,40 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.ruslanyussupov.popularmovies.BuildConfig;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.ReviewAdapter;
 import com.example.ruslanyussupov.popularmovies.data.model.Review;
-import com.example.ruslanyussupov.popularmovies.network.ReviewLoader;
+import com.example.ruslanyussupov.popularmovies.data.model.ReviewsResponse;
+import com.example.ruslanyussupov.popularmovies.data.remote.TheMovieDbAPI;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
-public class ReviewFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Review>>,
-        ReviewAdapter.OnReviewClickListener {
+public class ReviewFragment extends Fragment implements ReviewAdapter.OnReviewClickListener {
 
     private static final String LOG_TAG = ReviewFragment.class.getSimpleName();
-    private static final int REVIEWS_LOADER = 333;
     private static final String BUNDLE_MOVIE_ID = "movie_id";
     private static final String BUNDLE_REVIEWS = "reviews";
 
     private int mMovieId;
     private List<Review> mReviews;
     private ReviewAdapter mAdapter;
+    private TheMovieDbAPI mTheMovieDbAPI;
 
     @BindView(R.id.reviews_rv)RecyclerView mReviewsRv;
     @BindView(R.id.state_tv)TextView mStateTv;
@@ -48,7 +58,7 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         Log.d(LOG_TAG, "onCreateView");
 
@@ -80,18 +90,39 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
 
             if (NetworkUtils.hasNetworkConnection(getActivity())) {
 
-                LoaderManager loaderManager = getLoaderManager();
+                createMovieDbApi();
 
-                if (loaderManager.getLoader(REVIEWS_LOADER) == null) {
-                    loaderManager.initLoader(REVIEWS_LOADER, null, this);
-                } else {
-                    loaderManager.restartLoader(REVIEWS_LOADER, null, this);
-                }
+                mTheMovieDbAPI.getMovieReviews(mMovieId).enqueue(new Callback<ReviewsResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ReviewsResponse> call,
+                                           @NonNull retrofit2.Response<ReviewsResponse> response) {
+                        if (response.isSuccessful()) {
+                            ReviewsResponse reviewsResponse = response.body();
+                            if (reviewsResponse == null) {
+                                showEmptyState();
+                            } else {
+                                List<Review> reviews = reviewsResponse.getResults();
+                                if (reviews == null || reviews.size() == 0) {
+                                    showEmptyState();
+                                } else {
+                                    showReviews();
+                                    mAdapter.updateData(reviews);
+                                }
+                            }
+                        } else {
+                            showEmptyState();
+                            Log.d(LOG_TAG, "Code: " + response.code() + " Message: " + response.message());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ReviewsResponse> call, @NonNull Throwable t) {
+                        Log.e(LOG_TAG, "Can't load reviews for " + mMovieId, t);
+                    }
+                });
 
             } else {
-
                 showNoNetworkConnectionState();
-
             }
 
         } else {
@@ -100,7 +131,7 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
             mReviews = savedInstanceState.getParcelableArrayList(BUNDLE_REVIEWS);
 
             if (mReviews != null) {
-                mStateTv.setVisibility(View.GONE);
+                showReviews();
                 mAdapter.updateData(mReviews);
             } else {
                 showEmptyState();
@@ -108,13 +139,10 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
 
         }
 
-
-
-
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putParcelableArrayList(BUNDLE_REVIEWS, (ArrayList<? extends Parcelable>) mReviews);
         outState.putInt(BUNDLE_MOVIE_ID, mMovieId);
         super.onSaveInstanceState(outState);
@@ -124,28 +152,6 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
     public void onDestroy() {
         Log.d(LOG_TAG, "onDestroy");
         super.onDestroy();
-    }
-
-    @Override
-    public Loader<List<Review>> onCreateLoader(int id, Bundle args) {
-        return new ReviewLoader(getActivity(), NetworkUtils.getMovieReviewsUrl(mMovieId));
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<Review>> loader, List<Review> data) {
-        if (data == null || data.size() == 0) {
-            showEmptyState();
-            return;
-        }
-
-        mStateTv.setVisibility(View.GONE);
-        mReviews = data;
-        mAdapter.updateData(mReviews);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<Review>> loader) {
-        mAdapter.updateData(new ArrayList<Review>());
     }
 
     @Override
@@ -159,26 +165,54 @@ public class ReviewFragment extends Fragment implements LoaderManager.LoaderCall
 
     // Create review fragment with args
     public static ReviewFragment create(int movieId) {
-
         ReviewFragment reviewFragment = new ReviewFragment();
         Bundle args = new Bundle();
         args.putInt(BUNDLE_MOVIE_ID, movieId);
         reviewFragment.setArguments(args);
         return reviewFragment;
-
     }
 
     private void showNoNetworkConnectionState() {
-
+        mReviewsRv.setVisibility(View.GONE);
         mStateTv.setVisibility(View.VISIBLE);
         mStateTv.setText(R.string.no_network_connection_state);
-
     }
 
     private void showEmptyState() {
-
+        mReviewsRv.setVisibility(View.GONE);
         mStateTv.setVisibility(View.VISIBLE);
         mStateTv.setText(R.string.empty_state_reviews);
-
     }
+
+    private void showReviews() {
+        mReviewsRv.setVisibility(View.VISIBLE);
+        mStateTv.setVisibility(View.GONE);
+    }
+
+    private void createMovieDbApi() {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public Response intercept(@NonNull Chain chain) throws IOException {
+
+                        Request request = chain.request();
+
+                        HttpUrl url = request.url().newBuilder()
+                                .addQueryParameter("api_key", BuildConfig.THEMOVIEDB_API_KEY)
+                                .addQueryParameter("language", "en-US")
+                                .build();
+
+                        return chain.proceed(request.newBuilder().url(url).build());
+                    }
+                }).build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(TheMovieDbAPI.ENDPOINT)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        mTheMovieDbAPI = retrofit.create(TheMovieDbAPI.class);
+    }
+
 }
