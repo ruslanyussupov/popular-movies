@@ -2,6 +2,7 @@ package com.example.ruslanyussupov.popularmovies.ui;
 
 
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -9,18 +10,17 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.VideoAdapter;
 import com.example.ruslanyussupov.popularmovies.data.model.VideosResponse;
 import com.example.ruslanyussupov.popularmovies.data.remote.TheMovieDbAPI;
+import com.example.ruslanyussupov.popularmovies.databinding.FragmentVideoBinding;
 import com.example.ruslanyussupov.popularmovies.events.ShareEvent;
 import com.example.ruslanyussupov.popularmovies.data.model.Video;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
@@ -31,8 +31,6 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -48,9 +46,7 @@ public class VideoFragment extends Fragment implements VideoAdapter.OnVideoClick
     private int mMovieId;
     private VideoAdapter mVideoAdapter;
     private TheMovieDbAPI mTheMovieDbAPI;
-
-    @BindView(R.id.videos_rv)RecyclerView mVideosRv;
-    @BindView(R.id.state_tv)TextView mStateTv;
+    private FragmentVideoBinding mBinding;
 
     public VideoFragment() {}
 
@@ -60,10 +56,9 @@ public class VideoFragment extends Fragment implements VideoAdapter.OnVideoClick
 
         Log.d(LOG_TAG, "onCreateView");
 
-        View rootView = inflater.inflate(R.layout.fragment_video, container, false);
-        ButterKnife.bind(this, rootView);
+        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_video, container, false);
 
-        return rootView;
+        return mBinding.getRoot();
 
     }
 
@@ -73,14 +68,14 @@ public class VideoFragment extends Fragment implements VideoAdapter.OnVideoClick
 
         Log.d(LOG_TAG, "onActivityCreated");
 
-        mStateTv.setVisibility(View.GONE);
+        mBinding.stateTv.setVisibility(View.GONE);
 
         mVideoAdapter = new VideoAdapter(new ArrayList<Video>(), this);
-        mVideosRv.setAdapter(mVideoAdapter);
-        mVideosRv.setLayoutManager(new LinearLayoutManager(getActivity(),
+        mBinding.videosRv.setAdapter(mVideoAdapter);
+        mBinding.videosRv.setLayoutManager(new LinearLayoutManager(getActivity(),
                 LinearLayoutManager.HORIZONTAL, false));
         int offset = getResources().getDimensionPixelOffset(R.dimen.video_item_offset);
-        mVideosRv.addItemDecoration(new ItemDecoration(0, 0, offset, 0));
+        mBinding.videosRv.addItemDecoration(new ItemDecoration(0, 0, offset, 0));
 
         if (savedInstanceState == null) {
 
@@ -128,7 +123,7 @@ public class VideoFragment extends Fragment implements VideoAdapter.OnVideoClick
             mVideos = savedInstanceState.getParcelableArrayList(BUNDLE_VIDEOS);
 
             if (mVideos != null) {
-                mStateTv.setVisibility(View.GONE);
+                mBinding.stateTv.setVisibility(View.GONE);
                 mVideoAdapter.updateData(mVideos);
             } else {
                 showEmptyState();
@@ -198,20 +193,20 @@ public class VideoFragment extends Fragment implements VideoAdapter.OnVideoClick
     }
 
     private void showNoNetworkConnectionState() {
-        mVideosRv.setVisibility(View.GONE);
-        mStateTv.setVisibility(View.VISIBLE);
-        mStateTv.setText(R.string.no_network_connection_state);
+        mBinding.videosRv.setVisibility(View.GONE);
+        mBinding.stateTv.setVisibility(View.VISIBLE);
+        mBinding.stateTv.setText(R.string.no_network_connection_state);
     }
 
     private void showEmptyState() {
-        mVideosRv.setVisibility(View.GONE);
-        mStateTv.setVisibility(View.VISIBLE);
-        mStateTv.setText(R.string.empty_state_videos);
+        mBinding.videosRv.setVisibility(View.GONE);
+        mBinding.stateTv.setVisibility(View.VISIBLE);
+        mBinding.stateTv.setText(R.string.empty_state_videos);
     }
 
     private void showVideos() {
-        mStateTv.setVisibility(View.GONE);
-        mVideosRv.setVisibility(View.VISIBLE);
+        mBinding.stateTv.setVisibility(View.GONE);
+        mBinding.stateTv.setVisibility(View.VISIBLE);
     }
 
 }

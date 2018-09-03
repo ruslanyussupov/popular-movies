@@ -2,6 +2,7 @@ package com.example.ruslanyussupov.popularmovies.ui;
 
 
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -9,36 +10,24 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
-import com.example.ruslanyussupov.popularmovies.BuildConfig;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.ReviewAdapter;
 import com.example.ruslanyussupov.popularmovies.data.model.Review;
 import com.example.ruslanyussupov.popularmovies.data.model.ReviewsResponse;
 import com.example.ruslanyussupov.popularmovies.data.remote.TheMovieDbAPI;
+import com.example.ruslanyussupov.popularmovies.databinding.FragmentReviewBinding;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ReviewFragment extends Fragment implements ReviewAdapter.OnReviewClickListener {
 
@@ -50,9 +39,7 @@ public class ReviewFragment extends Fragment implements ReviewAdapter.OnReviewCl
     private List<Review> mReviews;
     private ReviewAdapter mAdapter;
     private TheMovieDbAPI mTheMovieDbAPI;
-
-    @BindView(R.id.reviews_rv)RecyclerView mReviewsRv;
-    @BindView(R.id.state_tv)TextView mStateTv;
+    private FragmentReviewBinding mBinding;
 
     public ReviewFragment() {}
 
@@ -62,10 +49,9 @@ public class ReviewFragment extends Fragment implements ReviewAdapter.OnReviewCl
 
         Log.d(LOG_TAG, "onCreateView");
 
-        View rootView = inflater.inflate(R.layout.fragment_review, container, false);
-        ButterKnife.bind(this, rootView);
+        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_review, container, false);
 
-        return rootView;
+        return mBinding.getRoot();
 
     }
 
@@ -75,14 +61,14 @@ public class ReviewFragment extends Fragment implements ReviewAdapter.OnReviewCl
 
         Log.d(LOG_TAG, "onActivityCreated");
 
-        mStateTv.setVisibility(View.GONE);
+        mBinding.stateTv.setVisibility(View.GONE);
 
         mAdapter = new ReviewAdapter(new ArrayList<Review>(), this);
-        mReviewsRv.setAdapter(mAdapter);
-        mReviewsRv.setLayoutManager(new LinearLayoutManager(getActivity(),
+        mBinding.reviewsRv.setAdapter(mAdapter);
+        mBinding.reviewsRv.setLayoutManager(new LinearLayoutManager(getActivity(),
                 LinearLayoutManager.HORIZONTAL, false));
         int offset = getResources().getDimensionPixelOffset(R.dimen.review_item_offset);
-        mReviewsRv.addItemDecoration(new ItemDecoration(0,0, offset, 0));
+        mBinding.reviewsRv.addItemDecoration(new ItemDecoration(0,0, offset, 0));
 
         if (savedInstanceState == null) {
 
@@ -173,20 +159,20 @@ public class ReviewFragment extends Fragment implements ReviewAdapter.OnReviewCl
     }
 
     private void showNoNetworkConnectionState() {
-        mReviewsRv.setVisibility(View.GONE);
-        mStateTv.setVisibility(View.VISIBLE);
-        mStateTv.setText(R.string.no_network_connection_state);
+        mBinding.reviewsRv.setVisibility(View.GONE);
+        mBinding.stateTv.setVisibility(View.VISIBLE);
+        mBinding.stateTv.setText(R.string.no_network_connection_state);
     }
 
     private void showEmptyState() {
-        mReviewsRv.setVisibility(View.GONE);
-        mStateTv.setVisibility(View.VISIBLE);
-        mStateTv.setText(R.string.empty_state_reviews);
+        mBinding.reviewsRv.setVisibility(View.GONE);
+        mBinding.stateTv.setVisibility(View.VISIBLE);
+        mBinding.stateTv.setText(R.string.empty_state_reviews);
     }
 
     private void showReviews() {
-        mReviewsRv.setVisibility(View.VISIBLE);
-        mStateTv.setVisibility(View.GONE);
+        mBinding.reviewsRv.setVisibility(View.VISIBLE);
+        mBinding.stateTv.setVisibility(View.GONE);
     }
 
 }

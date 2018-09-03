@@ -2,43 +2,32 @@ package com.example.ruslanyussupov.popularmovies.ui;
 
 
 import android.content.Context;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import com.example.ruslanyussupov.popularmovies.BuildConfig;
 import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.MovieAdapter;
 import com.example.ruslanyussupov.popularmovies.data.model.Movie;
 import com.example.ruslanyussupov.popularmovies.data.model.MoviesResponse;
 import com.example.ruslanyussupov.popularmovies.data.remote.TheMovieDbAPI;
+import com.example.ruslanyussupov.popularmovies.databinding.FragmentMovieGridBinding;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MovieGridFragment extends Fragment {
 
@@ -56,11 +45,7 @@ public class MovieGridFragment extends Fragment {
     private MovieAdapter mMovieAdapter;
     private List<Movie> mMovies;
     private OnMovieClickListener mMovieClickListener;
-
-    // Define views for binding
-    @BindView(R.id.rv_movies)RecyclerView mMoviesRecyclerView;
-    @BindView(R.id.state_tv)TextView mStateTv;
-    @BindView(R.id.loading_pb)ProgressBar mLoadingPb;
+    private FragmentMovieGridBinding mBinding;
 
     public MovieGridFragment() {}
 
@@ -80,12 +65,9 @@ public class MovieGridFragment extends Fragment {
 
         Log.d(LOG_TAG, "onCreateView");
 
-        View rootView = inflater.inflate(R.layout.fragment_movie_grid, container, false);
+        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_movie_grid, container, false);
 
-        // Bind views
-        ButterKnife.bind(this, rootView);
-
-        return rootView;
+        return mBinding.getRoot();
 
     }
 
@@ -99,10 +81,10 @@ public class MovieGridFragment extends Fragment {
 
         // Set up MovieAdapter and GridLayoutManager to RV
         mMovieAdapter = new MovieAdapter(new ArrayList<Movie>(), mMovieClickListener);
-        mMoviesRecyclerView.setAdapter(mMovieAdapter);
-        mMoviesRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), MOVIE_GRID_COLUMNS));
+        mBinding.rvMovies.setAdapter(mMovieAdapter);
+        mBinding.rvMovies.setLayoutManager(new GridLayoutManager(getActivity(), MOVIE_GRID_COLUMNS));
         int offset = getResources().getDimensionPixelOffset(R.dimen.movie_item_offset);
-        mMoviesRecyclerView.addItemDecoration(new ItemDecoration(offset, offset, offset, offset));
+        mBinding.rvMovies.addItemDecoration(new ItemDecoration(offset, offset, offset, offset));
 
         // If there is nothing to restore start loading, else restore from Bundle
         if (savedInstanceState == null) {
@@ -174,23 +156,23 @@ public class MovieGridFragment extends Fragment {
     }
 
     private void showEmptyState() {
-        mLoadingPb.setVisibility(View.GONE);
-        mMoviesRecyclerView.setVisibility(View.GONE);
-        mStateTv.setVisibility(View.VISIBLE);
-        mStateTv.setText(R.string.empty_state);
+        mBinding.loadingPb.setVisibility(View.GONE);
+        mBinding.rvMovies.setVisibility(View.GONE);
+        mBinding.stateTv.setVisibility(View.VISIBLE);
+        mBinding.stateTv.setText(R.string.empty_state);
     }
 
     private void showMovies() {
-        mLoadingPb.setVisibility(View.GONE);
-        mStateTv.setVisibility(View.GONE);
-        mMoviesRecyclerView.setVisibility(View.VISIBLE);
+        mBinding.loadingPb.setVisibility(View.GONE);
+        mBinding.stateTv.setVisibility(View.GONE);
+        mBinding.rvMovies.setVisibility(View.VISIBLE);
     }
 
     private void showNoNetworkConnectionState() {
-        mLoadingPb.setVisibility(View.GONE);
-        mMoviesRecyclerView.setVisibility(View.GONE);
-        mStateTv.setVisibility(View.VISIBLE);
-        mStateTv.setText(R.string.no_network_connection_state);
+        mBinding.loadingPb.setVisibility(View.GONE);
+        mBinding.rvMovies.setVisibility(View.GONE);
+        mBinding.stateTv.setVisibility(View.VISIBLE);
+        mBinding.stateTv.setText(R.string.no_network_connection_state);
     }
 
     private class MoviesCallback implements Callback<MoviesResponse> {

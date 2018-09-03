@@ -1,19 +1,18 @@
 package com.example.ruslanyussupov.popularmovies.adapters;
 
 
+import android.databinding.DataBindingUtil;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.data.model.Review;
+import com.example.ruslanyussupov.popularmovies.databinding.ItemReviewBinding;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder> {
 
@@ -25,23 +24,19 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
         mOnReviewClickListener = onReviewClickListener;
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        View reviewView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_review, parent, false);
+        ItemReviewBinding binding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()),
+                R.layout.item_review, parent, false);
 
-        return new ViewHolder(reviewView);
+        return new ViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-
-        Review currentReview = mReviews.get(position);
-
-        holder.mAuthorTv.setText(currentReview.getAuthor());
-        holder.mContentTv.setText(currentReview.getContent());
-
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.bind(position);
     }
 
     @Override
@@ -54,20 +49,26 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.author_tv)TextView mAuthorTv;
-        @BindView(R.id.content_tv)TextView mContentTv;
+        private final ItemReviewBinding mBinding;
 
-        public ViewHolder(View itemView) {
-            super(itemView);
+        ViewHolder(ItemReviewBinding binding) {
+            super(binding.getRoot());
 
-            ButterKnife.bind(this, itemView);
+            mBinding = binding;
 
-            itemView.setOnClickListener(new View.OnClickListener() {
+            binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mOnReviewClickListener.onReviewClick(getAdapterPosition());
                 }
             });
+        }
+
+        void bind(int position) {
+            Review currentReview = mReviews.get(position);
+
+            mBinding.authorTv.setText(currentReview.getAuthor());
+            mBinding.contentTv.setText(currentReview.getContent());
         }
     }
 

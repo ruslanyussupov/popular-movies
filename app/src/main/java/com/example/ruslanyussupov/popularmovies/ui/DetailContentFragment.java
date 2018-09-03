@@ -3,21 +3,21 @@ package com.example.ruslanyussupov.popularmovies.ui;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.ruslanyussupov.popularmovies.R;
+import com.example.ruslanyussupov.popularmovies.databinding.FragmentDetailContentBinding;
 import com.example.ruslanyussupov.popularmovies.db.MovieContract;
 import com.example.ruslanyussupov.popularmovies.events.AddFavouriteEvent;
 import com.example.ruslanyussupov.popularmovies.events.RemoveFavouriteEvent;
@@ -27,10 +27,6 @@ import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import org.greenrobot.eventbus.EventBus;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 public class DetailContentFragment extends Fragment {
 
@@ -44,27 +40,20 @@ public class DetailContentFragment extends Fragment {
     private boolean mIsFavourite;
     private String mPosterLocalPath;
     private String mBackdropLocalPath;
-
-    @BindView(R.id.title_tv)TextView mTitleTv;
-    @BindView(R.id.poster_iv)ImageView mPosterIv;
-    @BindView(R.id.release_date_tv)TextView mReleaseDateTv;
-    @BindView(R.id.user_rating_tv)TextView mVoteAverageTv;
-    @BindView(R.id.overview_tv)TextView mOverviewTv;
-    @BindView(R.id.backdrop_iv)ImageView mBackdropIv;
-    @BindView(R.id.favorite_ib)ImageButton mFavouriteIb;
+    private FragmentDetailContentBinding mBinding;
 
     public DetailContentFragment() {}
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
 
         Log.d(LOG_TAG, "onCreateView");
 
-        View rootView = inflater.inflate(R.layout.fragment_detail_content, container, false);
-        ButterKnife.bind(this, rootView);
+        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_detail_content, container, false);
 
-        return rootView;
+        return mBinding.getRoot();
 
     }
 
@@ -122,14 +111,13 @@ public class DetailContentFragment extends Fragment {
         super.onDestroy();
     }
 
-    @OnClick(R.id.favorite_ib)
-    public void favouriteChangeState() {
+    public void favouriteChangeState(View view) {
 
         if (mIsFavourite) {
 
             DbUtils.deleteMovieFromFavourite(getActivity(), mMovie);
 
-            mFavouriteIb.setSelected(false);
+            mBinding.favoriteIb.setSelected(false);
             mIsFavourite = false;
 
             EventBus.getDefault().post(new RemoveFavouriteEvent(mMovie));
@@ -141,7 +129,7 @@ public class DetailContentFragment extends Fragment {
 
             DbUtils.addMovieToFavourite(getActivity(), mMovie);
 
-            mFavouriteIb.setSelected(true);
+            mBinding.favoriteIb.setSelected(true);
             mIsFavourite = true;
 
             EventBus.getDefault().post(new AddFavouriteEvent(mMovie));
@@ -179,45 +167,45 @@ public class DetailContentFragment extends Fragment {
 
         if (mIsFavourite) {
 
-            mFavouriteIb.setSelected(true);
+            mBinding.favoriteIb.setSelected(true);
 
             Bitmap poster = BitmapFactory.decodeFile(mPosterLocalPath);
             Bitmap backdrop = BitmapFactory.decodeFile(mBackdropLocalPath);
 
             if (poster == null) {
-                mPosterIv.setImageResource(R.drawable.poster_placeholder);
+                mBinding.posterIv.setImageResource(R.drawable.poster_placeholder);
             } else {
-                mPosterIv.setImageBitmap(poster);
+                mBinding.posterIv.setImageBitmap(poster);
             }
 
             if (backdrop == null) {
-                mBackdropIv.setImageResource(R.drawable.backdrop_placeholder);
+                mBinding.backdropIv.setImageResource(R.drawable.backdrop_placeholder);
             } else {
-                mBackdropIv.setImageBitmap(backdrop);
+                mBinding.backdropIv.setImageBitmap(backdrop);
             }
 
         } else {
 
-            mFavouriteIb.setSelected(false);
+            mBinding.favoriteIb.setSelected(false);
 
             Picasso.get()
                     .load(NetworkUtils.buildMoviePosterUrlPath(mMovie.getPosterPath()))
                     .error(R.drawable.poster_placeholder)
                     .placeholder(R.drawable.poster_error)
-                    .into(mPosterIv);
+                    .into(mBinding.posterIv);
 
             Picasso.get()
                     .load(NetworkUtils.buildMovieBackdropUrlPath(mMovie.getBackdropPath()))
                     .error(R.drawable.backdrop_error)
                     .placeholder(R.drawable.poster_placeholder)
-                    .into(mBackdropIv);
+                    .into(mBinding.backdropIv);
 
         }
 
-        mTitleTv.setText(mMovie.getOriginalTitle());
-        mReleaseDateTv.setText(mMovie.getReleaseDate());
-        mVoteAverageTv.setText(String.valueOf(mMovie.getVoteAverage()));
-        mOverviewTv.setText(mMovie.getOverview());
+        mBinding.titleTv.setText(mMovie.getOriginalTitle());
+        mBinding.releaseDateTv.setText(mMovie.getReleaseDate());
+        mBinding.userRatingTv.setText(String.valueOf(mMovie.getVoteAverage()));
+        mBinding.overviewTv.setText(mMovie.getOverview());
 
     }
 

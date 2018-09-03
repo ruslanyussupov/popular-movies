@@ -1,23 +1,22 @@
 package com.example.ruslanyussupov.popularmovies.adapters;
 
 
+import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.data.model.Movie;
+import com.example.ruslanyussupov.popularmovies.databinding.ItemMovieBinding;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAdapter.ViewHolder> {
 
@@ -31,29 +30,19 @@ public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAd
         mMovieClickListener = movieClickListener;
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
-        View movieView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_movie, parent, false);
+        ItemMovieBinding binding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()),
+                R.layout.item_movie, parent, false);
 
-        return new ViewHolder(movieView);
+        return new ViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-
-        Movie currentMovie = mFavMovies.get(position);
-        String posterPath = currentMovie.getPosterLocalPath();
-        Log.d(LOG_TAG, "Poster path: " + posterPath);
-        Bitmap poster = BitmapFactory.decodeFile(posterPath);
-
-        if (poster == null) {
-            holder.mMoviePoster.setImageResource(R.drawable.poster_placeholder);
-        } else {
-            holder.mMoviePoster.setImageBitmap(poster);
-        }
-
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.bind(position);
     }
 
     @Override
@@ -66,14 +55,13 @@ public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAd
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.movie_poster)ImageView mMoviePoster;
+        private final ItemMovieBinding mBinding;
 
-        public ViewHolder(View itemView) {
-            super(itemView);
+        ViewHolder(ItemMovieBinding binding) {
+            super(binding.getRoot());
+            mBinding = binding;
 
-            ButterKnife.bind(this, itemView);
-
-            itemView.setOnClickListener(new View.OnClickListener() {
+            mBinding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int position = getAdapterPosition();
@@ -81,6 +69,19 @@ public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAd
                 }
             });
 
+        }
+
+        void bind(int position) {
+            Movie currentMovie = mFavMovies.get(position);
+            String posterPath = currentMovie.getPosterLocalPath();
+            Log.d(LOG_TAG, "Poster path: " + posterPath);
+            Bitmap poster = BitmapFactory.decodeFile(posterPath);
+
+            if (poster == null) {
+                mBinding.moviePoster.setImageResource(R.drawable.poster_placeholder);
+            } else {
+                mBinding.moviePoster.setImageBitmap(poster);
+            }
         }
     }
 

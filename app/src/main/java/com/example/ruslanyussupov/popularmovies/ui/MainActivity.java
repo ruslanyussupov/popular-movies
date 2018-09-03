@@ -1,9 +1,9 @@
 package com.example.ruslanyussupov.popularmovies.ui;
 
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -12,9 +12,7 @@ import android.view.View;
 import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.data.model.Movie;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.example.ruslanyussupov.popularmovies.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity implements OnMovieClickListener {
 
@@ -31,23 +29,18 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
     private static final int REPLACE_FRAGMENT = 1;
 
     private boolean mTwoPane;
-
-    // Define views for binding
-    @BindView(R.id.toolbar)Toolbar mToolbar;
+    private ActivityMainBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        // Bind views
-        ButterKnife.bind(this);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         View tabletLayout = findViewById(R.id.tablet_layout);
         mTwoPane = tabletLayout != null && tabletLayout.getVisibility() == View.VISIBLE;
 
         // Set our custom Toolbar as ActionBar
-        setSupportActionBar(mToolbar);
+        setSupportActionBar(mBinding.toolbar);
 
         if (savedInstanceState == null) {
 

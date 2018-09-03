@@ -3,23 +3,23 @@ package com.example.ruslanyussupov.popularmovies.ui;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.FavouriteMovieAdapter;
+import com.example.ruslanyussupov.popularmovies.databinding.FragmentMovieGridBinding;
 import com.example.ruslanyussupov.popularmovies.db.MovieContract;
 import com.example.ruslanyussupov.popularmovies.events.AddFavouriteEvent;
 import com.example.ruslanyussupov.popularmovies.events.RemoveFavouriteEvent;
@@ -32,8 +32,6 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class FavouriteMovieFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -44,11 +42,7 @@ public class FavouriteMovieFragment extends Fragment
     private FavouriteMovieAdapter mAdapter;
     private OnMovieClickListener mMovieClickListener;
     private List<Movie> mMovies;
-
-    // Define views for binding
-    @BindView(R.id.rv_movies)RecyclerView mMoviesRv;
-    @BindView(R.id.state_tv)TextView mStateTv;
-    @BindView(R.id.loading_pb)ProgressBar mLoadingPb;
+    FragmentMovieGridBinding mBinding;
 
     public FavouriteMovieFragment() {}
 
@@ -87,12 +81,12 @@ public class FavouriteMovieFragment extends Fragment
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_movie_grid, container, false);
-        ButterKnife.bind(this, rootView);
+        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_movie_grid,
+                container, false);
 
-        return rootView;
+        return mBinding.getRoot();
     }
 
     @Override
@@ -100,17 +94,18 @@ public class FavouriteMovieFragment extends Fragment
         super.onActivityCreated(savedInstanceState);
 
         mAdapter = new FavouriteMovieAdapter(new ArrayList<Movie>(), mMovieClickListener);
-        mMoviesRv.setAdapter(mAdapter);
-        mMoviesRv.setLayoutManager(new GridLayoutManager(getActivity(), MOVIE_GRID_COLUMNS));
+        mBinding.rvMovies.setAdapter(mAdapter);
+        mBinding.rvMovies.setLayoutManager(new GridLayoutManager(getActivity(), MOVIE_GRID_COLUMNS));
         int offset = getResources().getDimensionPixelOffset(R.dimen.movie_item_offset);
-        mMoviesRv.addItemDecoration(new ItemDecoration(offset, offset, offset, offset));
+        mBinding.rvMovies.addItemDecoration(new ItemDecoration(offset, offset, offset, offset));
 
     }
 
+    @NonNull
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        mLoadingPb.setVisibility(View.VISIBLE);
+        mBinding.loadingPb.setVisibility(View.VISIBLE);
 
         return new CursorLoader(getActivity(),
                 MovieContract.MovieEntry.CONTENT_URI,
@@ -121,9 +116,9 @@ public class FavouriteMovieFragment extends Fragment
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+    public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
 
-        mLoadingPb.setVisibility(View.GONE);
+        mBinding.loadingPb.setVisibility(View.GONE);
 
         if (data == null || data.getCount() == 0) {
             showEmptyState();
@@ -136,21 +131,21 @@ public class FavouriteMovieFragment extends Fragment
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
+    public void onLoaderReset(@NonNull Loader<Cursor> loader) {
         mAdapter.updateData(new ArrayList<Movie>());
     }
 
     private void showEmptyState() {
 
-        mLoadingPb.setVisibility(View.GONE);
-        mStateTv.setVisibility(View.VISIBLE);
-        mStateTv.setText(R.string.empty_state);
+        mBinding.loadingPb.setVisibility(View.GONE);
+        mBinding.stateTv.setVisibility(View.VISIBLE);
+        mBinding.stateTv.setText(R.string.empty_state);
 
     }
 
     @Subscribe
     public void onFavouriteAdd(AddFavouriteEvent event) {
-        mStateTv.setVisibility(View.GONE);
+        mBinding.stateTv.setVisibility(View.GONE);
         mMovies.add(event.getMovie());
         mAdapter.updateData(mMovies);
     }

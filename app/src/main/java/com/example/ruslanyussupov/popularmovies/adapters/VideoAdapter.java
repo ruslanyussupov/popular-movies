@@ -1,21 +1,19 @@
 package com.example.ruslanyussupov.popularmovies.adapters;
 
 
-import android.content.Context;
+import android.databinding.DataBindingUtil;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.data.model.Video;
+import com.example.ruslanyussupov.popularmovies.databinding.ItemVideoBinding;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> {
 
@@ -27,54 +25,52 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
         mOnVideoClickListener = onVideoClickListener;
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        ItemVideoBinding binding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()),
+                R.layout.item_video, parent, false);
 
-        View videoView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_video, parent, false);
-
-        return new ViewHolder(videoView);
+        return new ViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-
-        Context context = holder.itemView.getContext();
-
-        Video currentVideo = mVideos.get(position);
-
-        Picasso.get().load(currentVideo.getPreviewImagePath())
-                .placeholder(R.drawable.video_preview_placeholder)
-                .error(R.drawable.video_preview_placeholder)
-                .into(holder.mVideoPreviewIv);
-
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.bind(position);
     }
 
     @Override
     public int getItemCount() {
-
         if (mVideos == null) {
             return 0;
         }
-
         return mVideos.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.video_preview_iv)ImageView mVideoPreviewIv;
+        private final ItemVideoBinding mBinding;
 
-        ViewHolder(View itemView) {
-            super(itemView);
+        ViewHolder(ItemVideoBinding binding) {
+            super(binding.getRoot());
 
-            ButterKnife.bind(this, itemView);
+            mBinding = binding;
 
-            itemView.setOnClickListener(new View.OnClickListener() {
+            binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     mOnVideoClickListener.onVideoClick(getAdapterPosition());
                 }
             });
+        }
+
+        void bind(int position) {
+            Video currentVideo = mVideos.get(position);
+
+            Picasso.get().load(currentVideo.getPreviewImagePath())
+                    .placeholder(R.drawable.video_preview_placeholder)
+                    .error(R.drawable.video_preview_placeholder)
+                    .into(mBinding.videoPreviewIv);
         }
     }
 

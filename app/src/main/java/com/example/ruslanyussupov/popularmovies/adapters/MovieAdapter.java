@@ -1,23 +1,21 @@
 package com.example.ruslanyussupov.popularmovies.adapters;
 
 
-import android.content.Context;
+import android.databinding.DataBindingUtil;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.example.ruslanyussupov.popularmovies.OnMovieClickListener;
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.data.model.Movie;
+import com.example.ruslanyussupov.popularmovies.databinding.ItemMovieBinding;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
 
@@ -30,30 +28,20 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         mMovieClickListener = onMovieClickListener;
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         // Inflate the our custom layout
-        View movieView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_movie, parent, false);
+        ItemMovieBinding binding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()),
+                R.layout.item_movie, parent, false);
 
-        return new ViewHolder(movieView);
+        return new ViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-
-        Context context = holder.itemView.getContext();
-
-        // Get appropriate movie
-        Movie currentMovie = mMovies.get(position);
-
-        // Load movie poster into ImageView
-        String posterPath = NetworkUtils.buildMoviePosterUrlPath(currentMovie.getPosterPath());
-        Picasso.get().load(posterPath).placeholder(R.drawable.poster_placeholder)
-                .error(R.drawable.poster_error)
-                .into(holder.posterImageView);
-
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.bind(position);
     }
 
     @Override
@@ -66,16 +54,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        // Define what to bind
-        @BindView(R.id.movie_poster) ImageView posterImageView;
+        private final ItemMovieBinding mBinding;
 
-        ViewHolder(View itemView) {
-            super(itemView);
+        ViewHolder(ItemMovieBinding binding) {
+            super(binding.getRoot());
 
-            // Execute binding
-            ButterKnife.bind(this, itemView);
+            mBinding = binding;
 
-            itemView.setOnClickListener(new View.OnClickListener() {
+            binding.getRoot().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int position = getAdapterPosition();
@@ -83,6 +69,17 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
                 }
             });
 
+        }
+
+        void bind(int position) {
+            // Get appropriate movie
+            Movie currentMovie = mMovies.get(position);
+
+            // Load movie poster into ImageView
+            String posterPath = NetworkUtils.buildMoviePosterUrlPath(currentMovie.getPosterPath());
+            Picasso.get().load(posterPath).placeholder(R.drawable.poster_placeholder)
+                    .error(R.drawable.poster_error)
+                    .into(mBinding.moviePoster);
         }
     }
 
