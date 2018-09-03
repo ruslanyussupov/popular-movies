@@ -90,7 +90,7 @@ public class ReviewFragment extends Fragment implements ReviewAdapter.OnReviewCl
 
             if (NetworkUtils.hasNetworkConnection(getActivity())) {
 
-                createMovieDbApi();
+                mTheMovieDbAPI = NetworkUtils.getMovieDbApi();
 
                 mTheMovieDbAPI.getMovieReviews(mMovieId).enqueue(new Callback<ReviewsResponse>() {
                     @Override
@@ -102,7 +102,7 @@ public class ReviewFragment extends Fragment implements ReviewAdapter.OnReviewCl
                                 showEmptyState();
                             } else {
                                 List<Review> reviews = reviewsResponse.getResults();
-                                if (reviews == null || reviews.size() == 0) {
+                                if (reviews == null || reviews.isEmpty()) {
                                     showEmptyState();
                                 } else {
                                     showReviews();
@@ -187,32 +187,6 @@ public class ReviewFragment extends Fragment implements ReviewAdapter.OnReviewCl
     private void showReviews() {
         mReviewsRv.setVisibility(View.VISIBLE);
         mStateTv.setVisibility(View.GONE);
-    }
-
-    private void createMovieDbApi() {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(@NonNull Chain chain) throws IOException {
-
-                        Request request = chain.request();
-
-                        HttpUrl url = request.url().newBuilder()
-                                .addQueryParameter("api_key", BuildConfig.THEMOVIEDB_API_KEY)
-                                .addQueryParameter("language", "en-US")
-                                .build();
-
-                        return chain.proceed(request.newBuilder().url(url).build());
-                    }
-                }).build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(TheMovieDbAPI.ENDPOINT)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        mTheMovieDbAPI = retrofit.create(TheMovieDbAPI.class);
     }
 
 }

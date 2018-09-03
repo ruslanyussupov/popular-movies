@@ -5,10 +5,12 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.ruslanyussupov.popularmovies.BuildConfig;
+import com.example.ruslanyussupov.popularmovies.data.remote.TheMovieDbAPI;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,7 +21,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 
-public class NetworkUtils {
+import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+public final class NetworkUtils {
 
     private static final String LOG_TAG = NetworkUtils.class.getSimpleName();
 
@@ -40,6 +49,29 @@ public class NetworkUtils {
     private static final String LANGUAGE = Locale.getDefault().toString();
     private static final String API_KEY = BuildConfig.THEMOVIEDB_API_KEY;
 
+    public static TheMovieDbAPI getMovieDbApi() {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public okhttp3.Response intercept(@NonNull Chain chain) throws IOException {
+                        Request request = chain.request();
+
+                        HttpUrl url = request.url().newBuilder()
+                                .addQueryParameter("api_key", BuildConfig.THEMOVIEDB_API_KEY)
+                                .addQueryParameter("language", "en-US")
+                                .build();
+
+                        return chain.proceed(request.newBuilder().url(url).build());
+                    }
+                }).build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(TheMovieDbAPI.ENDPOINT)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        return retrofit.create(TheMovieDbAPI.class);
+    }
 
     /**
      * Takes URL as String and make connection to read the data and return it.

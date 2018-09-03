@@ -109,7 +109,7 @@ public class MovieGridFragment extends Fragment {
 
             Log.d(LOG_TAG, "savedInstanceState == null");
 
-            createMovieDbApi();
+            mTheMovieDbAPI = NetworkUtils.getMovieDbApi();
 
             // Check internet connection before loading data
             if (NetworkUtils.hasNetworkConnection(getActivity())) {
@@ -173,30 +173,6 @@ public class MovieGridFragment extends Fragment {
         return movieGridFragment;
     }
 
-    private void createMovieDbApi() {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public okhttp3.Response intercept(@NonNull Chain chain) throws IOException {
-                        Request request = chain.request();
-
-                        HttpUrl url = request.url().newBuilder()
-                                .addQueryParameter("api_key", BuildConfig.THEMOVIEDB_API_KEY)
-                                .addQueryParameter("language", "en-US")
-                                .build();
-
-                        return chain.proceed(request.newBuilder().url(url).build());
-                    }
-                }).build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(TheMovieDbAPI.ENDPOINT)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        mTheMovieDbAPI = retrofit.create(TheMovieDbAPI.class);
-    }
-
     private void showEmptyState() {
         mLoadingPb.setVisibility(View.GONE);
         mMoviesRecyclerView.setVisibility(View.GONE);
@@ -227,7 +203,7 @@ public class MovieGridFragment extends Fragment {
                     showEmptyState();
                 } else {
                     List<Movie> movies = moviesResponse.getResults();
-                    if (movies == null || movies.size() == 0) {
+                    if (movies == null || movies.isEmpty()) {
                         showEmptyState();
                     } else {
                         showMovies();

@@ -5,10 +5,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -20,9 +19,10 @@ import android.widget.Toast;
 
 import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.adapters.VideoAdapter;
+import com.example.ruslanyussupov.popularmovies.data.model.VideosResponse;
+import com.example.ruslanyussupov.popularmovies.data.remote.TheMovieDbAPI;
 import com.example.ruslanyussupov.popularmovies.events.ShareEvent;
 import com.example.ruslanyussupov.popularmovies.data.model.Video;
-import com.example.ruslanyussupov.popularmovies.network.VideoLoader;
 import com.example.ruslanyussupov.popularmovies.utils.NetworkUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -33,9 +33,11 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-public class VideoFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Video>>,
-        VideoAdapter.OnVideoClickListener {
+public class VideoFragment extends Fragment implements VideoAdapter.OnVideoClickListener {
 
     private static final String LOG_TAG = VideoFragment.class.getSimpleName();
 
@@ -45,8 +47,7 @@ public class VideoFragment extends Fragment implements LoaderManager.LoaderCallb
     private List<Video> mVideos;
     private int mMovieId;
     private VideoAdapter mVideoAdapter;
-
-    private static final int VIDEO_LOADER = 222;
+    private TheMovieDbAPI mTheMovieDbAPI;
 
     @BindView(R.id.videos_rv)RecyclerView mVideosRv;
     @BindView(R.id.state_tv)TextView mStateTv;
@@ -55,7 +56,7 @@ public class VideoFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         Log.d(LOG_TAG, "onCreateView");
 
@@ -87,18 +88,38 @@ public class VideoFragment extends Fragment implements LoaderManager.LoaderCallb
 
             if (NetworkUtils.hasNetworkConnection(getActivity())) {
 
-                LoaderManager loaderManager = getLoaderManager();
+                mTheMovieDbAPI = NetworkUtils.getMovieDbApi();
+                mTheMovieDbAPI.getMovieTrailers(mMovieId).enqueue(new Callback<VideosResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<VideosResponse> call,
+                                           @NonNull Response<VideosResponse> response) {
+                        if (response.isSuccessful()) {
+                            VideosResponse videosResponse = response.body();
+                            if (videosResponse == null) {
+                                showEmptyState();
+                            } else {
+                                List<Video> videos = videosResponse.getResults();
+                                if (videos == null || videos.isEmpty()) {
+                                    showEmptyState();
+                                } else {
+                                    showVideos();
+                                    mVideoAdapter.updateData(videos);
+                                }
+                            }
+                        } else {
+                            showEmptyState();
+                        }
+                    }
 
-                if (loaderManager.getLoader(VIDEO_LOADER) == null) {
-                    loaderManager.initLoader(VIDEO_LOADER, null, this);
-                } else {
-                    loaderManager.restartLoader(VIDEO_LOADER, null, this);
-                }
+                    @Override
+                    public void onFailure(@NonNull Call<VideosResponse> call, @NonNull Throwable t) {
+                        showEmptyState();
+                        Log.e(LOG_TAG, "Can't load videos for " + mMovieId, t);
+                    }
+                });
 
             } else {
-
                 showNoNetworkConnectionState();
-
             }
 
         } else {
@@ -143,29 +164,6 @@ public class VideoFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     @Override
-    public Loader<List<Video>> onCreateLoader(int id, Bundle args) {
-        return new VideoLoader(getActivity(), NetworkUtils.getMovieVideosUrl(mMovieId));
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<Video>> loader, List<Video> data) {
-
-        if (data == null || data.size() == 0) {
-            showEmptyState();
-            return;
-        }
-
-        mStateTv.setVisibility(View.GONE);
-        mVideos = data;
-        mVideoAdapter.updateData(mVideos);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<Video>> loader) {
-        mVideoAdapter.updateData(new ArrayList<Video>());
-    }
-
-    @Override
     public void onVideoClick(int position) {
         Intent openVideoIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse(mVideos.get(position).getUrl()));
@@ -200,17 +198,20 @@ public class VideoFragment extends Fragment implements LoaderManager.LoaderCallb
     }
 
     private void showNoNetworkConnectionState() {
-
+        mVideosRv.setVisibility(View.GONE);
         mStateTv.setVisibility(View.VISIBLE);
         mStateTv.setText(R.string.no_network_connection_state);
-
     }
 
     private void showEmptyState() {
-
+        mVideosRv.setVisibility(View.GONE);
         mStateTv.setVisibility(View.VISIBLE);
         mStateTv.setText(R.string.empty_state_videos);
+    }
 
+    private void showVideos() {
+        mStateTv.setVisibility(View.GONE);
+        mVideosRv.setVisibility(View.VISIBLE);
     }
 
 }
