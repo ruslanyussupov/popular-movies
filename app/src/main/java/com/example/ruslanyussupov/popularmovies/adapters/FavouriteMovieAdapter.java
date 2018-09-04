@@ -42,15 +42,12 @@ public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAd
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(position);
+        holder.bind(mFavMovies.get(position));
     }
 
     @Override
     public int getItemCount() {
-        if (mFavMovies == null) {
-            return 0;
-        }
-        return mFavMovies.size();
+        return mFavMovies == null ? 0 : mFavMovies.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -71,9 +68,9 @@ public class FavouriteMovieAdapter extends RecyclerView.Adapter<FavouriteMovieAd
 
         }
 
-        void bind(int position) {
-            Movie currentMovie = mFavMovies.get(position);
-            String posterPath = currentMovie.getPosterLocalPath();
+        void bind(Movie movie) {
+            mBinding.executePendingBindings();
+            String posterPath = movie.getPosterLocalPath();
             Log.d(LOG_TAG, "Poster path: " + posterPath);
             Bitmap poster = BitmapFactory.decodeFile(posterPath);
 

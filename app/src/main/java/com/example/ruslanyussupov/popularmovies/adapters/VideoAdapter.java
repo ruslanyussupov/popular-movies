@@ -36,15 +36,12 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(position);
+        holder.bind(mVideos.get(position));
     }
 
     @Override
     public int getItemCount() {
-        if (mVideos == null) {
-            return 0;
-        }
-        return mVideos.size();
+        return mVideos == null ? 0 : mVideos.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -64,10 +61,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
             });
         }
 
-        void bind(int position) {
-            Video currentVideo = mVideos.get(position);
-
-            Picasso.get().load(currentVideo.getPreviewImagePath())
+        void bind(Video video) {
+            mBinding.executePendingBindings();
+            Picasso.get().load(video.getPreviewImagePath())
                     .placeholder(R.drawable.video_preview_placeholder)
                     .error(R.drawable.video_preview_placeholder)
                     .into(mBinding.videoPreviewIv);

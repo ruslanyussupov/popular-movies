@@ -36,15 +36,12 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(position);
+        holder.bind(mReviews.get(position));
     }
 
     @Override
     public int getItemCount() {
-        if (mReviews == null) {
-            return 0;
-        }
-        return mReviews.size();
+        return mReviews == null ? 0 : mReviews.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -64,11 +61,9 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
             });
         }
 
-        void bind(int position) {
-            Review currentReview = mReviews.get(position);
-
-            mBinding.authorTv.setText(currentReview.getAuthor());
-            mBinding.contentTv.setText(currentReview.getContent());
+        void bind(Review review) {
+            mBinding.executePendingBindings();
+            mBinding.setReview(review);
         }
     }
 

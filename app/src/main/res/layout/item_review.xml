@@ -3,7 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
-
+        <variable
+            name="review"
+            type="com.example.ruslanyussupov.popularmovies.data.model.Review"/>
     </data>
 
     <android.support.constraint.ConstraintLayout
@@ -15,6 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
+            android:text="@{review.author}"
             tools:text="Andres Gomez"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"/>
@@ -25,6 +28,7 @@
             android:layout_height="wrap_content"
             android:maxLines="9"
             android:ellipsize="end"
+            android:text="@{review.content}"
             tools:text="One of the best movies Disney has created in the last years. Smart plot with a great background topic talking about the differences, stereotypes, prejudices and joining the tendency of giving women more important roles. It has still several gaps to fill and enhance on the latest point but it is, IMHO, a milestone in the right direction. The characters work pretty well and it is funny when needed and not too full of cheesy songs."
             app:layout_constraintTop_toBottomOf="@id/author_tv"
             app:layout_constraintLeft_toLeftOf="parent"

@@ -41,15 +41,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bind(position);
+        holder.bind(mMovies.get(position));
     }
 
     @Override
     public int getItemCount() {
-        if (mMovies == null) {
-            return 0;
-        }
-        return mMovies.size();
+        return mMovies == null ? 0 : mMovies.size();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -71,12 +68,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
         }
 
-        void bind(int position) {
-            // Get appropriate movie
-            Movie currentMovie = mMovies.get(position);
-
+        void bind(Movie movie) {
+            mBinding.executePendingBindings();
             // Load movie poster into ImageView
-            String posterPath = NetworkUtils.buildMoviePosterUrlPath(currentMovie.getPosterPath());
+            String posterPath = NetworkUtils.buildMoviePosterUrlPath(movie.getPosterPath());
             Picasso.get().load(posterPath).placeholder(R.drawable.poster_placeholder)
                     .error(R.drawable.poster_error)
                     .into(mBinding.moviePoster);
