@@ -49,30 +49,6 @@ public final class NetworkUtils {
     private static final String LANGUAGE = Locale.getDefault().toString();
     private static final String API_KEY = BuildConfig.THEMOVIEDB_API_KEY;
 
-    public static TheMovieDbAPI getMovieDbApi() {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public okhttp3.Response intercept(@NonNull Chain chain) throws IOException {
-                        Request request = chain.request();
-
-                        HttpUrl url = request.url().newBuilder()
-                                .addQueryParameter("api_key", BuildConfig.THEMOVIEDB_API_KEY)
-                                .addQueryParameter("language", "en-US")
-                                .build();
-
-                        return chain.proceed(request.newBuilder().url(url).build());
-                    }
-                }).build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(TheMovieDbAPI.ENDPOINT)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        return retrofit.create(TheMovieDbAPI.class);
-    }
-
     /**
      * Takes URL as String and make connection to read the data and return it.
      *
@@ -219,4 +195,27 @@ public final class NetworkUtils {
 
     }
 
+    public static TheMovieDbAPI getMovieDbApi() {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public okhttp3.Response intercept(@NonNull Chain chain) throws IOException {
+                        Request request = chain.request();
+
+                        HttpUrl url = request.url().newBuilder()
+                                .addQueryParameter("api_key", BuildConfig.THEMOVIEDB_API_KEY)
+                                .addQueryParameter("language", "en-US")
+                                .build();
+
+                        return chain.proceed(request.newBuilder().url(url).build());
+                    }
+                }).build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(TheMovieDbAPI.ENDPOINT)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        return retrofit.create(TheMovieDbAPI.class);
+    }
 }

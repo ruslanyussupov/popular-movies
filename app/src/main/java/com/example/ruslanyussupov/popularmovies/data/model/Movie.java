@@ -1,14 +1,20 @@
 package com.example.ruslanyussupov.popularmovies.data.model;
 
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
+@Entity(tableName = "movies")
 public class Movie implements Parcelable {
 
+    @PrimaryKey
     private int id;
+
     private String overview;
     private String posterLocalPath;
     private String backdropLocalPath;
@@ -28,6 +34,7 @@ public class Movie implements Parcelable {
     @SerializedName("backdrop_path")
     private String backdropPath;
 
+    @Ignore
     public Movie(int id, String originalTitle, String posterPath, String overview, double voteAverage,
                  String releaseDate, String backdropPath) {
         this.id = id;
@@ -112,6 +119,42 @@ public class Movie implements Parcelable {
 
     public String getBackdropLocalPath() {
         return backdropLocalPath;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setOverview(String overview) {
+        this.overview = overview;
+    }
+
+    public void setPosterLocalPath(String posterLocalPath) {
+        this.posterLocalPath = posterLocalPath;
+    }
+
+    public void setBackdropLocalPath(String backdropLocalPath) {
+        this.backdropLocalPath = backdropLocalPath;
+    }
+
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
+    public void setPosterPath(String posterPath) {
+        this.posterPath = posterPath;
+    }
+
+    public void setVoteAverage(double voteAverage) {
+        this.voteAverage = voteAverage;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    public void setBackdropPath(String backdropPath) {
+        this.backdropPath = backdropPath;
     }
 
     @Override

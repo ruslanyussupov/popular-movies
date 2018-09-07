@@ -46,6 +46,18 @@ public class Review implements Parcelable {
         return url;
     }
 
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     @Override
     public int describeContents() {
         return 0;

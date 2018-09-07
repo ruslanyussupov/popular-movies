@@ -1,5 +1,6 @@
 package com.example.ruslanyussupov.popularmovies.ui;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.support.v7.app.AppCompatActivity;
@@ -14,22 +15,15 @@ import com.example.ruslanyussupov.popularmovies.R;
 import com.example.ruslanyussupov.popularmovies.data.model.Movie;
 import com.example.ruslanyussupov.popularmovies.databinding.ActivityMainBinding;
 
+import static com.example.ruslanyussupov.popularmovies.data.DataSource.*;
+
 public class MainActivity extends AppCompatActivity implements OnMovieClickListener {
 
-    public static final int SORT_BY_POPULAR = 1;
-    public static final int SORT_BY_TOP_RATED = 2;
-    private static final int SORT_BY_TOP_FAVOURITE = 3;
-
-    private static final String BUNDLE_SORT_BY = "sort_by";
     private static final String EXTRA_MOVIE = "movie";
-
-    private int mSortBy = SORT_BY_POPULAR;
-
-    private static final int ADD_FRAGMENT = 0;
-    private static final int REPLACE_FRAGMENT = 1;
 
     private boolean mTwoPane;
     private ActivityMainBinding mBinding;
+    private MovieGridViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,27 +36,18 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
         // Set our custom Toolbar as ActionBar
         setSupportActionBar(mBinding.toolbar);
 
+        mViewModel = ViewModelProviders.of(this).get(MovieGridViewModel.class);
+
         if (savedInstanceState == null) {
-
-            showMoviesGrid(mSortBy, ADD_FRAGMENT);
-
-        } else {
-
-            mSortBy = savedInstanceState.getInt(BUNDLE_SORT_BY);
-
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.movies_grid_container, new MovieGridFragment())
+                    .commit();
         }
 
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt(BUNDLE_SORT_BY, mSortBy);
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.sort_by, menu);
         return true;
@@ -70,98 +55,32 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-
+    public boolean onPrepareOptionsMenu(final Menu menu) {
         // Set appropriate sorting mode as checked
-        switch (mSortBy) {
-
-            case SORT_BY_POPULAR:
+        switch (mViewModel.getFilter()) {
+            case POPULAR:
                 menu.findItem(R.id.sort_by_popular).setChecked(true);
-                return true;
-
-            case SORT_BY_TOP_RATED:
+                break;
+            case TOP_RATED:
                 menu.findItem(R.id.sort_by_top_rated).setChecked(true);
-                return true;
-
-            case SORT_BY_TOP_FAVOURITE:
-                menu.findItem(R.id.sort_by_favourite).setChecked(true);
-                return true;
-
-            default:
-                throw new IllegalArgumentException("Sort by = " + mSortBy);
-
+                break;
         }
-
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         int itemId = item.getItemId();
-
         switch (itemId) {
             case R.id.sort_by_popular:
-                updateMoviesGrid(SORT_BY_POPULAR);
-                item.setChecked(true);
+                mViewModel.setFilter(Filter.POPULAR);
                 return true;
             case R.id.sort_by_top_rated:
-                updateMoviesGrid(SORT_BY_TOP_RATED);
-                item.setChecked(true);
-                return true;
-            case R.id.sort_by_favourite:
-                updateMoviesGrid(SORT_BY_TOP_FAVOURITE);
-                item.setChecked(true);
+                mViewModel.setFilter(Filter.TOP_RATED);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void updateMoviesGrid(int sortBy) {
-
-        if (mSortBy == sortBy) {
-            return;
-        }
-
-        mSortBy = sortBy;
-
-        showMoviesGrid(mSortBy, REPLACE_FRAGMENT);
-
-    }
-
-    private void showMoviesGrid(int sortBy, int action) {
-
-        MovieGridFragment movieGridFragment = MovieGridFragment.create(sortBy);
-
-        switch (action) {
-
-            case ADD_FRAGMENT:
-                if (sortBy == SORT_BY_TOP_FAVOURITE) {
-                    getSupportFragmentManager().beginTransaction()
-                            .add(R.id.movies_grid_container, new FavouriteMovieFragment())
-                            .commit();
-                } else {
-                    getSupportFragmentManager().beginTransaction()
-                            .add(R.id.movies_grid_container, movieGridFragment)
-                            .commit();
-                }
-                break;
-            case REPLACE_FRAGMENT:
-                if (sortBy == SORT_BY_TOP_FAVOURITE) {
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.movies_grid_container, new FavouriteMovieFragment())
-                            .commit();
-                } else {
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.movies_grid_container, movieGridFragment)
-                            .commit();
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported action: " + action);
-
-        }
-
     }
 
     @Override
