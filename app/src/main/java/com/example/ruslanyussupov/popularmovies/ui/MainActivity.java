@@ -74,9 +74,11 @@ public class MainActivity extends AppCompatActivity implements OnMovieClickListe
         switch (itemId) {
             case R.id.sort_by_popular:
                 mViewModel.setFilter(Filter.POPULAR);
+                item.setChecked(true);
                 return true;
             case R.id.sort_by_top_rated:
                 mViewModel.setFilter(Filter.TOP_RATED);
+                item.setChecked(true);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

@@ -79,21 +79,23 @@ public class MovieGridFragment extends Fragment {
         mBinding.rvMovies.addItemDecoration(new ItemDecoration(offset, offset, offset, offset));
 
         mViewModel = ViewModelProviders.of(getActivity()).get(MovieGridViewModel.class);
-        mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
-            @Override
-            public void onChanged(@Nullable List<Movie> movies) {
-                if (movies == null || movies.isEmpty()) {
-                    if (NetworkUtils.hasNetworkConnection(getActivity())) {
+
+        if (NetworkUtils.hasNetworkConnection(getActivity())) {
+            mViewModel.getMovies().observe(this, new Observer<List<Movie>>() {
+                @Override
+                public void onChanged(@Nullable List<Movie> movies) {
+                    if (movies == null || movies.isEmpty()) {
                         showEmptyState();
                     } else {
-                        showNoNetworkConnectionState();
+                        showMovies();
+                        mMovieAdapter.updateData(movies);
                     }
-                } else {
-                    showMovies();
-                    mMovieAdapter.updateData(movies);
                 }
-            }
-        });
+            });
+        } else {
+            showNoNetworkConnectionState();
+        }
+
 
     }
 

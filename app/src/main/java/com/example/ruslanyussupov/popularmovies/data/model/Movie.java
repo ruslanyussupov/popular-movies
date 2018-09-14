@@ -34,6 +34,8 @@ public class Movie implements Parcelable {
     @SerializedName("backdrop_path")
     private String backdropPath;
 
+    public Movie() {}
+
     @Ignore
     public Movie(int id, String originalTitle, String posterPath, String overview, double voteAverage,
                  String releaseDate, String backdropPath) {
@@ -46,6 +48,7 @@ public class Movie implements Parcelable {
         this.backdropPath = backdropPath;
     }
 
+    @Ignore
     public Movie(int id, String originalTitle, String posterPath, String overview, double voteAverage,
                  String releaseDate, String backdropPath, String posterDbPath, String backdropDbPath) {
         this.id = id;
