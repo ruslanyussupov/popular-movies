@@ -6,11 +6,15 @@ import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "movies")
 public class Movie implements Parcelable {
+
+    private static final String MOVIE_POSTER_MAIN_PATH = "https://image.tmdb.org/t/p/w185";
+    private static final String MOVIE_BACKDROP_MAIN_PATH = "https://image.tmdb.org/t/p/w780";
 
     @PrimaryKey
     private int id;
@@ -34,8 +38,6 @@ public class Movie implements Parcelable {
     @SerializedName("backdrop_path")
     private String backdropPath;
 
-    public Movie() {}
-
     @Ignore
     public Movie(int id, String originalTitle, String posterPath, String overview, double voteAverage,
                  String releaseDate, String backdropPath) {
@@ -48,9 +50,8 @@ public class Movie implements Parcelable {
         this.backdropPath = backdropPath;
     }
 
-    @Ignore
     public Movie(int id, String originalTitle, String posterPath, String overview, double voteAverage,
-                 String releaseDate, String backdropPath, String posterDbPath, String backdropDbPath) {
+                 String releaseDate, String backdropPath, String posterLocalPath, String backdropLocalPath) {
         this.id = id;
         this.originalTitle = originalTitle;
         this.posterPath = posterPath;
@@ -58,8 +59,8 @@ public class Movie implements Parcelable {
         this.voteAverage = voteAverage;
         this.releaseDate = releaseDate;
         this.backdropPath = backdropPath;
-        this.posterLocalPath = posterDbPath;
-        this.backdropLocalPath = backdropDbPath;
+        this.posterLocalPath = posterLocalPath;
+        this.backdropLocalPath = backdropLocalPath;
     }
 
 
@@ -100,6 +101,10 @@ public class Movie implements Parcelable {
         return posterPath;
     }
 
+    public String getFullPosterPath() {
+        return MOVIE_POSTER_MAIN_PATH + posterPath;
+    }
+
     public String getOverview() {
         return overview;
     }
@@ -114,6 +119,10 @@ public class Movie implements Parcelable {
 
     public String getBackdropPath() {
         return backdropPath;
+    }
+
+    public String getFullBackdropPath() {
+        return MOVIE_BACKDROP_MAIN_PATH + backdropPath;
     }
 
     public String getPosterLocalPath() {
@@ -187,8 +196,9 @@ public class Movie implements Parcelable {
         return false;
     }
 
+    @NonNull
     @Override
     public String toString() {
-        return id + ": " + originalTitle;
+        return id + " | " + originalTitle + " | " + posterPath + " | " + backdropPath;
     }
 }

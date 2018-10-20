@@ -2,10 +2,11 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".ui.DetailContentFragment">
+    tools:context=".detail.DetailContentFragment">
     <data>
 
     </data>
+
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -26,7 +27,7 @@
         <TextView
             android:id="@+id/title_tv"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/title_margin_horizontal"
             android:layout_marginStart="@dimen/title_margin_horizontal"
             android:layout_marginTop="@dimen/detail_margin_vertical"
@@ -35,10 +36,9 @@
             android:maxLines="3"
             android:ellipsize="end"
             tools:text="Avengers: Age of Ultron"
-            app:layout_constraintLeft_toRightOf="@id/poster_iv"
+            app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@id/favorite_ib"
-            app:layout_constraintTop_toBottomOf="@id/backdrop_iv"
-            app:layout_constraintBottom_toBottomOf="@id/poster_iv"/>
+            app:layout_constraintTop_toBottomOf="@id/backdrop_iv" />
 
         <ImageButton
             android:id="@+id/favorite_ib"
@@ -49,23 +49,8 @@
             android:layout_marginRight="@dimen/fav_buton_margin_horizontal"
             android:layout_marginEnd="@dimen/fav_buton_margin_horizontal"
             android:contentDescription="@string/favourite_button_content_description"
-            android:onClick="favouriteChangeState"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/backdrop_iv"/>
-
-        <ImageView
-            android:id="@+id/poster_iv"
-            android:layout_width="@dimen/detail_poster_width"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/movie_poster_content_description"
-            android:adjustViewBounds="true"
-            android:layout_marginLeft="@dimen/detail_poster_margin_left"
-            android:layout_marginStart="@dimen/detail_poster_margin_left"
-            android:scaleType="fitStart"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/backdrop_iv"
-            app:layout_constraintBottom_toBottomOf="@id/backdrop_iv"
-            tools:src="@drawable/poster_placeholder" />
 
         <TextView
             android:id="@+id/average_rating_label"
@@ -77,7 +62,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Caption"
             android:text="@string/average_rating_label"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/labels_barrier" />
+            app:layout_constraintTop_toBottomOf="@id/title_tv" />
 
         <TextView
             android:id="@+id/user_rating_tv"
@@ -103,7 +88,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Caption"
             android:text="@string/release_date_label"
             app:layout_constraintLeft_toRightOf="@id/user_rating_tv"
-            app:layout_constraintTop_toBottomOf="@id/labels_barrier" />
+            app:layout_constraintTop_toBottomOf="@id/title_tv" />
 
         <TextView
             android:id="@+id/release_date_tv"
@@ -120,13 +105,6 @@
             app:layout_constraintTop_toTopOf="@id/release_date_label"
             app:layout_constraintBottom_toBottomOf="@id/release_date_label"
             tools:text="2015-04-22" />
-
-        <android.support.constraint.Barrier
-            android:id="@+id/labels_barrier"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierDirection="bottom"
-            app:constraint_referenced_ids="poster_iv, title_tv"/>
 
         <android.support.constraint.Barrier
             android:id="@+id/overview_barrier"
@@ -178,7 +156,13 @@
             android:paddingEnd="@dimen/detail_padding_horizontal"
             app:layout_constraintTop_toBottomOf="@id/overview_tv"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintRight_toRightOf="parent">
+
+            <include
+                android:id="@+id/videos"
+                layout="@layout/view_videos"/>
+
+        </FrameLayout>
 
         <FrameLayout
             android:id="@+id/reviews_container"
@@ -192,7 +176,13 @@
             android:paddingBottom="@dimen/detail_padding_vertical"
             app:layout_constraintTop_toBottomOf="@id/videos_container"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+            app:layout_constraintRight_toRightOf="parent">
+
+            <include
+                android:id="@+id/reviews"
+                layout="@layout/view_reviews"/>
+
+        </FrameLayout>
 
     </android.support.constraint.ConstraintLayout>
 </layout>

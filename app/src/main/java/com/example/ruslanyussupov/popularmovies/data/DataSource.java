@@ -1,6 +1,6 @@
 package com.example.ruslanyussupov.popularmovies.data;
 
-import android.arch.lifecycle.LiveData;
+
 
 import com.example.ruslanyussupov.popularmovies.data.model.Movie;
 import com.example.ruslanyussupov.popularmovies.data.model.Review;
@@ -8,18 +8,25 @@ import com.example.ruslanyussupov.popularmovies.data.model.Video;
 
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.Single;
+
 public interface DataSource {
 
-    LiveData<List<Movie>> getMovies(Filter filter);
+    Observable<List<Movie>> getMovies(Filter filter, int page);
 
-    LiveData<List<Movie>> getFavouriteMovies();
+    Observable<List<Video>> getMovieTrailers(int movieId);
 
-    LiveData<List<Video>> getMovieTrailers(int movieId);
+    Observable<List<Review>> getMovieReviews(int movieId);
 
-    LiveData<List<Review>> getMovieReviews(int movieId);
+    void deleteFromFavourite(Movie movie);
+
+    void addToFavourite(Movie movie);
+
+    Single<Movie> getFavouriteMovie(int movieId);
 
     enum Filter {
-        POPULAR, TOP_RATED
+        POPULAR, TOP_RATED, FAVOURITE
     }
 
 }

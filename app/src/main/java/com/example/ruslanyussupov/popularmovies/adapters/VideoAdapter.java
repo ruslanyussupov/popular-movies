@@ -5,7 +5,6 @@ import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.ruslanyussupov.popularmovies.R;
@@ -53,12 +52,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
 
             mBinding = binding;
 
-            binding.getRoot().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mOnVideoClickListener.onVideoClick(getAdapterPosition());
-                }
-            });
+            binding.getRoot().setOnClickListener(v -> mOnVideoClickListener
+                    .onVideoClick(mVideos.get(getAdapterPosition())));
         }
 
         void bind(Video video) {
@@ -76,7 +71,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
     }
 
     public interface OnVideoClickListener {
-        void onVideoClick(int position);
+        void onVideoClick(Video video);
     }
 
 }

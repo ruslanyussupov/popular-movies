@@ -5,7 +5,6 @@ import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.ruslanyussupov.popularmovies.R;
@@ -53,12 +52,8 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
             mBinding = binding;
 
-            binding.getRoot().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mOnReviewClickListener.onReviewClick(getAdapterPosition());
-                }
-            });
+            binding.getRoot().setOnClickListener(v -> mOnReviewClickListener
+                    .onReviewClick(mReviews.get(getAdapterPosition())));
         }
 
         void bind(Review review) {
@@ -73,7 +68,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
     }
 
     public interface OnReviewClickListener {
-        void onReviewClick(int position);
+        void onReviewClick(Review review);
     }
 
 }

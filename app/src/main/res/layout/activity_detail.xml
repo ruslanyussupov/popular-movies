@@ -23,7 +23,7 @@
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
             <fragment
-                android:name="com.example.ruslanyussupov.popularmovies.ui.DetailContentFragment"
+                android:name="com.example.ruslanyussupov.popularmovies.detail.DetailContentFragment"
                 android:id="@+id/movie_detail_fragment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />

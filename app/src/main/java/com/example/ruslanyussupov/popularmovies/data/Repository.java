@@ -1,13 +1,10 @@
 package com.example.ruslanyussupov.popularmovies.data;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.persistence.room.Room;
-import android.content.Context;
-import android.support.annotation.NonNull;
-import android.util.Log;
 
-import com.example.ruslanyussupov.popularmovies.BuildConfig;
+import android.support.annotation.Nullable;
+
+import com.example.ruslanyussupov.popularmovies.App;
+import com.example.ruslanyussupov.popularmovies.Utils;
 import com.example.ruslanyussupov.popularmovies.data.local.FavouriteMoviesDb;
 import com.example.ruslanyussupov.popularmovies.data.model.Movie;
 import com.example.ruslanyussupov.popularmovies.data.model.MoviesResponse;
@@ -15,160 +12,78 @@ import com.example.ruslanyussupov.popularmovies.data.model.Review;
 import com.example.ruslanyussupov.popularmovies.data.model.ReviewsResponse;
 import com.example.ruslanyussupov.popularmovies.data.model.Video;
 import com.example.ruslanyussupov.popularmovies.data.model.VideosResponse;
-import com.example.ruslanyussupov.popularmovies.data.remote.TheMovieDbAPI;
+import com.example.ruslanyussupov.popularmovies.data.remote.TheMovieDbService;
 
-import java.io.IOException;
 import java.util.List;
 
-import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import javax.inject.Inject;
+
+import io.reactivex.Observable;
+import io.reactivex.Single;
 
 public class Repository implements DataSource {
 
-    private static final String TAG = Repository.class.getSimpleName();
+    @Inject
+    TheMovieDbService movieDbAPI;
 
-    private final FavouriteMoviesDb mFavouriteMoviesDb;
-    private final TheMovieDbAPI mMovieDbAPI;
-    private MutableLiveData<List<Movie>> mMovies;
-    private Callback<MoviesResponse> mCallback;
+    @Inject
+    FavouriteMoviesDb favouriteMoviesDb;
 
-    public Repository(Context context) {
-        mFavouriteMoviesDb = Room.databaseBuilder(context, FavouriteMoviesDb.class,
-                "fav_movies").build();
-        mMovieDbAPI = createMovieDbApi();
+    @Inject
+    Utils utils;
+
+    public Repository() {
+        App.getComponent().inject(this);
+
     }
 
     @Override
-    public LiveData<List<Movie>> getMovies(Filter filter) {
-        if (mMovies == null) {
-            mMovies = new MutableLiveData<>();
-        }
-        if (mCallback == null) {
-            mCallback = new Callback<MoviesResponse>() {
-                @Override
-                public void onResponse(@NonNull Call<MoviesResponse> call, @NonNull Response<MoviesResponse> response) {
-                    if (response.isSuccessful()) {
-                        MoviesResponse moviesResponse = response.body();
-                        if (moviesResponse != null) {
-                            mMovies.postValue(moviesResponse.getResults());
-                        } else {
-                            Log.d(TAG, "Movies response is NULL. " + "Code: " + response.code()
-                                    + " Message: " + response.message());
-                        }
-                    } else {
-                        Log.d(TAG, "Response isn't successful. " + "Code: " + response.code()
-                                + " Message: " + response.message());
-                    }
-                }
+    public Observable<List<Movie>> getMovies(Filter filter, int page) {
 
-                @Override
-                public void onFailure(@NonNull Call<MoviesResponse> call, @NonNull Throwable t) {
-                    Log.e(TAG, "Can't load movies.", t);
-                }
-            };
+        if (filter.equals(Filter.POPULAR)) {
+            return movieDbAPI.getPopularMovies(page)
+                    .map(MoviesResponse::getResults);
+        } else if (filter.equals(Filter.TOP_RATED)) {
+            return movieDbAPI.getTopRatedMovies(page)
+                    .map(MoviesResponse::getResults);
+        } else {
+            return favouriteMoviesDb.movieDao().getFavouriteMovies().toObservable();
         }
 
-        switch (filter) {
-            case POPULAR:
-                mMovieDbAPI.getPopularMovies().enqueue(mCallback);
-                break;
-            case TOP_RATED:
-                mMovieDbAPI.getTopRatedMovies().enqueue(mCallback);
-                break;
-        }
-        return mMovies;
     }
 
     @Override
-    public LiveData<List<Movie>> getFavouriteMovies() {
-        return mFavouriteMoviesDb.movieDao().getFavouriteMovies();
+    public Observable<List<Video>> getMovieTrailers(int movieId) {
+        return movieDbAPI.getMovieTrailers(movieId)
+                .map(VideosResponse::getResults);
     }
 
     @Override
-    public LiveData<List<Video>> getMovieTrailers(int movieId) {
-        final MutableLiveData<List<Video>> trailers = new MutableLiveData<>();
-        mMovieDbAPI.getMovieTrailers(movieId).enqueue(new Callback<VideosResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<VideosResponse> call, @NonNull Response<VideosResponse> response) {
-                if (response.isSuccessful()) {
-                    VideosResponse videosResponse = response.body();
-                    if (videosResponse != null) {
-                        trailers.postValue(videosResponse.getResults());
-                    } else {
-                        Log.d(TAG, "Movie trailers response is NULL. " + "Code: " + response.code()
-                                + " Message: " + response.message());
-                    }
-                } else {
-                    Log.d(TAG, "Response isn't successful. " + "Code: " + response.code()
-                            + " Message: " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<VideosResponse> call, @NonNull Throwable t) {
-                Log.e(TAG, "Can't load movie trailers.", t);
-            }
-        });
-        return trailers;
+    public Observable<List<Review>> getMovieReviews(int movieId) {
+        return movieDbAPI.getMovieReviews(movieId)
+                .map(ReviewsResponse::getResults);
     }
 
     @Override
-    public LiveData<List<Review>> getMovieReviews(int movieId) {
-        final MutableLiveData<List<Review>> reviews = new MutableLiveData<>();
-        mMovieDbAPI.getMovieReviews(movieId).enqueue(new Callback<ReviewsResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<ReviewsResponse> call, @NonNull Response<ReviewsResponse> response) {
-                if (response.isSuccessful()) {
-                    ReviewsResponse reviewsResponse = response.body();
-                    if (reviewsResponse != null) {
-                        reviews.postValue(reviewsResponse.getResults());
-                    } else {
-                        Log.d(TAG, "Movie reviews response is NULL. " + "Code: " + response.code()
-                                + " Message: " + response.message());
-                    }
-                } else {
-                    Log.d(TAG, "Response isn't successful. " + "Code: " + response.code()
-                            + " Message: " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ReviewsResponse> call, @NonNull Throwable t) {
-                Log.e(TAG, "Can't load movie reviews.", t);
-            }
-        });
-        return reviews;
+    public void deleteFromFavourite(Movie movie) {
+        favouriteMoviesDb.movieDao().delete(movie);
+        utils.deleteFile(movie.getBackdropLocalPath());
+        utils.deleteFile(movie.getPosterLocalPath());
     }
 
-    private TheMovieDbAPI createMovieDbApi() {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public okhttp3.Response intercept(@NonNull Chain chain) throws IOException {
-                        Request request = chain.request();
+    @Override
+    public void addToFavourite(Movie movie) {
+        String backdropLocalPath = utils.saveBitmap(movie.getFullBackdropPath(), "backdrop-" + movie.getId());
+        String posterLocalPath = utils.saveBitmap(movie.getFullPosterPath(), "poster-" + movie.getId());
+        movie.setBackdropLocalPath(backdropLocalPath);
+        movie.setPosterLocalPath(posterLocalPath);
+        favouriteMoviesDb.movieDao().insert(movie);
+    }
 
-                        HttpUrl url = request.url().newBuilder()
-                                .addQueryParameter("api_key", BuildConfig.THEMOVIEDB_API_KEY)
-                                .addQueryParameter("language", "en-US")
-                                .build();
-
-                        return chain.proceed(request.newBuilder().url(url).build());
-                    }
-                }).build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(TheMovieDbAPI.ENDPOINT)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        return retrofit.create(TheMovieDbAPI.class);
+    @Override
+    @Nullable
+    public Single<Movie> getFavouriteMovie(int movieId) {
+        return favouriteMoviesDb.movieDao().getFavouriteMovie(movieId);
     }
 
 }

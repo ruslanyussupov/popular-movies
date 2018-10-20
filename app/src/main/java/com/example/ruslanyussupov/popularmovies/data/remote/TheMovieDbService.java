@@ -4,24 +4,25 @@ import com.example.ruslanyussupov.popularmovies.data.model.MoviesResponse;
 import com.example.ruslanyussupov.popularmovies.data.model.ReviewsResponse;
 import com.example.ruslanyussupov.popularmovies.data.model.VideosResponse;
 
-import retrofit2.Call;
+import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
-public interface TheMovieDbAPI {
+public interface TheMovieDbService {
 
     String ENDPOINT = "https://api.themoviedb.org/3/";
 
     @GET("movie/popular")
-    Call<MoviesResponse> getPopularMovies();
+    Observable<MoviesResponse> getPopularMovies(@Query("page") int page);
 
     @GET("movie/top_rated")
-    Call<MoviesResponse> getTopRatedMovies();
+    Observable<MoviesResponse> getTopRatedMovies(@Query("page") int page);
 
     @GET("movie/{id}/videos")
-    Call<VideosResponse> getMovieTrailers(@Path("id") int id);
+    Observable<VideosResponse> getMovieTrailers(@Path("id") int id);
 
     @GET("movie/{id}/reviews")
-    Call<ReviewsResponse> getMovieReviews(@Path("id") int id);
+    Observable<ReviewsResponse> getMovieReviews(@Path("id") int id);
 
 }
