@@ -73,7 +73,7 @@ public class MovieGridFragment extends Fragment {
         int offset = getResources().getDimensionPixelOffset(R.dimen.movie_item_offset);
         mBinding.rvMovies.addItemDecoration(new ItemDecoration(offset, offset, offset, offset));
 
-        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
 
         mViewModel.getResultLiveData().observe(this, result -> {
 
