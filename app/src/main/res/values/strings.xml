@@ -31,6 +31,6 @@
 
     <string name="action_share_title">Share</string>
     <string name="action_share_subject">Movie Trailer</string>
-    <string name="nothing_to_share">Nothing to share</string>
+    <string name="nothing_to_share">There is no any trailer to share.</string>
 
 </resources>

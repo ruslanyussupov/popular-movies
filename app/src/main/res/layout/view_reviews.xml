@@ -5,7 +5,7 @@
 
     </data>
 
-    <android.support.constraint.ConstraintLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="200dp">
 
@@ -23,7 +23,7 @@
             app:layout_constraintTop_toBottomOf="@id/reviews_label"
             app:layout_constraintLeft_toLeftOf="@id/reviews_label"/>
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/reviews_rv"
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -43,6 +43,6 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"/>
 
-    </android.support.constraint.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>
