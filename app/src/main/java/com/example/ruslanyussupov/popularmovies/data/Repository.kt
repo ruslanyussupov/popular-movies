@@ -13,6 +13,7 @@ import javax.inject.Inject
 
 import io.reactivex.Observable
 import io.reactivex.Single
+import timber.log.Timber
 
 class Repository : DataSource {
 
@@ -58,6 +59,23 @@ class Repository : DataSource {
     }
 
     override fun addToFavourite(movie: Movie) {
+        val backdrop = utils.loadBitmap(movie.fullBackdropPath)
+        val poster = utils.loadBitmap(movie.fullPosterPath)
+
+        Timber.d("$backdrop")
+        Timber.d("$poster")
+
+        if (backdrop != null) {
+            val backdropLocalPath = utils.saveBitmap(backdrop, "backdrop-${movie.id}")
+            movie.backdropLocalPath = backdropLocalPath
+        }
+
+        if (poster != null) {
+            val posterLocalPath = utils.saveBitmap(poster,
+                    "poster-${movie.id}")
+            movie.posterLocalPath = posterLocalPath
+        }
+
         favouriteMoviesDb.movieDao().insert(movie)
     }
 

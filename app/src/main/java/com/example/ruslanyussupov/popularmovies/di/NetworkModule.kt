@@ -2,7 +2,6 @@ package com.example.ruslanyussupov.popularmovies.di
 
 
 import com.example.ruslanyussupov.popularmovies.BuildConfig
-import com.example.ruslanyussupov.popularmovies.IoScheduler
 import com.example.ruslanyussupov.popularmovies.data.remote.TheMovieDbService
 
 
@@ -58,12 +57,6 @@ class NetworkModule {
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
-    }
-
-    @Provides
-    @Singleton
-    fun providesIoScheduler(): IoScheduler {
-        return IoScheduler()
     }
 
     companion object {

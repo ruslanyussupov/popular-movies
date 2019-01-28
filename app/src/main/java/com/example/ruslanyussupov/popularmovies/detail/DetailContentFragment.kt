@@ -31,6 +31,8 @@ import com.squareup.picasso.Picasso
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class DetailContentFragment : Fragment() {
@@ -191,7 +193,10 @@ class DetailContentFragment : Fragment() {
 
                 mBinding.favoriteIb.isSelected = false
                 mIsFavourite = false
-                mViewModel.deleteFromFavourites()
+
+                GlobalScope.launch {
+                    mViewModel.deleteFromFavourites()
+                }
 
                 Toast.makeText(activity, getString(R.string.removed_from_favourite),
                         Toast.LENGTH_SHORT).show()
@@ -200,7 +205,10 @@ class DetailContentFragment : Fragment() {
 
                 mBinding.favoriteIb.isSelected = true
                 mIsFavourite = true
-                mViewModel.addToFavourites()
+
+                GlobalScope.launch {
+                    mViewModel.addToFavourites()
+                }
 
                 Toast.makeText(activity, getString(R.string.added_to_favourite),
                         Toast.LENGTH_SHORT).show()

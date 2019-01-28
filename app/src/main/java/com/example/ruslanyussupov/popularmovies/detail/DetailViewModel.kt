@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 import com.example.ruslanyussupov.popularmovies.App
-import com.example.ruslanyussupov.popularmovies.IoScheduler
 import com.example.ruslanyussupov.popularmovies.Result
 import com.example.ruslanyussupov.popularmovies.Utils
 import com.example.ruslanyussupov.popularmovies.data.DataSource
@@ -18,15 +17,13 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import timber.log.Timber
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class DetailViewModel(private val movie: Movie) : ViewModel() {
 
     @Inject
     internal lateinit var dataSource: DataSource
-
-    @Inject
-    internal lateinit var ioScheduler: IoScheduler
 
     @Inject
     internal lateinit var utils: Utils
@@ -72,31 +69,19 @@ class DetailViewModel(private val movie: Movie) : ViewModel() {
         )
     }
 
-    fun addToFavourites() {
-        ioScheduler.runOnThread {
-            val backdrop = utils.loadBitmap(movie.fullBackdropPath)
-            val poster = utils.loadBitmap(movie.fullPosterPath)
+    suspend fun addToFavourites() {
 
-            Timber.d("$backdrop")
-            Timber.d("$poster")
-
-            if (backdrop != null) {
-                val backdropLocalPath = utils.saveBitmap(backdrop, "backdrop-${movie.id}")
-                movie.backdropLocalPath = backdropLocalPath
-            }
-
-            if (poster != null) {
-                val posterLocalPath = utils.saveBitmap(poster,
-                        "poster-${movie.id}")
-                movie.posterLocalPath = posterLocalPath
-            }
-
+        withContext(Dispatchers.IO) {
             dataSource.addToFavourite(movie)
         }
+
     }
 
-    fun deleteFromFavourites() {
-        ioScheduler.runOnThread { dataSource.deleteFromFavourite(movie) }
+    suspend fun deleteFromFavourites() {
+        withContext(Dispatchers.IO) {
+            dataSource.deleteFromFavourite(movie)
+            utils
+        }
     }
 
     override fun onCleared() {
