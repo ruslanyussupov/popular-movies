@@ -11,8 +11,9 @@ import com.example.ruslanyussupov.popularmovies.data.model.Video
 import com.example.ruslanyussupov.popularmovies.databinding.ItemVideoBinding
 import com.squareup.picasso.Picasso
 
-class VideoAdapter(private var mVideos: List<Video>,
-                   private val onVideoClick: (video: Video) -> Unit) : RecyclerView.Adapter<VideoAdapter.ViewHolder>() {
+class VideoAdapter(private var videos: List<Video>,
+                   private val onVideoClick: (video: Video) -> Unit)
+    : RecyclerView.Adapter<VideoAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding: ItemVideoBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.context),
@@ -22,23 +23,20 @@ class VideoAdapter(private var mVideos: List<Video>,
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(mVideos[position])
+        holder.bind(videos[position])
     }
 
     override fun getItemCount(): Int {
-        return mVideos.size
+        return videos.size
     }
 
     inner class ViewHolder(private val mBinding: ItemVideoBinding) : RecyclerView.ViewHolder(mBinding.root) {
 
-        init {
-            mBinding.root.setOnClickListener {
-                onVideoClick(mVideos[adapterPosition])
-            }
-        }
-
         fun bind(video: Video) {
             mBinding.executePendingBindings()
+
+            itemView.setOnClickListener { onVideoClick(video) }
+
             Picasso.get()
                     .load(video.previewImagePath)
                     .placeholder(R.drawable.video_preview_placeholder)
@@ -48,7 +46,7 @@ class VideoAdapter(private var mVideos: List<Video>,
     }
 
     fun updateData(videos: List<Video>) {
-        mVideos = videos
+        this.videos = videos
         notifyDataSetChanged()
     }
 

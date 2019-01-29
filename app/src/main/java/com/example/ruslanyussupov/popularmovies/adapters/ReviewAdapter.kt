@@ -10,8 +10,9 @@ import com.example.ruslanyussupov.popularmovies.R
 import com.example.ruslanyussupov.popularmovies.data.model.Review
 import com.example.ruslanyussupov.popularmovies.databinding.ItemReviewBinding
 
-class ReviewAdapter(private var mReviews: List<Review>,
-                    private val onReviewClick: (review: Review) -> Unit) : RecyclerView.Adapter<ReviewAdapter.ViewHolder>() {
+class ReviewAdapter(private var reviews: List<Review>,
+                    private val onReviewClick: (review: Review) -> Unit)
+    : RecyclerView.Adapter<ReviewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -22,29 +23,24 @@ class ReviewAdapter(private var mReviews: List<Review>,
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(mReviews[position])
+        holder.bind(reviews[position])
     }
 
     override fun getItemCount(): Int {
-        return mReviews.size
+        return reviews.size
     }
 
     inner class ViewHolder(private val mBinding: ItemReviewBinding) : RecyclerView.ViewHolder(mBinding.root) {
 
-        init {
-            mBinding.root.setOnClickListener {
-                onReviewClick(mReviews[adapterPosition])
-            }
-        }
-
         fun bind(review: Review) {
             mBinding.executePendingBindings()
+            itemView.setOnClickListener { onReviewClick(review) }
             mBinding.review = review
         }
     }
 
     fun updateData(reviews: List<Review>) {
-        mReviews = reviews
+        this.reviews = reviews
         notifyDataSetChanged()
     }
 

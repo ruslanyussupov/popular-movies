@@ -13,7 +13,6 @@ import com.example.ruslanyussupov.popularmovies.data.model.Video
 
 import javax.inject.Inject
 
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -28,60 +27,64 @@ class DetailViewModel(private val movie: Movie) : ViewModel() {
     @Inject
     internal lateinit var utils: Utils
 
-    val videosResultLiveData: MutableLiveData<Result<List<Video>>>
-    val reviewsResultLiveData: MutableLiveData<Result<List<Review>>>
+    val videosResultLiveData: MutableLiveData<Result<List<Video>>> = MutableLiveData()
+    val reviewsResultLiveData: MutableLiveData<Result<List<Review>>> = MutableLiveData()
+    val isFavouriteLiveData: MutableLiveData<Boolean> = MutableLiveData()
     private val compositeDisposable = CompositeDisposable()
-
-    val movieFromFavourites: Single<Movie>
-        get() = dataSource.getFavouriteMovie(movie.id)
 
     init {
         App.component?.inject(this)
-        videosResultLiveData = MutableLiveData()
-        reviewsResultLiveData = MutableLiveData()
         subscribeToVideosDataSource()
         subscribeToReviewsDataSource()
+        checkFavourite()
     }
 
     private fun subscribeToVideosDataSource() {
         compositeDisposable.add(
-                dataSource
-                        .getMovieTrailers(movie.id)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                { videos -> videosResultLiveData.setValue(Result.success(videos)) },
-                                { error -> videosResultLiveData.setValue(Result.error(error.message ?: "")) }
-                        )
+            dataSource
+                .getMovieTrailers(movie.id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { videos -> videosResultLiveData.setValue(Result.success(videos)) },
+                    { error -> videosResultLiveData.setValue(Result.error(error.message ?: "")) }
+                )
         )
     }
 
     private fun subscribeToReviewsDataSource() {
         compositeDisposable.add(
-                dataSource
-                        .getMovieReviews(movie.id)
+            dataSource
+                .getMovieReviews(movie.id)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { reviews -> reviewsResultLiveData.setValue(Result.success(reviews)) },
+                    { error -> reviewsResultLiveData.setValue(Result.error(error.message ?: "")) }
+                )
+        )
+    }
+
+    private fun checkFavourite() {
+        compositeDisposable.addAll(
+                dataSource.getFavouriteMovie(movie.id)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                { reviews -> reviewsResultLiveData.setValue(Result.success(reviews)) },
-                                { error -> reviewsResultLiveData.setValue(Result.error(error.message ?: "")) }
-                        )
+                        .subscribe({
+                            isFavouriteLiveData.postValue(true)
+                        }, {
+                            isFavouriteLiveData.postValue(false)
+                        })
         )
     }
 
     suspend fun addToFavourites() {
-
-        withContext(Dispatchers.IO) {
-            dataSource.addToFavourite(movie)
-        }
+        withContext(Dispatchers.IO) { dataSource.addToFavourite(movie) }
 
     }
 
     suspend fun deleteFromFavourites() {
-        withContext(Dispatchers.IO) {
-            dataSource.deleteFromFavourite(movie)
-            utils
-        }
+        withContext(Dispatchers.IO) { dataSource.deleteFromFavourite(movie) }
     }
 
     override fun onCleared() {

@@ -7,6 +7,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.View
+import androidx.fragment.app.transaction
 
 import com.example.ruslanyussupov.popularmovies.R
 import com.example.ruslanyussupov.popularmovies.adapters.MovieAdapter
@@ -25,28 +26,26 @@ import com.example.ruslanyussupov.popularmovies.data.DataSource.*
 
 class MainActivity : AppCompatActivity(), MovieAdapter.OnMovieClickListener {
 
-    private var mTwoPane = false
+    private var isTwoPane = false
     private var currentFilter = Filter.POPULAR
     private var filterDisposable: Disposable? = null
-    private lateinit var mBinding: ActivityMainBinding
-    private lateinit var mViewModel: MainViewModel
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Timber.d("onCreate")
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         val tabletLayout = findViewById<View>(R.id.tablet_layout)
-        mTwoPane = tabletLayout != null && tabletLayout.visibility == View.VISIBLE
+        isTwoPane = tabletLayout != null && tabletLayout.visibility == View.VISIBLE
 
-        setSupportActionBar(mBinding.toolbar)
+        setSupportActionBar(binding.toolbar)
 
-        mViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                    .add(R.id.movies_grid_container, MovieGridFragment())
-                    .commit()
+            supportFragmentManager.transaction { add(R.id.movies_grid_container, MovieGridFragment()) }
         } else {
             currentFilter = Filter.valueOf(savedInstanceState.getString(BUNDLE_FILTER, Filter.FAVOURITE.name))
         }
@@ -104,7 +103,7 @@ class MainActivity : AppCompatActivity(), MovieAdapter.OnMovieClickListener {
 
         filterDisposable = Observable.merge(Observable.just(currentFilter), popularItemObs,
                 topRatedItemObs, favouriteItemObs)
-                .subscribe { mViewModel.onFilterChanged(it) }
+                .subscribe { viewModel.onFilterChanged(it) }
 
         return true
 
@@ -112,10 +111,8 @@ class MainActivity : AppCompatActivity(), MovieAdapter.OnMovieClickListener {
 
     override fun onMovieClick(movie: Movie) {
 
-        if (mTwoPane) {
-            supportFragmentManager.beginTransaction()
-                    .replace(R.id.movie_detail_container, DetailContentFragment.create(movie))
-                    .commit()
+        if (isTwoPane) {
+            supportFragmentManager.transaction { replace(R.id.movie_detail_container, DetailContentFragment.create(movie)) }
         } else {
             val openDetailActivity = Intent(this, DetailActivity::class.java)
             openDetailActivity.putExtra(EXTRA_MOVIE, movie)

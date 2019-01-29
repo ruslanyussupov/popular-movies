@@ -3,6 +3,7 @@ package com.example.ruslanyussupov.popularmovies.detail
 
 import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
+import android.graphics.Bitmap
 import androidx.databinding.DataBindingUtil
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -31,26 +32,26 @@ import com.squareup.picasso.Picasso
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.fragment_detail_content.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class DetailContentFragment : Fragment() {
 
-    private var mMovie: Movie? = null
-    private lateinit var mBinding: FragmentDetailContentBinding
-    private lateinit var mViewModel: DetailViewModel
-    private var mIsFavourite: Boolean = false
-    private val mVideosAdapter = VideoAdapter(emptyList(), ::onVideoClick)
-    private val mReviewsAdapter = ReviewAdapter(emptyList(), ::onReviewClick)
-    private var disposable: Disposable? = null
+    private var movie: Movie? = null
+    private lateinit var binding: FragmentDetailContentBinding
+    private lateinit var viewModel: DetailViewModel
+    private var isFavourite: Boolean = false
+    private val videosAdapter = VideoAdapter(emptyList(), ::onVideoClick)
+    private val reviewsAdapter = ReviewAdapter(emptyList(), ::onReviewClick)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
         Timber.d("onCreateView")
-        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_detail_content, container, false)
-        return mBinding.root
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_detail_content, container, false)
+        return binding.root
 
     }
 
@@ -59,143 +60,127 @@ class DetailContentFragment : Fragment() {
 
         Timber.d("onActivityCreated")
 
-        mBinding.videos.videosRv.adapter = mVideosAdapter
-        mBinding.videos.videosRv.layoutManager = LinearLayoutManager(activity,
-                LinearLayoutManager.HORIZONTAL, false)
-        val videosOffset = resources.getDimensionPixelOffset(R.dimen.video_item_offset)
-        mBinding.videos.videosRv.addItemDecoration(ItemDecoration(0, 0, videosOffset, 0))
-
-
-        mBinding.reviews.reviewsRv.adapter = mReviewsAdapter
-        mBinding.reviews.reviewsRv.layoutManager = LinearLayoutManager(activity,
-                LinearLayoutManager.HORIZONTAL, false)
-        val reviewsOffset = resources.getDimensionPixelOffset(R.dimen.review_item_offset)
-        mBinding.reviews.reviewsRv.addItemDecoration(ItemDecoration(0, 0, reviewsOffset, 0))
-
-        setFavBtnClickListener()
-
         if (savedInstanceState == null) {
-
-            val intent = activity?.intent
-
-            if (intent?.hasExtra(MovieGridFragment.EXTRA_MOVIE) == true) {
-                mMovie = intent.getParcelableExtra(MovieGridFragment.EXTRA_MOVIE)
-            } else if (arguments?.containsKey(MovieGridFragment.EXTRA_MOVIE) == true) {
-                mMovie = arguments?.getParcelable(MovieGridFragment.EXTRA_MOVIE)
+            if (arguments?.containsKey(BUNDLE_MOVIE) == true) {
+                movie = arguments?.getParcelable(BUNDLE_MOVIE)
             }
 
         } else {
 
-            mMovie = savedInstanceState.getParcelable(BUNDLE_MOVIE)
-            mIsFavourite = savedInstanceState.getBoolean(BUNDLE_IS_FAVOURITE)
+            movie = savedInstanceState.getParcelable(BUNDLE_MOVIE)
+            isFavourite = savedInstanceState.getBoolean(BUNDLE_IS_FAVOURITE)
 
         }
 
-        if (mMovie != null) {
-            val movie = mMovie
-            val viewModelFactory = DetailViewModelFactory(movie as Movie)
-            mViewModel = ViewModelProviders.of(this, viewModelFactory).get(DetailViewModel::class.java)
+        if (movie == null) {
 
-            disposable = mViewModel.movieFromFavourites
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe({
-                        mIsFavourite = true
-                        updateUi()
-                    }, {
-                        mIsFavourite = false
-                        updateUi()
-                    })
+            empty_state_text_view.visibility = View.VISIBLE
 
-            inflateUi()
         } else {
-            showEmptyState()
+
+            empty_state_text_view.visibility = View.GONE
+
+            viewModel = ViewModelProviders.of(this, DetailViewModelFactory(movie as Movie))
+                    .get(DetailViewModel::class.java)
+
+            viewModel.isFavouriteLiveData.observe(this, Observer {
+                this.isFavourite = it
+                initUI()
+            })
+
         }
 
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(BUNDLE_MOVIE, mMovie)
-        outState.putBoolean(BUNDLE_IS_FAVOURITE, mIsFavourite)
+        outState.putParcelable(BUNDLE_MOVIE, movie)
+        outState.putBoolean(BUNDLE_IS_FAVOURITE, isFavourite)
         super.onSaveInstanceState(outState)
     }
 
     override fun onDestroy() {
         Timber.d("onDestroy")
         super.onDestroy()
-        disposable!!.dispose()
     }
 
-    private fun updateUi() {
+    private fun initUI() {
 
-        if (mIsFavourite) {
+        var backdrop: Bitmap? = null
 
-            mBinding.favoriteIb.isSelected = true
+        if (isFavourite) {
 
-            if (!mViewModel.utils.hasNetworkConnection()) {
-                val backdrop = BitmapFactory.decodeFile(mMovie!!.backdropLocalPath)
+            binding.favoriteIb.isSelected = true
 
-                if (backdrop == null) {
-                    mBinding.backdropIv.setImageResource(R.drawable.backdrop_placeholder)
-                } else {
-                    mBinding.backdropIv.setImageBitmap(backdrop)
-                }
-                return
-            }
+            backdrop = BitmapFactory.decodeFile(movie?.backdropLocalPath)
 
         } else {
-            mBinding.favoriteIb.isSelected = false
+            binding.favoriteIb.isSelected = false
         }
 
-        Picasso.get()
-                .load(mMovie!!.fullBackdropPath)
-                .error(R.drawable.backdrop_error)
-                .placeholder(R.drawable.poster_placeholder)
-                .into(mBinding.backdropIv)
+        if (backdrop == null) {
+            Picasso.get()
+                    .load(movie?.fullBackdropPath)
+                    .error(R.drawable.backdrop_error)
+                    .placeholder(R.drawable.poster_placeholder)
+                    .into(binding.backdropIv)
+        } else {
+            binding.backdropIv.setImageBitmap(backdrop)
+        }
 
-    }
+        setFavBtnClickListener()
 
-    private fun inflateUi() {
-        mBinding.titleTv.text = mMovie?.originalTitle
-        mBinding.releaseDateTv.text = mMovie?.releaseDate
-        mBinding.userRatingTv.text = mMovie?.voteAverage.toString()
-        mBinding.overviewTv.text = mMovie?.overview
+        binding.videos.videosRv.adapter = videosAdapter
+        binding.videos.videosRv.layoutManager = LinearLayoutManager(activity,
+                LinearLayoutManager.HORIZONTAL, false)
+        val videosOffset = resources.getDimensionPixelOffset(R.dimen.video_item_offset)
+        binding.videos.videosRv.addItemDecoration(ItemDecoration(0, 0, videosOffset, 0))
 
-        mViewModel.videosResultLiveData.observe(this, Observer { result ->
+        binding.reviews.reviewsRv.adapter = reviewsAdapter
+        binding.reviews.reviewsRv.layoutManager = LinearLayoutManager(activity,
+                LinearLayoutManager.HORIZONTAL, false)
+        val reviewsOffset = resources.getDimensionPixelOffset(R.dimen.review_item_offset)
+        binding.reviews.reviewsRv.addItemDecoration(ItemDecoration(0, 0, reviewsOffset, 0))
+
+        binding.titleTv.text = movie?.originalTitle
+        binding.releaseDateTv.text = movie?.releaseDate
+        binding.userRatingTv.text = movie?.voteAverage.toString()
+        binding.overviewTv.text = movie?.overview
+
+        viewModel.videosResultLiveData.observe(this, Observer { result ->
             when (result.state) {
                 Result.State.SUCCESS -> if (result.data == null || result.data.isEmpty()) {
-                    mBinding.videosContainer.visibility = View.GONE
+                    binding.videosContainer.visibility = View.GONE
                 } else {
-                    mBinding.videosContainer.visibility = View.VISIBLE
-                    mVideosAdapter.updateData(result.data)
+                    binding.videosContainer.visibility = View.VISIBLE
+                    videosAdapter.updateData(result.data)
                 }
-                Result.State.ERROR -> mBinding.videosContainer.visibility = View.GONE
+                Result.State.ERROR -> binding.videosContainer.visibility = View.GONE
             }
         })
 
-        mViewModel.reviewsResultLiveData.observe(this, Observer { result ->
+        viewModel.reviewsResultLiveData.observe(this, Observer { result ->
             when (result.state) {
                 Result.State.SUCCESS -> if (result.data == null || result.data.isEmpty()) {
-                    mBinding.reviewsContainer.visibility = View.GONE
+                    binding.reviewsContainer.visibility = View.GONE
                 } else {
-                    mBinding.reviewsContainer.visibility = View.VISIBLE
-                    mReviewsAdapter.updateData(result.data)
+                    binding.reviewsContainer.visibility = View.VISIBLE
+                    reviewsAdapter.updateData(result.data)
                 }
-                Result.State.ERROR -> mBinding.reviewsContainer.visibility = View.GONE
+                Result.State.ERROR -> binding.reviewsContainer.visibility = View.GONE
             }
         })
 
     }
 
     private fun setFavBtnClickListener() {
-        mBinding.favoriteIb.setOnClickListener {
-            if (mIsFavourite) {
+        binding.favoriteIb.setOnClickListener {
+            if (isFavourite) {
 
-                mBinding.favoriteIb.isSelected = false
-                mIsFavourite = false
+                binding.favoriteIb.isSelected = false
+                isFavourite = false
 
                 GlobalScope.launch {
-                    mViewModel.deleteFromFavourites()
+                    viewModel.deleteFromFavourites()
                 }
 
                 Toast.makeText(activity, getString(R.string.removed_from_favourite),
@@ -203,11 +188,11 @@ class DetailContentFragment : Fragment() {
 
             } else {
 
-                mBinding.favoriteIb.isSelected = true
-                mIsFavourite = true
+                binding.favoriteIb.isSelected = true
+                isFavourite = true
 
                 GlobalScope.launch {
-                    mViewModel.addToFavourites()
+                    viewModel.addToFavourites()
                 }
 
                 Toast.makeText(activity, getString(R.string.added_to_favourite),
@@ -215,10 +200,6 @@ class DetailContentFragment : Fragment() {
 
             }
         }
-    }
-
-    private fun showEmptyState() {
-
     }
 
     private fun onVideoClick(video: Video) {

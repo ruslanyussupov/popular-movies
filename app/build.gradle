@@ -49,6 +49,7 @@ dependencies {
 
     // KTX
     implementation "androidx.core:core-ktx:$ktx_core_version"
+    implementation "androidx.fragment:fragment-ktx:$ktx_fragment_version"
 
     // Kotlin coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"

@@ -27,15 +27,15 @@ import com.example.ruslanyussupov.popularmovies.Result
 
 class MovieGridFragment : Fragment() {
 
-    private lateinit var mMovieAdapter: MovieAdapter
-    private lateinit var mMovieClickListener: OnMovieClickListener
-    private lateinit var mBinding: FragmentMovieGridBinding
-    private lateinit var mViewModel: MainViewModel
+    private lateinit var movieAdapter: MovieAdapter
+    private lateinit var movieClickListener: OnMovieClickListener
+    private lateinit var binding: FragmentMovieGridBinding
+    private lateinit var viewModel: MainViewModel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         if (context is OnMovieClickListener) {
-            mMovieClickListener = context
+            movieClickListener = context
         } else {
             throw ClassCastException("$context must implement OnMovieClickListener")
         }
@@ -45,8 +45,8 @@ class MovieGridFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
 
         Timber.d("onCreateView")
-        mBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_movie_grid, container, false)
-        return mBinding.root
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_movie_grid, container, false)
+        return binding.root
 
     }
 
@@ -55,37 +55,37 @@ class MovieGridFragment : Fragment() {
 
         Timber.d("onActivityCreated")
 
-        mMovieAdapter = MovieAdapter(emptyList(), mMovieClickListener::onMovieClick)
-        mBinding.rvMovies.adapter = mMovieAdapter
-        mBinding.rvMovies.layoutManager = GridLayoutManager(activity, MOVIE_GRID_COLUMNS)
+        movieAdapter = MovieAdapter(emptyList(), movieClickListener::onMovieClick)
+        binding.rvMovies.adapter = movieAdapter
+        binding.rvMovies.layoutManager = GridLayoutManager(activity, MOVIE_GRID_COLUMNS)
         val offset = resources.getDimensionPixelOffset(R.dimen.movie_item_offset)
-        mBinding.rvMovies.addItemDecoration(ItemDecoration(offset, offset, offset, offset))
+        binding.rvMovies.addItemDecoration(ItemDecoration(offset, offset, offset, offset))
 
-        mViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+        viewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
-        mViewModel.getResultLiveData().observe(this, Observer<Result<List<Movie>>> { result ->
+        viewModel.getResultLiveData().observe(this, Observer<Result<List<Movie>>> { result ->
 
-            mBinding.rvMovies.scrollToPosition(0)
+            binding.rvMovies.scrollToPosition(0)
 
             when (result.state) {
                 Result.State.LOADING -> {
                     Timber.d("Movies loading...")
-                    mBinding.loadingPb.visibility = View.VISIBLE
+                    binding.loadingPb.visibility = View.VISIBLE
                 }
                 Result.State.SUCCESS -> {
-                    mBinding.loadingPb.visibility = View.GONE
+                    binding.loadingPb.visibility = View.GONE
                     if (result.data == null || result.data.isEmpty()) {
                         Timber.d("Result is empty.")
                         showSnackBar("No movies!")
-                        mMovieAdapter.updateData(emptyList())
+                        movieAdapter.updateData(emptyList())
                     } else {
                         Timber.d("Movies loaded successfully: ${result.data}")
-                        mMovieAdapter.updateData(result.data)
+                        movieAdapter.updateData(result.data)
                     }
                 }
                 Result.State.ERROR -> {
-                    mBinding.loadingPb.visibility = View.GONE
-                    if (mViewModel.utils.hasNetworkConnection()) {
+                    binding.loadingPb.visibility = View.GONE
+                    if (viewModel.utils.hasNetworkConnection()) {
                         Timber.e("Error while loading movies: ${result.error}")
                         showSnackBar(result.error)
                     } else {
@@ -105,15 +105,13 @@ class MovieGridFragment : Fragment() {
     }
 
     private fun showSnackBar(message: String) {
-        Snackbar.make(mBinding.rvMovies, message, Snackbar.LENGTH_LONG)
-                .setAction("Retry") { mViewModel.retry() }
+        Snackbar.make(binding.rvMovies, message, Snackbar.LENGTH_LONG)
+                .setAction("Retry") { viewModel.retry() }
                 .show()
     }
 
     companion object {
-
         const val EXTRA_MOVIE = "movie"
-
         private const val MOVIE_GRID_COLUMNS = 2
     }
 

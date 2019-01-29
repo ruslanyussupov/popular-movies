@@ -30,7 +30,7 @@ class Utils(private val appContext: Context,
             }
         }
 
-        Timber.d(imagesDir.absolutePath)
+        Timber.d("Favourite movies pictures storage path: ${imagesDir.absolutePath}")
         return imagesDir
 
     }
@@ -46,25 +46,26 @@ class Utils(private val appContext: Context,
 
         val imageFile = File("${privateStorageDir().toString()}${File.separator}$name.png")
 
-        val result = imageFile.outputStream().use {
+        val isSaved = imageFile.outputStream().use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
         }
 
-        Timber.d("Bitmap saved: ${imageFile.absolutePath} $result")
+        Timber.d("Bitmap saved ($isSaved): ${imageFile.absolutePath}")
 
-        return imageFile.absolutePath
+        return if (isSaved) imageFile.absolutePath else ""
 
     }
 
     fun loadBitmap(url: String): Bitmap? {
         Timber.d("Start loading bitmap $url")
         val request = requestBuilder.url(url).build()
-        var response: Response? = null
+        val response: Response?
 
         try {
             response = okHttpClient.newCall(request).execute()
         } catch (error: IOException) {
-            Timber.e(error,"Couldn't fetch a bitmap from $url")
+            Timber.e(error,"Couldn't fetch a bitmap through $url")
+            return null
         }
 
         return BitmapFactory.decodeStream(response?.body()?.byteStream()) ?: null

@@ -17,7 +17,7 @@ import com.squareup.picasso.Picasso
 import javax.inject.Inject
 
 
-class MovieAdapter(private var mMovies: List<Movie>,
+class MovieAdapter(private var movies: List<Movie>,
                    private val onMovieClick: (movie: Movie) -> Unit)
     : RecyclerView.Adapter<MovieAdapter.ViewHolder>() {
 
@@ -37,37 +37,34 @@ class MovieAdapter(private var mMovies: List<Movie>,
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(mMovies[position])
+        holder.bind(movies[position])
     }
 
     override fun getItemCount(): Int {
-        return mMovies.size
+        return movies.size
     }
 
-    inner class ViewHolder(private val mBinding: ItemMovieBinding) : RecyclerView.ViewHolder(mBinding.root) {
-
-        init {
-            mBinding.root.setOnClickListener {
-                val position = adapterPosition
-                onMovieClick(mMovies[position])
-            }
-        }
+    inner class ViewHolder(private val binding: ItemMovieBinding)
+        : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(movie: Movie) {
-            mBinding.executePendingBindings()
+            binding.executePendingBindings()
+
+            itemView.setOnClickListener { onMovieClick(movie) }
+
             if (utils.hasNetworkConnection()) {
                 Picasso.get()
                         .load(movie.fullPosterPath)
                         .placeholder(R.drawable.poster_placeholder)
                         .error(R.drawable.poster_error)
-                        .into(mBinding.moviePoster)
+                        .into(binding.moviePoster)
             } else {
                 val poster = BitmapFactory.decodeFile(movie.posterLocalPath)
 
                 if (poster == null) {
-                    mBinding.moviePoster.setImageResource(R.drawable.backdrop_placeholder)
+                    binding.moviePoster.setImageResource(R.drawable.backdrop_placeholder)
                 } else {
-                    mBinding.moviePoster.setImageBitmap(poster)
+                    binding.moviePoster.setImageBitmap(poster)
                 }
             }
 
@@ -75,7 +72,7 @@ class MovieAdapter(private var mMovies: List<Movie>,
     }
 
     fun updateData(movies: List<Movie>) {
-        mMovies = movies
+        this.movies = movies
         notifyDataSetChanged()
     }
 
