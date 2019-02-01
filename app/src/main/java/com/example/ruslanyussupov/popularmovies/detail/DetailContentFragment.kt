@@ -24,14 +24,10 @@ import com.example.ruslanyussupov.popularmovies.data.model.Review
 import com.example.ruslanyussupov.popularmovies.data.model.Video
 import com.example.ruslanyussupov.popularmovies.databinding.FragmentDetailContentBinding
 import com.example.ruslanyussupov.popularmovies.data.model.Movie
-import com.example.ruslanyussupov.popularmovies.list.MovieGridFragment
 import com.example.ruslanyussupov.popularmovies.Result
 import com.squareup.picasso.Picasso
 
 
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_detail_content.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -105,6 +101,9 @@ class DetailContentFragment : Fragment() {
 
     private fun initUI() {
 
+        binding.movie = movie
+        binding.userRatingTv.text = movie?.voteAverage.toString()
+
         var backdrop: Bitmap? = null
 
         if (isFavourite) {
@@ -140,11 +139,6 @@ class DetailContentFragment : Fragment() {
                 LinearLayoutManager.HORIZONTAL, false)
         val reviewsOffset = resources.getDimensionPixelOffset(R.dimen.review_item_offset)
         binding.reviews.reviewsRv.addItemDecoration(ItemDecoration(0, 0, reviewsOffset, 0))
-
-        binding.titleTv.text = movie?.originalTitle
-        binding.releaseDateTv.text = movie?.releaseDate
-        binding.userRatingTv.text = movie?.voteAverage.toString()
-        binding.overviewTv.text = movie?.overview
 
         viewModel.videosResultLiveData.observe(this, Observer { result ->
             when (result.state) {

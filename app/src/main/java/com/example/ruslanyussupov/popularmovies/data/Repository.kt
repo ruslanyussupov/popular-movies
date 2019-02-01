@@ -62,7 +62,7 @@ class Repository : DataSource {
         val backdrop = utils.loadBitmap(movie.fullBackdropPath)
         val poster = utils.loadBitmap(movie.fullPosterPath)
 
-        Timber.d("Backdrop pay: $backdrop")
+        Timber.d("Backdrop path: $backdrop")
         Timber.d("Poster path: $poster")
 
         if (backdrop != null) {
