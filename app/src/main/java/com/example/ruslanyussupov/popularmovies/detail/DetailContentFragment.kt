@@ -102,29 +102,8 @@ class DetailContentFragment : Fragment() {
     private fun initUI() {
 
         binding.movie = movie
-        binding.userRatingTv.text = movie?.voteAverage.toString()
 
-        var backdrop: Bitmap? = null
-
-        if (isFavourite) {
-
-            binding.favoriteIb.isSelected = true
-
-            backdrop = BitmapFactory.decodeFile(movie?.backdropLocalPath)
-
-        } else {
-            binding.favoriteIb.isSelected = false
-        }
-
-        if (backdrop == null) {
-            Picasso.get()
-                    .load(movie?.fullBackdropPath)
-                    .error(R.drawable.backdrop_error)
-                    .placeholder(R.drawable.poster_placeholder)
-                    .into(binding.backdropIv)
-        } else {
-            binding.backdropIv.setImageBitmap(backdrop)
-        }
+        binding.favoriteIb.isSelected = isFavourite
 
         setFavBtnClickListener()
 
@@ -198,7 +177,7 @@ class DetailContentFragment : Fragment() {
 
     private fun onVideoClick(video: Video) {
         val packageManager = activity?.packageManager ?: return
-        val openVideoIntent = Intent(Intent.ACTION_VIEW, Uri.parse(video.url))
+        val openVideoIntent = Intent(Intent.ACTION_VIEW, Uri.parse(video.url()))
         if (openVideoIntent.resolveActivity(packageManager) != null) {
             startActivity(openVideoIntent)
         }

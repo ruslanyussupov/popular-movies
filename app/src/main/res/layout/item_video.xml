@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
-
+        <import type="com.example.ruslanyussupov.popularmovies.data.model.Video" />
+        <variable
+            name="video"
+            type="com.example.ruslanyussupov.popularmovies.data.model.Video" />
     </data>
 
     <FrameLayout
@@ -16,6 +20,9 @@
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
             android:contentDescription="@string/video_preview_content_description"
+            app:imageUrl="@{video.previewImageUrl()}"
+            app:placeholder="@{@drawable/video_preview_placeholder}"
+            app:error="@{@drawable/video_preview_placeholder}"
             tools:src="@drawable/video_preview_placeholder"/>
 
         <ImageView

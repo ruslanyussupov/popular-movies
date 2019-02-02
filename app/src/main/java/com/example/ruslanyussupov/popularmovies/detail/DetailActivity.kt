@@ -90,7 +90,7 @@ class DetailActivity : AppCompatActivity() {
                     shareIntent.apply {
                         type = "text/plain"
                         putExtra(Intent.EXTRA_SUBJECT, getString(R.string.action_share_subject))
-                        putExtra(Intent.EXTRA_TEXT, result.data[0].url)
+                        putExtra(Intent.EXTRA_TEXT, result.data[0].url())
                     }
                     startActivity(Intent.createChooser(shareIntent, getString(R.string.action_share_subject)))
                 }

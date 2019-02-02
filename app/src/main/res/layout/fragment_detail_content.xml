@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".detail.DetailContentFragment">
+    xmlns:tools="http://schemas.android.com/tools">
     <data>
         <import type="com.example.ruslanyussupov.popularmovies.data.model.Movie"/>
         <variable
@@ -22,6 +21,10 @@
             android:scaleType="centerCrop"
             android:contentDescription="@string/backdrop_content_description"
             tools:src="@drawable/backdrop_placeholder"
+            app:imageUrl="@{movie.fullBackdropPath}"
+            app:pathCached="@{movie.backdropLocalPath}"
+            app:placeholder="@{@drawable/backdrop_placeholder}"
+            app:error="@{@drawable/backdrop_error}"
             app:layout_constraintDimensionRatio="h, 780:439"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
@@ -78,6 +81,7 @@
             android:paddingStart="@dimen/detail_padding_horizontal"
             android:textStyle="bold"
             android:textSize="@dimen/user_rating_text_size"
+            android:text="@{Double.toString(movie.voteAverage)}"
             app:layout_constraintLeft_toRightOf="@id/average_rating_label"
             app:layout_constraintTop_toTopOf="@id/average_rating_label"
             app:layout_constraintBottom_toBottomOf="@id/average_rating_label"

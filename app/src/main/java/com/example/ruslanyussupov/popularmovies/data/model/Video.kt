@@ -11,12 +11,8 @@ class Video(val key: String,
             val site: String,
             val size: Int) : Parcelable {
 
-    @IgnoredOnParcel
-    val previewImagePath: String
-        get() = "https://img.youtube.com/vi/$key/1.jpg"
+    fun previewImageUrl() = "https://img.youtube.com/vi/$key/1.jpg"
 
-    @IgnoredOnParcel
-    val url: String
-        get() = "https://www.youtube.com/watch?v=$key"
+    fun url() = "https://www.youtube.com/watch?v=$key"
 
 }
