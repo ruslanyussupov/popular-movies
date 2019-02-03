@@ -121,7 +121,7 @@ class DetailContentFragment : Fragment() {
 
         viewModel.videosResultLiveData.observe(this, Observer { result ->
             when (result.state) {
-                Result.State.SUCCESS -> if (result.data == null || result.data.isEmpty()) {
+                Result.State.SUCCESS -> if (result.data.isNullOrEmpty()) {
                     binding.videosContainer.visibility = View.GONE
                 } else {
                     binding.videosContainer.visibility = View.VISIBLE
@@ -133,7 +133,7 @@ class DetailContentFragment : Fragment() {
 
         viewModel.reviewsResultLiveData.observe(this, Observer { result ->
             when (result.state) {
-                Result.State.SUCCESS -> if (result.data == null || result.data.isEmpty()) {
+                Result.State.SUCCESS -> if (result.data.isNullOrEmpty()) {
                     binding.reviewsContainer.visibility = View.GONE
                 } else {
                     binding.reviewsContainer.visibility = View.VISIBLE

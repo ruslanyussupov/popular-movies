@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import com.squareup.picasso.Picasso
+import timber.log.Timber
 
 @BindingAdapter(value = ["imageUrl", "pathCached", "placeholder", "error"], requireAll = false)
 fun setImageUrl(imageView: ImageView,
@@ -11,6 +12,8 @@ fun setImageUrl(imageView: ImageView,
                 pathCached: String?,
                 placeholder: Drawable,
                 error: Drawable) {
+
+    Timber.d("Binding $imageUrl")
 
     var errorPlaceholder = error
 

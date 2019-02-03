@@ -82,7 +82,7 @@ class DetailActivity : AppCompatActivity() {
         viewModel.videosResultLiveData
                 .observe(this, Observer<Result<List<Video>>> { result ->
             if (result.state == Result.State.SUCCESS) {
-                if (result.data == null || result.data.isEmpty()) {
+                if (result.data.isNullOrEmpty()) {
                     Toast.makeText(this@DetailActivity, getString(R.string.nothing_to_share),
                             Toast.LENGTH_SHORT).show()
                 } else {

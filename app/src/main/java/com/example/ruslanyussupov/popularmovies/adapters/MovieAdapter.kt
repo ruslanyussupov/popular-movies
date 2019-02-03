@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 
 import com.example.ruslanyussupov.popularmovies.App
 import com.example.ruslanyussupov.popularmovies.R
@@ -39,8 +40,8 @@ class MovieAdapter(private var movies: List<Movie>,
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val movie = movies[position]
-        binding.executePendingBindings()
         binding.movie = movie
+        binding.executePendingBindings()
         holder.itemView.setOnClickListener { onMovieClick(movie) }
     }
 
@@ -48,12 +49,31 @@ class MovieAdapter(private var movies: List<Movie>,
         return movies.size
     }
 
-    fun updateData(movies: List<Movie>) {
-        this.movies = movies
-        notifyDataSetChanged()
+    fun updateData(newMovieList: List<Movie>) {
+        val diffResult = DiffUtil.calculateDiff(MovieDiffCallback(movies, newMovieList), true)
+        movies = newMovieList
+        diffResult.dispatchUpdatesTo(this)
     }
 
     class ViewHolder(val view: View) : RecyclerView.ViewHolder(view)
+
+    class MovieDiffCallback(private val oldMovieList: List<Movie>,
+                            private val newMovieList: List<Movie>) : DiffUtil.Callback() {
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldMovieList[oldItemPosition].id == newMovieList[newItemPosition].id
+        }
+
+        override fun getOldListSize() = oldMovieList.size
+
+        override fun getNewListSize() = newMovieList.size
+
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return  newMovieList[newItemPosition].posterPath == oldMovieList[oldItemPosition].posterPath &&
+                    newMovieList[newItemPosition].originalTitle == oldMovieList[oldItemPosition].originalTitle
+        }
+
+    }
 
     interface OnMovieClickListener {
         fun onMovieClick(movie: Movie)

@@ -74,7 +74,7 @@ class MovieGridFragment : Fragment() {
                 }
                 Result.State.SUCCESS -> {
                     binding.loadingPb.visibility = View.GONE
-                    if (result.data == null || result.data.isEmpty()) {
+                    if (result.data.isNullOrEmpty()) {
                         Timber.d("Result is empty.")
                         showSnackBar("No movies!")
                         movieAdapter.updateData(emptyList())
