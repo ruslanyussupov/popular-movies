@@ -13,8 +13,6 @@ fun setImageUrl(imageView: ImageView,
                 placeholder: Drawable,
                 error: Drawable) {
 
-    Timber.d("Binding $imageUrl")
-
     var errorPlaceholder = error
 
     if (pathCached != null) {

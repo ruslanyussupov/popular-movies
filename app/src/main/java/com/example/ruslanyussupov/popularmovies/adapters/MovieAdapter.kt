@@ -4,7 +4,6 @@ package com.example.ruslanyussupov.popularmovies.adapters
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 
@@ -24,24 +23,22 @@ class MovieAdapter(private var movies: List<Movie>,
     @Inject
     internal lateinit var utils: Utils
 
-    private lateinit var binding: ItemMovieBinding
-
     init {
         App.component?.inject(this)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        binding = DataBindingUtil.inflate(LayoutInflater.from(parent.context),
+        val binding = DataBindingUtil.inflate<ItemMovieBinding>(LayoutInflater.from(parent.context),
                 R.layout.item_movie, parent, false)
 
-        return ViewHolder(binding.root)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val movie = movies[position]
-        binding.movie = movie
-        binding.executePendingBindings()
+        holder.binding.movie = movie
+        holder.binding.executePendingBindings()
         holder.itemView.setOnClickListener { onMovieClick(movie) }
     }
 
@@ -55,7 +52,7 @@ class MovieAdapter(private var movies: List<Movie>,
         diffResult.dispatchUpdatesTo(this)
     }
 
-    class ViewHolder(val view: View) : RecyclerView.ViewHolder(view)
+    class ViewHolder(val binding: ItemMovieBinding) : RecyclerView.ViewHolder(binding.root)
 
     class MovieDiffCallback(private val oldMovieList: List<Movie>,
                             private val newMovieList: List<Movie>) : DiffUtil.Callback() {
