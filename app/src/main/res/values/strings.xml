@@ -7,24 +7,15 @@
     <string name="top_rated">Top Rated</string>
     <string name="favourite">Favourite</string>
     
-    <string name="release_date_label">Release\nDate</string>
-    <string name="average_rating_label">Average\nRating</string>
+    <string name="release_date_label">Release date:</string>
     <string name="overview_label">Overview</string>
     <string name="trailers_label">Trailers</string>
     <string name="reviews_label">Reviews</string>
 
-    <string name="empty_state">There are no movies…</string>
-    <string name="no_network_connection_state">No network connection</string>
-    <string name="empty_state_videos">There are no trailers…</string>
-    <string name="empty_state_reviews">There are no reviews…</string>
-
     <string name="movie_poster_content_description">The movie poster</string>
     <string name="backdrop_content_description">The movie backdrop</string>
-    <string name="favourite_button_content_description">Add to favourite button</string>
     <string name="video_preview_content_description">Video preview</string>
     <string name="play_button_content_description">Play video button</string>
-
-    <string name="no_information">No information</string>
 
     <string name="added_to_favourite">Added to favourite</string>
     <string name="removed_from_favourite">Removed from favourite</string>
@@ -33,5 +24,6 @@
     <string name="action_share_subject">Movie Trailer</string>
     <string name="nothing_to_share">There is no any trailer to share.</string>
     <string name="no_data">NO DATA</string>
+    <string name="no_reviews">No reviews</string>
 
 </resources>

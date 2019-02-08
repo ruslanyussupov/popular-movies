@@ -1,208 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-    <data>
-        <import type="com.example.ruslanyussupov.popularmovies.data.model.Movie"/>
-        <variable
-            name="movie"
-            type="com.example.ruslanyussupov.popularmovies.data.model.Movie" />
-    </data>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/backdrop_iv"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
-            android:contentDescription="@string/backdrop_content_description"
-            tools:src="@drawable/backdrop_placeholder"
-            app:imageUrl="@{movie.fullBackdropPath}"
-            app:pathCached="@{movie.backdropLocalPath}"
-            app:placeholder="@{@drawable/backdrop_placeholder}"
-            app:error="@{@drawable/backdrop_error}"
-            app:layout_constraintDimensionRatio="h, 780:439"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/reviews_rv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-        <TextView
-            android:id="@+id/title_tv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/title_margin_horizontal"
-            android:layout_marginStart="@dimen/title_margin_horizontal"
-            android:layout_marginTop="@dimen/detail_margin_vertical"
-            android:textSize="@dimen/title_text_size"
-            android:textStyle="bold"
-            android:maxLines="3"
-            android:ellipsize="end"
-            android:text="@{movie.originalTitle}"
-            tools:text="Avengers: Age of Ultron"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/favorite_ib"
-            app:layout_constraintTop_toBottomOf="@id/backdrop_iv" />
-
-        <ImageButton
-            android:id="@+id/favorite_ib"
-            android:layout_width="@dimen/fav_button_width"
-            android:layout_height="@dimen/fav_button_height"
-            android:background="@drawable/fav_btn"
-            android:layout_marginTop="@dimen/detail_margin_vertical"
-            android:layout_marginRight="@dimen/fav_buton_margin_horizontal"
-            android:layout_marginEnd="@dimen/fav_buton_margin_horizontal"
-            android:contentDescription="@string/favourite_button_content_description"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/backdrop_iv"/>
-
-        <TextView
-            android:id="@+id/average_rating_label"
+        <LinearLayout
+            android:id="@+id/empty_state"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_vertical"
-            android:layout_marginLeft="@dimen/margin_horizontal"
-            android:layout_marginStart="@dimen/margin_horizontal"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            android:text="@string/average_rating_label"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/title_tv" />
+            android:orientation="vertical"
+            android:layout_gravity="center">
 
-        <TextView
-            android:id="@+id/user_rating_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingEnd="@dimen/detail_padding_horizontal"
-            android:paddingLeft="@dimen/detail_padding_horizontal"
-            android:paddingRight="@dimen/detail_padding_horizontal"
-            android:paddingStart="@dimen/detail_padding_horizontal"
-            android:textStyle="bold"
-            android:textSize="@dimen/user_rating_text_size"
-            android:text="@{Double.toString(movie.voteAverage)}"
-            app:layout_constraintLeft_toRightOf="@id/average_rating_label"
-            app:layout_constraintTop_toTopOf="@id/average_rating_label"
-            app:layout_constraintBottom_toBottomOf="@id/average_rating_label"
-            tools:text="7.3" />
+            <ImageView
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:src="@drawable/no_data"
+                android:layout_gravity="center"
+                android:contentDescription="@string/no_data"/>
 
-        <TextView
-            android:id="@+id/release_date_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_vertical"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-            android:text="@string/release_date_label"
-            app:layout_constraintLeft_toRightOf="@id/user_rating_tv"
-            app:layout_constraintTop_toBottomOf="@id/title_tv" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/no_data"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
-        <TextView
-            android:id="@+id/release_date_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingEnd="@dimen/detail_padding_horizontal"
-            android:paddingLeft="@dimen/detail_padding_horizontal"
-            android:paddingRight="@dimen/detail_padding_horizontal"
-            android:paddingStart="@dimen/detail_padding_horizontal"
-            android:gravity="center_vertical"
-            android:textStyle="bold"
-            android:text="@{movie.releaseDate}"
-            app:layout_constraintLeft_toRightOf="@id/release_date_label"
-            app:layout_constraintTop_toTopOf="@id/release_date_label"
-            app:layout_constraintBottom_toBottomOf="@id/release_date_label"
-            tools:text="2015-04-22" />
+        </LinearLayout>
 
-        <androidx.constraintlayout.widget.Barrier
-            android:id="@+id/overview_barrier"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:barrierDirection="bottom"
-            app:constraint_referenced_ids="release_date_label, release_date_tv" />
+    </FrameLayout>
 
-
-        <TextView
-            android:id="@+id/overview_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/overview_label"
-            android:layout_marginLeft="@dimen/margin_horizontal"
-            android:layout_marginStart="@dimen/margin_horizontal"
-            android:layout_marginTop="@dimen/margin_vertical"
-            style="@style/Label"
-            app:layout_constraintTop_toBottomOf="@id/overview_barrier"
-            app:layout_constraintLeft_toLeftOf="parent"/>
-
-        <View
-            style="@style/LabelUnderline"
-            app:layout_constraintTop_toBottomOf="@id/overview_label"
-            app:layout_constraintLeft_toLeftOf="@id/overview_label"/>
-
-        <TextView
-            android:id="@+id/overview_tv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/detail_margin_vertical"
-            android:paddingLeft="@dimen/detail_padding_horizontal"
-            android:paddingStart="@dimen/detail_padding_horizontal"
-            android:paddingRight="@dimen/detail_padding_horizontal"
-            android:paddingEnd="@dimen/detail_padding_horizontal"
-            android:text="@{movie.overview}"
-            tools:text="When Tony Stark tries to jumpstart a dormant peacekeeping program, things go awry and Earth’s Mightiest Heroes are put to the ultimate test as the fate of the planet hangs in the balance. As the villainous Ultron emerges, it is up to The Avengers to stop him from enacting his terrible plans, and soon uneasy alliances and unexpected action pave the way for an epic and unique global adventure."
-            app:layout_constraintTop_toBottomOf="@id/overview_label"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
-
-        <FrameLayout
-            android:id="@+id/videos_container"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_vertical"
-            android:paddingLeft="@dimen/detail_padding_horizontal"
-            android:paddingStart="@dimen/detail_padding_horizontal"
-            android:paddingRight="@dimen/detail_padding_horizontal"
-            android:paddingEnd="@dimen/detail_padding_horizontal"
-            app:layout_constraintTop_toBottomOf="@id/overview_tv"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent">
-
-            <include
-                android:id="@+id/videos"
-                layout="@layout/view_videos"/>
-
-        </FrameLayout>
-
-        <FrameLayout
-            android:id="@+id/reviews_container"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_vertical"
-            android:paddingLeft="@dimen/detail_padding_horizontal"
-            android:paddingStart="@dimen/detail_padding_horizontal"
-            android:paddingRight="@dimen/detail_padding_horizontal"
-            android:paddingEnd="@dimen/detail_padding_horizontal"
-            android:paddingBottom="@dimen/detail_padding_vertical"
-            app:layout_constraintTop_toBottomOf="@id/videos_container"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent">
-
-            <include
-                android:id="@+id/reviews"
-                layout="@layout/view_reviews"/>
-
-        </FrameLayout>
-
-        <TextView
-            android:id="@+id/empty_state_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

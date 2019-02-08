@@ -31,6 +31,8 @@ class DetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_detail)
 
+        setSupportActionBar(binding.toolbar)
+
         val movie = intent.getParcelableExtra<Movie?>(MovieGridFragment.EXTRA_MOVIE)
 
         if (movie == null) {
@@ -43,7 +45,6 @@ class DetailActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this, DetailViewModelFactory(movie))
                 .get(DetailViewModel::class.java)
 
-        setSupportActionBar(binding.toolbar)
         val actionBar = supportActionBar
         actionBar?.apply {
             setDisplayHomeAsUpEnabled(true)

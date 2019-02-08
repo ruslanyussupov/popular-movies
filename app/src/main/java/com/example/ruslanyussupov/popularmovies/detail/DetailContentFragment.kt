@@ -3,9 +3,7 @@ package com.example.ruslanyussupov.popularmovies.detail
 
 import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
-import android.graphics.Bitmap
 import androidx.databinding.DataBindingUtil
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -18,17 +16,16 @@ import androidx.lifecycle.Observer
 
 import com.example.ruslanyussupov.popularmovies.ItemDecoration
 import com.example.ruslanyussupov.popularmovies.R
-import com.example.ruslanyussupov.popularmovies.adapters.ReviewAdapter
 import com.example.ruslanyussupov.popularmovies.adapters.VideoAdapter
 import com.example.ruslanyussupov.popularmovies.data.model.Review
 import com.example.ruslanyussupov.popularmovies.data.model.Video
 import com.example.ruslanyussupov.popularmovies.databinding.FragmentDetailContentBinding
 import com.example.ruslanyussupov.popularmovies.data.model.Movie
 import com.example.ruslanyussupov.popularmovies.Result
-import com.squareup.picasso.Picasso
+import com.example.ruslanyussupov.popularmovies.adapters.ReviewAdapter
+import com.example.ruslanyussupov.popularmovies.databinding.MovieDetailsBinding
 
 
-import kotlinx.android.synthetic.main.fragment_detail_content.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -39,8 +36,8 @@ class DetailContentFragment : Fragment() {
     private lateinit var binding: FragmentDetailContentBinding
     private lateinit var viewModel: DetailViewModel
     private var isFavourite: Boolean = false
-    private val videosAdapter = VideoAdapter(emptyList(), ::onVideoClick)
-    private val reviewsAdapter = ReviewAdapter(emptyList(), ::onReviewClick)
+    private lateinit var reviewsAdapter: ReviewAdapter
+    private val videoAdapter = VideoAdapter(emptyList(), ::onVideoClick)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -61,28 +58,42 @@ class DetailContentFragment : Fragment() {
                 movie = arguments?.getParcelable(BUNDLE_MOVIE)
             }
 
+            if (movie == null) {
+
+                showEmptyState()
+
+            } else {
+
+                hideEmptyState()
+
+                viewModel = ViewModelProviders.of(this, DetailViewModelFactory(movie as Movie))
+                        .get(DetailViewModel::class.java)
+
+                viewModel.isFavouriteLiveData.observe(this, Observer {
+                    this.isFavourite = it
+                    initUI()
+                })
+
+            }
+
         } else {
 
             movie = savedInstanceState.getParcelable(BUNDLE_MOVIE)
             isFavourite = savedInstanceState.getBoolean(BUNDLE_IS_FAVOURITE)
 
-        }
+            if (movie == null) {
 
-        if (movie == null) {
+                showEmptyState()
 
-            empty_state_text_view.visibility = View.VISIBLE
+            } else {
 
-        } else {
+                hideEmptyState()
 
-            empty_state_text_view.visibility = View.GONE
+                viewModel = ViewModelProviders.of(this, DetailViewModelFactory(movie as Movie))
+                        .get(DetailViewModel::class.java)
 
-            viewModel = ViewModelProviders.of(this, DetailViewModelFactory(movie as Movie))
-                    .get(DetailViewModel::class.java)
-
-            viewModel.isFavouriteLiveData.observe(this, Observer {
-                this.isFavourite = it
                 initUI()
-            })
+            }
 
         }
 
@@ -99,58 +110,25 @@ class DetailContentFragment : Fragment() {
         super.onDestroy()
     }
 
-    private fun initUI() {
+    private fun createHeaderView(): View {
 
-        binding.movie = movie
+        val headerBinding = DataBindingUtil.inflate<MovieDetailsBinding>(layoutInflater, R.layout.movie_details, binding.reviewsRv, false)
 
-        binding.favoriteIb.isSelected = isFavourite
+        headerBinding.movie = movie
 
-        setFavBtnClickListener()
-
-        binding.videos.videosRv.adapter = videosAdapter
-        binding.videos.videosRv.layoutManager = LinearLayoutManager(activity,
+        headerBinding.videosRv.adapter = videoAdapter
+        headerBinding.videosRv.layoutManager = LinearLayoutManager(activity,
                 LinearLayoutManager.HORIZONTAL, false)
         val videosOffset = resources.getDimensionPixelOffset(R.dimen.video_item_offset)
-        binding.videos.videosRv.addItemDecoration(ItemDecoration(0, 0, videosOffset, 0))
+        headerBinding.videosRv.addItemDecoration(ItemDecoration(0, 0, videosOffset, 0))
 
-        binding.reviews.reviewsRv.adapter = reviewsAdapter
-        binding.reviews.reviewsRv.layoutManager = LinearLayoutManager(activity,
-                LinearLayoutManager.HORIZONTAL, false)
-        val reviewsOffset = resources.getDimensionPixelOffset(R.dimen.review_item_offset)
-        binding.reviews.reviewsRv.addItemDecoration(ItemDecoration(0, 0, reviewsOffset, 0))
+        headerBinding.favouriteFab.isSelected = isFavourite
 
-        viewModel.videosResultLiveData.observe(this, Observer { result ->
-            when (result.state) {
-                Result.State.SUCCESS -> if (result.data.isNullOrEmpty()) {
-                    binding.videosContainer.visibility = View.GONE
-                } else {
-                    binding.videosContainer.visibility = View.VISIBLE
-                    videosAdapter.updateData(result.data)
-                }
-                Result.State.ERROR -> binding.videosContainer.visibility = View.GONE
-            }
-        })
-
-        viewModel.reviewsResultLiveData.observe(this, Observer { result ->
-            when (result.state) {
-                Result.State.SUCCESS -> if (result.data.isNullOrEmpty()) {
-                    binding.reviewsContainer.visibility = View.GONE
-                } else {
-                    binding.reviewsContainer.visibility = View.VISIBLE
-                    reviewsAdapter.updateData(result.data)
-                }
-                Result.State.ERROR -> binding.reviewsContainer.visibility = View.GONE
-            }
-        })
-
-    }
-
-    private fun setFavBtnClickListener() {
-        binding.favoriteIb.setOnClickListener {
+        headerBinding.favouriteFab.setOnClickListener {
             if (isFavourite) {
 
-                binding.favoriteIb.isSelected = false
                 isFavourite = false
+                headerBinding.favouriteFab.isSelected = isFavourite
 
                 GlobalScope.launch {
                     viewModel.deleteFromFavourites()
@@ -161,8 +139,8 @@ class DetailContentFragment : Fragment() {
 
             } else {
 
-                binding.favoriteIb.isSelected = true
                 isFavourite = true
+                headerBinding.favouriteFab.isSelected = isFavourite
 
                 GlobalScope.launch {
                     viewModel.addToFavourites()
@@ -173,6 +151,65 @@ class DetailContentFragment : Fragment() {
 
             }
         }
+
+        headerBinding.executePendingBindings()
+
+        fun hideTrailers() {
+            headerBinding.trailersLabel.visibility = View.GONE
+            headerBinding.trailersLabelUnderline.visibility = View.GONE
+            headerBinding.videosRv.visibility = View.GONE
+        }
+
+        fun showTrailers() {
+            headerBinding.trailersLabel.visibility = View.VISIBLE
+            headerBinding.trailersLabelUnderline.visibility = View.VISIBLE
+            headerBinding.videosRv.visibility = View.VISIBLE
+        }
+
+        viewModel.videosResultLiveData.observe(this, Observer { result ->
+            when (result.state) {
+                Result.State.SUCCESS -> if (result.data.isNullOrEmpty()) {
+                    hideTrailers()
+                    videoAdapter.updateData(emptyList())
+                } else {
+                    showTrailers()
+                    videoAdapter.updateData(result.data)
+                }
+                Result.State.ERROR -> videoAdapter.updateData(emptyList())
+            }
+        })
+
+        return headerBinding.root
+    }
+
+    private fun initUI() {
+
+        binding.reviewsRv.layoutManager = LinearLayoutManager(activity,
+                LinearLayoutManager.VERTICAL, false)
+        reviewsAdapter = ReviewAdapter(emptyList(), createHeaderView(), ::onReviewClick)
+        binding.reviewsRv.adapter = reviewsAdapter
+
+        viewModel.reviewsResultLiveData.observe(this, Observer { result ->
+            when (result.state) {
+                Result.State.SUCCESS -> if (result.data.isNullOrEmpty()) {
+                    reviewsAdapter.updateData(emptyList())
+                } else {
+                    reviewsAdapter.updateData(result.data)
+                }
+                Result.State.ERROR -> reviewsAdapter.updateData(emptyList())
+            }
+        })
+
+    }
+
+    private fun showEmptyState() {
+        binding.reviewsRv.visibility = View.GONE
+        binding.emptyState.visibility = View.VISIBLE
+    }
+
+    private fun hideEmptyState() {
+        binding.reviewsRv.visibility = View.VISIBLE
+        binding.emptyState.visibility = View.GONE
     }
 
     private fun onVideoClick(video: Video) {

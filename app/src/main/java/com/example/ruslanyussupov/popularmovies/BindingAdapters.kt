@@ -4,7 +4,6 @@ import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import androidx.databinding.BindingAdapter
 import com.squareup.picasso.Picasso
-import timber.log.Timber
 
 @BindingAdapter(value = ["imageUrl", "pathCached", "placeholder", "error"], requireAll = false)
 fun setImageUrl(imageView: ImageView,

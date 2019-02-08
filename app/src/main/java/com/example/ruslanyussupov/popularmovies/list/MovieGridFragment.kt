@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 
-import com.example.ruslanyussupov.popularmovies.ItemDecoration
 import com.example.ruslanyussupov.popularmovies.R
 import com.example.ruslanyussupov.popularmovies.adapters.MovieAdapter
 import com.example.ruslanyussupov.popularmovies.databinding.FragmentMovieGridBinding
@@ -23,6 +22,7 @@ import timber.log.Timber
 import com.example.ruslanyussupov.popularmovies.adapters.MovieAdapter.*
 import com.example.ruslanyussupov.popularmovies.data.model.Movie
 import com.example.ruslanyussupov.popularmovies.Result
+import com.example.ruslanyussupov.popularmovies.GridSpacingItemDecoration
 
 
 class MovieGridFragment : Fragment() {
@@ -59,7 +59,8 @@ class MovieGridFragment : Fragment() {
         binding.rvMovies.adapter = movieAdapter
         binding.rvMovies.layoutManager = GridLayoutManager(activity, MOVIE_GRID_COLUMNS)
         val offset = resources.getDimensionPixelOffset(R.dimen.movie_item_offset)
-        binding.rvMovies.addItemDecoration(ItemDecoration(offset, offset, offset, offset))
+        //binding.rvMovies.addItemDecoration(ItemDecoration(offset, offset, offset, offset))
+        binding.rvMovies.addItemDecoration(GridSpacingItemDecoration(MOVIE_GRID_COLUMNS, offset, true))
 
         viewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
 
@@ -112,7 +113,7 @@ class MovieGridFragment : Fragment() {
 
     companion object {
         const val EXTRA_MOVIE = "movie"
-        private const val MOVIE_GRID_COLUMNS = 2
+        private const val MOVIE_GRID_COLUMNS = 3
     }
 
 }
