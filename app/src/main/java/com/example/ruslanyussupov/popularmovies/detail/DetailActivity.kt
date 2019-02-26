@@ -1,7 +1,5 @@
 package com.example.ruslanyussupov.popularmovies.detail
 
-import androidx.lifecycle.ViewModelProviders
-import android.content.Intent
 import androidx.databinding.DataBindingUtil
 import androidx.core.app.NavUtils
 import androidx.appcompat.app.AppCompatActivity
@@ -9,23 +7,18 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.transaction
-import androidx.lifecycle.Observer
 
 import com.example.ruslanyussupov.popularmovies.R
-import com.example.ruslanyussupov.popularmovies.Result
 import com.example.ruslanyussupov.popularmovies.databinding.ActivityDetailBinding
 import com.example.ruslanyussupov.popularmovies.data.model.Movie
-import com.example.ruslanyussupov.popularmovies.data.model.Video
-import com.example.ruslanyussupov.popularmovies.list.MovieGridFragment
 import kotlinx.android.synthetic.main.activity_detail.*
 
 
 class DetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetailBinding
-    private lateinit var viewModel: DetailViewModel
+    var onShare: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,17 +26,15 @@ class DetailActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
 
-        val movie = intent.getParcelableExtra<Movie?>(MovieGridFragment.EXTRA_MOVIE)
+        val movie = intent.getParcelableExtra<Movie?>(EXTRA_MOVIE)
+        val filter = intent.getStringExtra(EXTRA_FILTER)
 
-        if (movie == null) {
+        if (movie == null || filter == null) {
             empty_state_text_view.visibility = View.VISIBLE
             return
         }
 
         empty_state_text_view.visibility = View.GONE
-
-        viewModel = ViewModelProviders.of(this, DetailViewModelFactory(movie))
-                .get(DetailViewModel::class.java)
 
         val actionBar = supportActionBar
         actionBar?.apply {
@@ -52,7 +43,7 @@ class DetailActivity : AppCompatActivity() {
         }
 
         supportFragmentManager.transaction {
-            replace(R.id.fragment_container, DetailContentFragment.create(movie))
+            replace(R.id.fragment_container, DetailContentFragment.create(movie, filter))
         }
 
     }
@@ -72,31 +63,16 @@ class DetailActivity : AppCompatActivity() {
                 true
             }
             R.id.action_share -> {
-                onShare()
+                onShare?.invoke()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun onShare() {
-        viewModel.videosResultLiveData
-                .observe(this, Observer<Result<List<Video>>> { result ->
-            if (result.state == Result.State.SUCCESS) {
-                if (result.data.isNullOrEmpty()) {
-                    Toast.makeText(this@DetailActivity, getString(R.string.nothing_to_share),
-                            Toast.LENGTH_SHORT).show()
-                } else {
-                    val shareIntent = Intent(Intent.ACTION_SEND)
-                    shareIntent.apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_SUBJECT, getString(R.string.action_share_subject))
-                        putExtra(Intent.EXTRA_TEXT, result.data[0].url())
-                    }
-                    startActivity(Intent.createChooser(shareIntent, getString(R.string.action_share_subject)))
-                }
-            }
-        })
+    companion object {
+        const val EXTRA_FILTER = "filter"
+        const val EXTRA_MOVIE = "movie"
     }
 
 }

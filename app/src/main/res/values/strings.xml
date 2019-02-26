@@ -12,8 +12,8 @@
     <string name="trailers_label">Trailers</string>
     <string name="reviews_label">Reviews</string>
 
-    <string name="movie_poster_content_description">The movie poster</string>
-    <string name="backdrop_content_description">The movie backdrop</string>
+    <string name="movie_poster_content_description">The movie topRated</string>
+    <string name="backdrop_content_description">The movie popular</string>
     <string name="video_preview_content_description">Video preview</string>
     <string name="play_button_content_description">Play video button</string>
 

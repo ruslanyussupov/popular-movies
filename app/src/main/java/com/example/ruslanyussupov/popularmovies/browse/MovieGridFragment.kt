@@ -1,4 +1,4 @@
-package com.example.ruslanyussupov.popularmovies.list
+package com.example.ruslanyussupov.popularmovies.browse
 
 
 import androidx.lifecycle.ViewModelProviders
@@ -20,9 +20,9 @@ import com.example.ruslanyussupov.popularmovies.databinding.FragmentMovieGridBin
 import timber.log.Timber
 
 import com.example.ruslanyussupov.popularmovies.adapters.MovieAdapter.*
-import com.example.ruslanyussupov.popularmovies.data.model.Movie
-import com.example.ruslanyussupov.popularmovies.Result
 import com.example.ruslanyussupov.popularmovies.GridSpacingItemDecoration
+import com.example.ruslanyussupov.popularmovies.data.DataSource.Filter
+import com.example.ruslanyussupov.popularmovies.data.Status
 
 
 class MovieGridFragment : Fragment() {
@@ -55,47 +55,56 @@ class MovieGridFragment : Fragment() {
 
         Timber.d("onActivityCreated")
 
-        movieAdapter = MovieAdapter(emptyList(), movieClickListener::onMovieClick)
+        movieAdapter = MovieAdapter(movieClickListener::onMovieClick)
         binding.rvMovies.adapter = movieAdapter
         binding.rvMovies.layoutManager = GridLayoutManager(activity, MOVIE_GRID_COLUMNS)
         val offset = resources.getDimensionPixelOffset(R.dimen.movie_item_offset)
-        //binding.rvMovies.addItemDecoration(ItemDecoration(offset, offset, offset, offset))
         binding.rvMovies.addItemDecoration(GridSpacingItemDecoration(MOVIE_GRID_COLUMNS, offset, true))
 
-        viewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
+        binding.swipeRefresh.isRefreshing = false
+        binding.loadingPb.visibility = View.GONE
 
-        viewModel.getResultLiveData().observe(this, Observer<Result<List<Movie>>> { result ->
+        viewModel = activity?.run {
+            ViewModelProviders.of(this).get(MainViewModel::class.java)
+        } ?: throw Exception("Invalid activity.")
 
-            binding.rvMovies.scrollToPosition(0)
-
-            when (result.state) {
-                Result.State.LOADING -> {
-                    Timber.d("Movies loading...")
-                    binding.loadingPb.visibility = View.VISIBLE
-                }
-                Result.State.SUCCESS -> {
-                    binding.loadingPb.visibility = View.GONE
-                    if (result.data.isNullOrEmpty()) {
-                        Timber.d("Result is empty.")
-                        showSnackBar("No movies!")
-                        movieAdapter.updateData(emptyList())
-                    } else {
-                        Timber.d("Movies loaded successfully: ${result.data}")
-                        movieAdapter.updateData(result.data)
-                    }
-                }
-                Result.State.ERROR -> {
-                    binding.loadingPb.visibility = View.GONE
-                    if (viewModel.utils.hasNetworkConnection()) {
-                        Timber.e("Error while loading movies: ${result.error}")
-                        showSnackBar(result.error)
-                    } else {
-                        Timber.w("No network connection.")
-                        showSnackBar("No connection!")
-                    }
-                }
+        binding.swipeRefresh.setOnRefreshListener {
+            if (viewModel.filter.value == Filter.FAVOURITE) {
+                binding.swipeRefresh.isRefreshing = false
+            } else {
+                viewModel.refresh()
             }
+        }
 
+        viewModel.pagedList.observe(this, Observer {pagedList ->
+            Timber.d("Paged List: ${pagedList.size}")
+            movieAdapter.submitList(pagedList)
+        })
+
+        viewModel.networkState.observe(this, Observer {networkState ->
+            Timber.d("Network state: ${networkState?.status}")
+            when (networkState?.status) {
+                Status.RUNNING -> { binding.loadingPb.visibility = View.VISIBLE }
+                Status.SUCCESS -> { binding.loadingPb.visibility = View.GONE }
+                Status.FAILED -> {
+                    binding.loadingPb.visibility = View.GONE
+                    showSnackBar(networkState.msg ?: "Failed.")
+                }
+                else -> { binding.loadingPb.visibility = View.GONE }
+            }
+        })
+
+        viewModel.refreshState.observe(this, Observer {refreshState ->
+            Timber.d("Refresh state: ${refreshState?.status}")
+            when (refreshState?.status) {
+                Status.RUNNING -> { binding.swipeRefresh.isRefreshing = true }
+                Status.SUCCESS -> { binding.swipeRefresh.isRefreshing = false }
+                Status.FAILED -> {
+                    binding.swipeRefresh.isRefreshing = false
+                    showSnackBar(refreshState.msg ?: "Failed.")
+                }
+                else -> { binding.swipeRefresh.isRefreshing = false }
+            }
         })
 
     }
@@ -106,13 +115,12 @@ class MovieGridFragment : Fragment() {
     }
 
     private fun showSnackBar(message: String) {
-        Snackbar.make(binding.rvMovies, message, Snackbar.LENGTH_LONG)
+        Snackbar.make(binding.rvMovies, message, Snackbar.LENGTH_INDEFINITE)
                 .setAction("Retry") { viewModel.retry() }
                 .show()
     }
 
     companion object {
-        const val EXTRA_MOVIE = "movie"
         private const val MOVIE_GRID_COLUMNS = 3
     }
 

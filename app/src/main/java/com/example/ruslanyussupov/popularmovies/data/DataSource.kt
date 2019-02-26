@@ -1,26 +1,22 @@
 package com.example.ruslanyussupov.popularmovies.data
 
 
-import com.example.ruslanyussupov.popularmovies.data.model.Movie
-import com.example.ruslanyussupov.popularmovies.data.model.Review
-import com.example.ruslanyussupov.popularmovies.data.model.Video
-
-import io.reactivex.Observable
-import io.reactivex.Single
+import androidx.paging.PagedList
+import com.example.ruslanyussupov.popularmovies.data.model.*
 
 interface DataSource {
 
-    fun getMovies(filter: Filter, page: Int): Observable<List<Movie>>
+    suspend fun getMovies(filter: Filter, pageSize: Int = 10): Listing<PagedList<Movie>>
 
-    fun getMovieTrailers(movieId: Int): Observable<List<Video>>
+    suspend fun getMovieVideos(filter: Filter, movieId: Int): Listing<List<Video>>
 
-    fun getMovieReviews(movieId: Int): Observable<List<Review>>
+    suspend fun getMovieReviews(filter: Filter, movieId: Int, pageSize: Int = 10): Listing<PagedList<Review>>
 
-    fun deleteFromFavourite(movie: Movie)
+    suspend fun deleteFromFavourite(movie: Movie)
 
-    fun addToFavourite(movie: Movie)
+    suspend fun addToFavourite(movie: Movie)
 
-    fun getFavouriteMovie(movieId: Int): Single<Movie>
+    suspend fun getFavourite(movieId: Int): Movie?
 
     enum class Filter {
         POPULAR, TOP_RATED, FAVOURITE

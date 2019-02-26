@@ -1,95 +1,117 @@
 package com.example.ruslanyussupov.popularmovies.detail
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
+import androidx.paging.PagedList
 
 import com.example.ruslanyussupov.popularmovies.App
-import com.example.ruslanyussupov.popularmovies.Result
-import com.example.ruslanyussupov.popularmovies.Utils
 import com.example.ruslanyussupov.popularmovies.data.DataSource
+import com.example.ruslanyussupov.popularmovies.data.DataSource.Filter
+import com.example.ruslanyussupov.popularmovies.data.Listing
 import com.example.ruslanyussupov.popularmovies.data.model.Movie
 import com.example.ruslanyussupov.popularmovies.data.model.Review
 import com.example.ruslanyussupov.popularmovies.data.model.Video
 
 import javax.inject.Inject
 
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import timber.log.Timber
 
-class DetailViewModel(private val movie: Movie) : ViewModel() {
+class DetailViewModel : ViewModel() {
 
     @Inject
     internal lateinit var dataSource: DataSource
 
-    @Inject
-    internal lateinit var utils: Utils
+    lateinit var movie: Movie
+    lateinit var filter: Filter
 
-    val videosResultLiveData: MutableLiveData<Result<List<Video>>> = MutableLiveData()
-    val reviewsResultLiveData: MutableLiveData<Result<List<Review>>> = MutableLiveData()
-    val isFavouriteLiveData: MutableLiveData<Boolean> = MutableLiveData()
-    private val compositeDisposable = CompositeDisposable()
+    private var markDelete = false
+
+    private val _isFavorite by lazy {
+        val result = MutableLiveData<Boolean>()
+        viewModelScope.launch(Dispatchers.IO) {
+            val state = dataSource.getFavourite(movie.id) != null
+            result.postValue(state)
+        }
+        result
+    }
+
+    private val videosListing: LiveData<Listing<List<Video>>> by lazy {
+        val result = MutableLiveData<Listing<List<Video>>>()
+        viewModelScope.launch(Dispatchers.IO) {
+            val listing = dataSource.getMovieVideos(filter, movie.id)
+            result.postValue(listing)
+        }
+        result
+    }
+
+    private val reviewsListing: LiveData<Listing<PagedList<Review>>> by lazy {
+        val result = MutableLiveData<Listing<PagedList<Review>>>()
+        viewModelScope.launch(Dispatchers.IO) {
+            val listing = dataSource.getMovieReviews(filter, movie.id)
+            result.postValue(listing)
+        }
+        result
+    }
 
     init {
         App.component?.inject(this)
-        subscribeToVideosDataSource()
-        subscribeToReviewsDataSource()
-        checkFavourite()
     }
 
-    private fun subscribeToVideosDataSource() {
-        compositeDisposable.add(
-            dataSource
-                .getMovieTrailers(movie.id)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    { videos -> videosResultLiveData.setValue(Result.success(videos)) },
-                    { error -> videosResultLiveData.setValue(Result.error(error.message ?: "")) }
-                )
-        )
+    fun setIsFavourite(state: Boolean) {
+        if (state == _isFavorite.value) {
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            if (state) {
+                addToFavourites()
+            } else {
+                deleteFromFavourites()
+            }
+            _isFavorite.postValue(state)
+        }
     }
 
-    private fun subscribeToReviewsDataSource() {
-        compositeDisposable.add(
-            dataSource
-                .getMovieReviews(movie.id)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    { reviews -> reviewsResultLiveData.setValue(Result.success(reviews)) },
-                    { error -> reviewsResultLiveData.setValue(Result.error(error.message ?: "")) }
-                )
-        )
+    fun videos() = Transformations.switchMap(videosListing) { it.data }
+
+    fun videosNetworkState() = Transformations.switchMap(videosListing) { it.data }
+
+    fun videosRefreshState() = Transformations.switchMap(videosListing) { it.refreshState }
+
+    fun reviews() = Transformations.switchMap(reviewsListing) { it.data }
+
+    fun reviewsNetworkState() = Transformations.switchMap(reviewsListing) { it.networkState }
+
+    fun reviewsRefreshState() = Transformations.switchMap(reviewsListing) { it.refreshState }
+
+    fun isFavorite() = _isFavorite
+
+    fun retryVideos() {
+        Timber.d("retryVideos")
+        videosListing.value?.retry?.invoke()
     }
 
-    private fun checkFavourite() {
-        compositeDisposable.addAll(
-                dataSource.getFavouriteMovie(movie.id)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({
-                            isFavouriteLiveData.postValue(true)
-                        }, {
-                            isFavouriteLiveData.postValue(false)
-                        })
-        )
+    fun retryReviews() {
+        Timber.d("retryReviews")
+        videosListing.value?.retry?.invoke()
     }
 
-    suspend fun addToFavourites() {
-        withContext(Dispatchers.IO) { dataSource.addToFavourite(movie) }
+    private suspend fun addToFavourites() {
+        markDelete = false
+        GlobalScope.launch(Dispatchers.IO) { dataSource.addToFavourite(movie) }
 
     }
 
-    suspend fun deleteFromFavourites() {
-        withContext(Dispatchers.IO) { dataSource.deleteFromFavourite(movie) }
+    private fun deleteFromFavourites() {
+        markDelete = true
     }
 
     override fun onCleared() {
         super.onCleared()
-        compositeDisposable.dispose()
+        if (markDelete) {
+            GlobalScope.launch(Dispatchers.IO) { dataSource.deleteFromFavourite(movie) }
+        }
     }
 
 }

@@ -21,21 +21,17 @@ import com.example.ruslanyussupov.popularmovies.data.model.Review
 import com.example.ruslanyussupov.popularmovies.data.model.Video
 import com.example.ruslanyussupov.popularmovies.databinding.FragmentDetailContentBinding
 import com.example.ruslanyussupov.popularmovies.data.model.Movie
-import com.example.ruslanyussupov.popularmovies.Result
 import com.example.ruslanyussupov.popularmovies.adapters.ReviewAdapter
+import com.example.ruslanyussupov.popularmovies.data.DataSource.Filter
 import com.example.ruslanyussupov.popularmovies.databinding.MovieDetailsBinding
 
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class DetailContentFragment : Fragment() {
 
-    private var movie: Movie? = null
     private lateinit var binding: FragmentDetailContentBinding
     private lateinit var viewModel: DetailViewModel
-    private var isFavourite: Boolean = false
     private lateinit var reviewsAdapter: ReviewAdapter
     private val videoAdapter = VideoAdapter(emptyList(), ::onVideoClick)
 
@@ -53,55 +49,31 @@ class DetailContentFragment : Fragment() {
 
         Timber.d("onActivityCreated")
 
+        viewModel = ViewModelProviders.of(this).get(DetailViewModel::class.java)
+
         if (savedInstanceState == null) {
-            if (arguments?.containsKey(BUNDLE_MOVIE) == true) {
-                movie = arguments?.getParcelable(BUNDLE_MOVIE)
-            }
 
-            if (movie == null) {
+            val movie: Movie? = arguments?.getParcelable(BUNDLE_MOVIE)
+            val filter = arguments?.getString(BUNDLE_FILTER)
 
+            if (movie == null || filter == null) {
                 showEmptyState()
-
-            } else {
-
-                hideEmptyState()
-
-                viewModel = ViewModelProviders.of(this, DetailViewModelFactory(movie as Movie))
-                        .get(DetailViewModel::class.java)
-
-                viewModel.isFavouriteLiveData.observe(this, Observer {
-                    this.isFavourite = it
-                    initUI()
-                })
-
+                return
             }
 
-        } else {
-
-            movie = savedInstanceState.getParcelable(BUNDLE_MOVIE)
-            isFavourite = savedInstanceState.getBoolean(BUNDLE_IS_FAVOURITE)
-
-            if (movie == null) {
-
-                showEmptyState()
-
-            } else {
-
-                hideEmptyState()
-
-                viewModel = ViewModelProviders.of(this, DetailViewModelFactory(movie as Movie))
-                        .get(DetailViewModel::class.java)
-
-                initUI()
-            }
+            viewModel.movie = movie
+            viewModel.filter = Filter.valueOf(filter)
 
         }
+
+        hideEmptyState()
+
+        initUI()
 
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putParcelable(BUNDLE_MOVIE, movie)
-        outState.putBoolean(BUNDLE_IS_FAVOURITE, isFavourite)
+        Timber.d("onSaveInstanceState")
         super.onSaveInstanceState(outState)
     }
 
@@ -112,9 +84,10 @@ class DetailContentFragment : Fragment() {
 
     private fun createHeaderView(): View {
 
-        val headerBinding = DataBindingUtil.inflate<MovieDetailsBinding>(layoutInflater, R.layout.movie_details, binding.reviewsRv, false)
+        val headerBinding = DataBindingUtil.inflate<MovieDetailsBinding>(layoutInflater,
+                R.layout.movie_details, binding.reviewsRv, false)
 
-        headerBinding.movie = movie
+        headerBinding.movie = viewModel.movie
 
         headerBinding.videosRv.adapter = videoAdapter
         headerBinding.videosRv.layoutManager = LinearLayoutManager(activity,
@@ -122,62 +95,64 @@ class DetailContentFragment : Fragment() {
         val videosOffset = resources.getDimensionPixelOffset(R.dimen.video_item_offset)
         headerBinding.videosRv.addItemDecoration(ItemDecoration(0, 0, videosOffset, 0))
 
-        headerBinding.favouriteFab.isSelected = isFavourite
+        viewModel.isFavorite().observe(this, Observer {
+            headerBinding.favouriteFab.isSelected = it
+        })
 
         headerBinding.favouriteFab.setOnClickListener {
-            if (isFavourite) {
-
-                isFavourite = false
-                headerBinding.favouriteFab.isSelected = isFavourite
-
-                GlobalScope.launch {
-                    viewModel.deleteFromFavourites()
-                }
-
-                Toast.makeText(activity, getString(R.string.removed_from_favourite),
-                        Toast.LENGTH_SHORT).show()
-
-            } else {
-
-                isFavourite = true
-                headerBinding.favouriteFab.isSelected = isFavourite
-
-                GlobalScope.launch {
-                    viewModel.addToFavourites()
-                }
-
-                Toast.makeText(activity, getString(R.string.added_to_favourite),
-                        Toast.LENGTH_SHORT).show()
-
-            }
+            viewModel.setIsFavourite(!headerBinding.favouriteFab.isSelected)
         }
 
-        headerBinding.executePendingBindings()
-
-        fun hideTrailers() {
+        fun hideVideos() {
             headerBinding.trailersLabel.visibility = View.GONE
             headerBinding.trailersLabelUnderline.visibility = View.GONE
             headerBinding.videosRv.visibility = View.GONE
         }
 
-        fun showTrailers() {
+        fun showVideos() {
             headerBinding.trailersLabel.visibility = View.VISIBLE
             headerBinding.trailersLabelUnderline.visibility = View.VISIBLE
             headerBinding.videosRv.visibility = View.VISIBLE
         }
 
-        viewModel.videosResultLiveData.observe(this, Observer { result ->
-            when (result.state) {
-                Result.State.SUCCESS -> if (result.data.isNullOrEmpty()) {
-                    hideTrailers()
-                    videoAdapter.updateData(emptyList())
-                } else {
-                    showTrailers()
-                    videoAdapter.updateData(result.data)
+        hideVideos()
+
+        var retried = 0
+
+        viewModel.videos().observe(this, Observer {
+
+            if (it.isNullOrEmpty()) {
+                if (retried < 1) {
+                    viewModel.retryVideos()
+                    retried++
                 }
-                Result.State.ERROR -> videoAdapter.updateData(emptyList())
+                if (activity is DetailActivity) {
+                    val detailActivity = activity as DetailActivity
+                    detailActivity.onShare = {
+                        Toast.makeText(activity, getString(R.string.nothing_to_share),
+                                Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                showVideos()
+                videoAdapter.updateData(it)
+                if (activity is DetailActivity) {
+                    val detailActivity = activity as DetailActivity
+                    detailActivity.onShare = {
+                        val shareIntent = Intent(Intent.ACTION_SEND)
+                        shareIntent.apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_SUBJECT, getString(R.string.action_share_subject))
+                            putExtra(Intent.EXTRA_TEXT, it[0].url())
+                        }
+                        startActivity(Intent.createChooser(shareIntent, getString(R.string.action_share_subject)))
+                    }
+                }
             }
+
         })
+
+        headerBinding.executePendingBindings()
 
         return headerBinding.root
     }
@@ -186,18 +161,11 @@ class DetailContentFragment : Fragment() {
 
         binding.reviewsRv.layoutManager = LinearLayoutManager(activity,
                 LinearLayoutManager.VERTICAL, false)
-        reviewsAdapter = ReviewAdapter(emptyList(), createHeaderView(), ::onReviewClick)
+        reviewsAdapter = ReviewAdapter(createHeaderView(), ::onReviewClick)
         binding.reviewsRv.adapter = reviewsAdapter
 
-        viewModel.reviewsResultLiveData.observe(this, Observer { result ->
-            when (result.state) {
-                Result.State.SUCCESS -> if (result.data.isNullOrEmpty()) {
-                    reviewsAdapter.updateData(emptyList())
-                } else {
-                    reviewsAdapter.updateData(result.data)
-                }
-                Result.State.ERROR -> reviewsAdapter.updateData(emptyList())
-            }
+        viewModel.reviews().observe(this, Observer {
+            reviewsAdapter.submitList(it)
         })
 
     }
@@ -229,14 +197,14 @@ class DetailContentFragment : Fragment() {
     }
 
     companion object {
-
         private const val BUNDLE_MOVIE = "movie"
-        private const val BUNDLE_IS_FAVOURITE = "isFavourite"
+        private const val BUNDLE_FILTER = "filter"
 
-        fun create(movie: Movie): DetailContentFragment {
+        fun create(movie: Movie, filter: String): DetailContentFragment {
             val detailContentFragment = DetailContentFragment()
             val args = Bundle()
             args.putParcelable(BUNDLE_MOVIE, movie)
+            args.putString(BUNDLE_FILTER, filter)
             detailContentFragment.arguments = args
             return detailContentFragment
         }

@@ -6,6 +6,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 import com.google.gson.annotations.SerializedName
+import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -16,9 +17,12 @@ data class Movie(@PrimaryKey val id: Int,
                  @SerializedName("overview")        val overview: String,
                  @SerializedName("vote_average")    val voteAverage: Double,
                  @SerializedName("release_date")    val releaseDate: String,
-                 @SerializedName("backdrop_path")   val backdropPath: String,
+                 @SerializedName("backdrop_path")   val backdropPath: String, // TODO: could be null
                  var posterLocalPath: String? = null,
                  var backdropLocalPath: String? = null) : Parcelable {
+
+    @IgnoredOnParcel
+    var indexInResponse = -1
 
     val fullPosterPath: String
         get() = MOVIE_POSTER_MAIN_PATH + posterPath
