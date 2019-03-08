@@ -99,7 +99,7 @@ class DetailViewModel : ViewModel() {
 
     private suspend fun addToFavourites() {
         markDelete = false
-        GlobalScope.launch(Dispatchers.IO) { dataSource.addToFavourite(movie) }
+        GlobalScope.launch(Dispatchers.IO) { dataSource.insertFavourite(movie) }
 
     }
 
@@ -110,7 +110,7 @@ class DetailViewModel : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         if (markDelete) {
-            GlobalScope.launch(Dispatchers.IO) { dataSource.deleteFromFavourite(movie) }
+            GlobalScope.launch(Dispatchers.IO) { dataSource.deleteFavourite(movie) }
         }
     }
 

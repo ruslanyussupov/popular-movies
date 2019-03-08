@@ -15,9 +15,9 @@ import kotlinx.android.parcel.Parcelize
                 onDelete = ForeignKey.CASCADE)
         ])
 data class Review(@PrimaryKey val id: String,
-                  val author: String,
-                  val content: String,
-                  val url: String,
+                  val author: String?,
+                  val content: String?,
+                  val url: String?,
                   @ColumnInfo(index = true) var movieId: Int? = null) : Parcelable {
 
         @IgnoredOnParcel

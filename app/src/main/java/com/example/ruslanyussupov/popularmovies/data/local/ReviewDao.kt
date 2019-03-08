@@ -13,11 +13,11 @@ interface ReviewDao {
     @Query("SELECT * FROM reviews WHERE :movieId = movieId ORDER BY indexInResponse ASC")
     fun getReviews(movieId: Int): DataSource.Factory<Int, Review>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertReviews(reviews: List<Review>)
 
-    @Query("DELETE FROM reviews")
-    suspend fun deleteReviews()
+    @Query("DELETE FROM reviews WHERE :movieId = movieId")
+    suspend fun deleteReviews(movieId: Int)
 
     @Query("SELECT MAX(indexInResponse) FROM reviews ")
     suspend fun getMaxIndex(): Int?

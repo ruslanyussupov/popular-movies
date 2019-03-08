@@ -14,10 +14,10 @@ import kotlinx.android.parcel.Parcelize
                 onDelete = ForeignKey.CASCADE)
         ])
 class Video(@PrimaryKey val id: String,
-            val key: String,
-            val name: String,
-            val site: String,
-            val size: Int,
+            val key: String?,
+            val name: String?,
+            val site: String?,
+            val size: Int?,
             @ColumnInfo(index = true) var movieId: Int? = null) : Parcelable {
 
     fun previewImageUrl() = "https://img.youtube.com/vi/$key/1.jpg"

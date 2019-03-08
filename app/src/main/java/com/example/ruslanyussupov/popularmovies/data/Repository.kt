@@ -1,7 +1,6 @@
 package com.example.ruslanyussupov.popularmovies.data
 
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
@@ -10,19 +9,15 @@ import com.example.ruslanyussupov.popularmovies.Utils
 import com.example.ruslanyussupov.popularmovies.data.DataSource.*
 import com.example.ruslanyussupov.popularmovies.data.local.MovieDb
 import com.example.ruslanyussupov.popularmovies.data.model.*
+import com.example.ruslanyussupov.popularmovies.data.remote.MoviesRequest
+import com.example.ruslanyussupov.popularmovies.data.remote.ReviewsRequest
 import com.example.ruslanyussupov.popularmovies.data.remote.TheMovieDbService
+import com.example.ruslanyussupov.popularmovies.data.remote.VideosRequest
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 import javax.inject.Inject
-
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import timber.log.Timber
-
-import javax.inject.Named
 
 class Repository : DataSource {
 
@@ -30,16 +25,7 @@ class Repository : DataSource {
     internal lateinit var movieDbAPI: TheMovieDbService
 
     @Inject
-    @field:Named("FavouriteDb")
-    internal lateinit var favouriteDb: MovieDb
-
-    @Inject
-    @field:Named("PopularDb")
-    internal lateinit var popularDb: MovieDb
-
-    @Inject
-    @field:Named("TopRatedDb")
-    internal lateinit var topRatedDb: MovieDb
+    internal lateinit var movieDb: MovieDb
 
     @Inject
     internal lateinit var utils: Utils
@@ -52,13 +38,13 @@ class Repository : DataSource {
 
         return when (filter) {
             Filter.POPULAR -> {
-                createMoviesListing(popularDb, filter, pageSize)
+                createPopularMoviesListing(filter, pageSize)
             }
             Filter.TOP_RATED -> {
-                createMoviesListing(topRatedDb, filter, pageSize)
+                createTopRatedMoviesListing(filter, pageSize)
             }
             Filter.FAVOURITE -> {
-                val pagedList = favouriteDb.movieDao().getMovies().toLiveData(pageSize)
+                val pagedList = movieDb.movieDao().getFavoriteMovies().toLiveData(pageSize)
                 Listing(pagedList,
                         MutableLiveData(NetworkState.LOADED),
                         null,
@@ -73,9 +59,9 @@ class Repository : DataSource {
     override suspend fun getMovieVideos(filter: Filter, movieId: Int): Listing<List<Video>> {
 
         return when (filter) {
-            Filter.POPULAR -> { createVideosListing(popularDb, movieId) }
-            Filter.TOP_RATED -> { createVideosListing(topRatedDb, movieId) }
-            Filter.FAVOURITE -> { createVideosListing(favouriteDb, movieId) }
+            Filter.POPULAR -> { createVideosListing(movieId) }
+            Filter.TOP_RATED -> { createVideosListing(movieId) }
+            Filter.FAVOURITE -> { createVideosListing(movieId) }
         }
 
     }
@@ -85,139 +71,162 @@ class Repository : DataSource {
 
         return when (filter) {
             Filter.POPULAR -> {
-                createReviewsListing(popularDb, filter, movieId, pageSize)
+                createReviewsListing(movieId, pageSize)
             }
             Filter.TOP_RATED -> {
-                createReviewsListing(topRatedDb, filter, movieId, pageSize)
+                createReviewsListing(movieId, pageSize)
             }
             Filter.FAVOURITE -> {
-                createReviewsListing(favouriteDb, filter, movieId, pageSize)
+                createReviewsListing(movieId, pageSize)
             }
         }
 
     }
 
-    override suspend fun deleteFromFavourite(movie: Movie) {
-        favouriteDb.movieDao().deleteMovie(movie)
-        utils.deleteFile(movie.backdropLocalPath)
-        utils.deleteFile(movie.posterLocalPath)
-    }
-
-    override suspend fun addToFavourite(movie: Movie) {
+    override suspend fun insertFavourite(movie: Movie) {
         movie.apply {
-            posterLocalPath = utils.saveBitmap(movie.fullPosterPath, "favorite", "poster-${movie.id}")
-            backdropLocalPath = utils.saveBitmap(movie.fullBackdropPath, "favorite", "backdrop-${movie.id}")
+            posterLocalPath = utils.savePoster(movie.fullPosterPath, movie.id)
+            backdropLocalPath = utils.saveBackdrop(movie.fullBackdropPath, movie.id)
         }
-        favouriteDb.movieDao().insertMovie(movie)
-
+        movieDb.movieDao().insertFavoriteMovie(movie)
     }
 
-    override suspend fun getFavourite(movieId: Int): Movie? {
-        return favouriteDb.movieDao().getMovie(movieId)
+    override suspend fun deleteFavourite(movie: Movie) {
+        val id = movieDb.movieDao().deleteFavoriteMovie(movie)
+        if (id > -1) {
+            utils.deletePoster(id)
+            utils.deleteBackdrop(id)
+        }
     }
 
-    private fun createReviewsListing(db: MovieDb, filter: Filter, movieId: Int, pageSize: Int)
+    override suspend fun savePopularMovies(movies: List<Movie>) {
+        val jobs = mutableListOf<Job>()
+        movies.onEach {
+            jobs += GlobalScope.launch {
+                it.posterLocalPath = utils.savePoster(it.fullPosterPath, it.id)
+                it.backdropLocalPath = utils.saveBackdrop(it.fullBackdropPath, it.id)
+            }
+        }
+        jobs.forEach { it.join() }
+        movieDb.movieDao().insertPopularMovies(movies)
+    }
+
+    override suspend fun saveTopRatedMovies(movies: List<Movie>) {
+        val jobs = mutableListOf<Job>()
+        movies.onEach {
+            jobs += GlobalScope.launch {
+                it.posterLocalPath = utils.savePoster(it.fullPosterPath, it.id)
+                it.backdropLocalPath = utils.saveBackdrop(it.fullBackdropPath, it.id)
+            }
+        }
+        jobs.forEach { it.join() }
+        movieDb.movieDao().insertTopRatedMovies(movies)
+    }
+
+    override suspend fun saveReviews(movieId: Int, reviews: List<Review>) {
+        var index = movieDb.reviewDao().getMaxIndex() ?: -1
+        reviews.onEach {
+            it.movieId = movieId
+            it.indexInResponse = ++index
+        }
+        movieDb.reviewDao().insertReviews(reviews)
+    }
+
+    override suspend fun saveVideos(movieId: Int, videos: List<Video>) {
+        videos.onEach { it.movieId = movieId }
+        movieDb.videoDao().insertVideos(videos)
+    }
+
+    override suspend fun getFavourite(movieId: Int): Favorite? {
+        return movieDb.movieDao().getFavorite(movieId)
+    }
+
+    override suspend fun deletePopularMovies() {
+        val ids = movieDb.movieDao().deletePopularMovies()
+        utils.deletePosters(ids)
+        utils.deleteBackdrops(ids)
+    }
+
+    override suspend fun deleteTopRatedMovies() {
+        val ids = movieDb.movieDao().deleteTopRatedMovies()
+        utils.deletePosters(ids)
+        utils.deleteBackdrops(ids)
+    }
+
+    override suspend fun deleteReviews(movieId: Int) {
+        movieDb.reviewDao().deleteReviews(movieId)
+    }
+
+    override suspend fun deleteVideos(movieId: Int) {
+        movieDb.videoDao().deleteVideos(movieId)
+    }
+
+    private fun createReviewsListing(movieId: Int, pageSize: Int)
             : Listing<PagedList<Review>> {
 
-        val boundaryCallback = ReviewBoundaryCallback(movieId, filter, db, movieDbAPI)
-        val pagedList = db.reviewDao().getReviews(movieId).toLiveData(
+        val reviewsRequest = ReviewsRequest(movieId)
+        val boundaryCallback = ReviewBoundaryCallback(reviewsRequest)
+        val pagedList = movieDb.reviewDao().getReviews(movieId).toLiveData(
                 pageSize = pageSize,
                 boundaryCallback = boundaryCallback)
 
         return Listing(pagedList,
-                boundaryCallback.networkState,
-                boundaryCallback::refresh,
-                boundaryCallback.refreshState,
-                boundaryCallback.retry)
+                reviewsRequest.networkState,
+                reviewsRequest::refresh,
+                reviewsRequest.refreshState,
+                reviewsRequest::retry)
     }
 
-    private fun createVideosListing(db: MovieDb, movieId: Int)
+    private fun createVideosListing(movieId: Int)
             : Listing<List<Video>> {
 
-        val videosRequest = VideosRequest(movieId, movieDbAPI, db)
+        val videosRequest = VideosRequest(movieId)
 
-        return Listing(db.videoDao().getVideos(movieId),
+        return Listing(movieDb.videoDao().getVideos(movieId),
                 videosRequest.networkState,
                 videosRequest::refresh,
                 videosRequest.refreshState,
-                videosRequest.retry)
+                videosRequest::retry)
     }
 
-    private fun createMoviesListing(db: MovieDb, filter: Filter, pageSize: Int)
+    private fun createPopularMoviesListing(filter: Filter, pageSize: Int)
             : Listing<PagedList<Movie>> {
 
-        val boundaryCallback = MovieBoundaryCallback(filter, db, movieDbAPI, utils)
+        val moviesRequest = MoviesRequest(filter)
+        val boundaryCallback = MovieBoundaryCallback(moviesRequest)
         val config = PagedList.Config.Builder()
                 .setEnablePlaceholders(true)
                 .setPageSize(pageSize)
                 .build()
-        val pagedList = db.movieDao().getMovies().toLiveData(
+        val pagedList = movieDb.movieDao().getPopularMovies().toLiveData(
                 config = config,
                 boundaryCallback = boundaryCallback)
 
         return Listing(pagedList,
-                boundaryCallback.networkState,
-                boundaryCallback::refresh,
-                boundaryCallback.refreshState,
-                boundaryCallback.retry)
+                moviesRequest.networkState,
+                moviesRequest::refresh,
+                moviesRequest.refreshState,
+                moviesRequest::retry)
     }
 
-    private class VideosRequest(private val movieId: Int,
-                                private val movieDbAPI: TheMovieDbService,
-                                private val db: MovieDb) {
+    private fun createTopRatedMoviesListing(filter: Filter, pageSize: Int)
+            : Listing<PagedList<Movie>> {
 
-        private var isRequestInProgress = false
-        private val _networkState = MutableLiveData<NetworkState>()
-        val networkState: LiveData<NetworkState> = _networkState
-        private val _refreshState = MutableLiveData<NetworkState>()
-        val refreshState: LiveData<NetworkState> = _refreshState
-        val retry: () -> Unit = { request(_networkState) }
+        val moviesRequest = MoviesRequest(filter)
+        val boundaryCallback = MovieBoundaryCallback(moviesRequest)
+        val config = PagedList.Config.Builder()
+                .setEnablePlaceholders(true)
+                .setPageSize(pageSize)
+                .build()
+        val pagedList = movieDb.movieDao().getTopRatedMovies().toLiveData(
+                config = config,
+                boundaryCallback = boundaryCallback)
 
-        private fun request(networkState: MutableLiveData<NetworkState>) {
-
-            if (isRequestInProgress) return
-            networkState.postValue(NetworkState.LOADING)
-
-            movieDbAPI.getMovieVideos(movieId).enqueue(object : Callback<VideosResponse> {
-                override fun onFailure(call: Call<VideosResponse>, t: Throwable) {
-                    Timber.e(t)
-                    networkState.postValue(NetworkState.error(t.message))
-                    isRequestInProgress = false
-                }
-
-                override fun onResponse(call: Call<VideosResponse>, response: Response<VideosResponse>) {
-                    val videoResponse = response.body()
-                    if (videoResponse == null) {
-                        Timber.e("Video response is null.")
-                        networkState.postValue(NetworkState.error("Video response is null."))
-                        isRequestInProgress = false
-                    } else {
-                        Timber.d("Videos loaded: ${videoResponse.results.size}")
-                        GlobalScope.launch {
-                            saveVideos(videoResponse.results)
-                            networkState.postValue(NetworkState.LOADED)
-                            isRequestInProgress = false
-                        }
-                    }
-                }
-
-            })
-        }
-
-        private suspend fun saveVideos(videos: List<Video>) {
-            videos.onEach { it.movieId = movieId }
-            db.videoDao().insertVideos(videos)
-        }
-
-        fun refresh() {
-            runBlocking {
-                GlobalScope.launch {
-                    db.videoDao().deleteVideos(movieId)
-                }.join()
-                request(_refreshState)
-            }
-        }
-
+        return Listing(pagedList,
+                moviesRequest.networkState,
+                moviesRequest::refresh,
+                moviesRequest.refreshState,
+                moviesRequest::retry)
     }
 
 }

@@ -14,7 +14,6 @@ import javax.inject.Singleton
 import dagger.Module
 import dagger.Provides
 import retrofit2.Retrofit
-import javax.inject.Named
 
 @Module
 class DataModule {
@@ -33,26 +32,9 @@ class DataModule {
 
     @Provides
     @Singleton
-    @Named(value = "FavouriteDb")
-    fun provideFavouriteMovieDb(appContext: Context): MovieDb {
+    fun provideMovieDb(appContext: Context): MovieDb {
         return Room.databaseBuilder(appContext, MovieDb::class.java,
-                "fav_movies").build()
-    }
-
-    @Provides
-    @Singleton
-    @Named(value = "TopRatedDb")
-    fun provideTopRatedMovieDb(appContext: Context): MovieDb {
-        return Room.databaseBuilder(appContext, MovieDb::class.java,
-                "top_rated_movies").build()
-    }
-
-    @Provides
-    @Singleton
-    @Named(value = "PopularDb")
-    fun providePopularMoviesDb(appContext: Context): MovieDb {
-        return Room.databaseBuilder(appContext, MovieDb::class.java,
-                "popular_movies").build()
+                "movies").build()
     }
 
     @Provides

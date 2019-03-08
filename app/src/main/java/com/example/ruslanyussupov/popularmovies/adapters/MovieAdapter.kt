@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.DiffUtil
 import com.example.ruslanyussupov.popularmovies.R
 import com.example.ruslanyussupov.popularmovies.data.model.Movie
 import com.example.ruslanyussupov.popularmovies.databinding.ItemMovieBinding
-import timber.log.Timber
 
 class MovieAdapter(private val onMovieClick: (movie: Movie) -> Unit)
     : PagedListAdapter<Movie, RecyclerView.ViewHolder>(MOVIE_COMPARATOR) {
@@ -26,7 +25,6 @@ class MovieAdapter(private val onMovieClick: (movie: Movie) -> Unit)
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val movie = getItem(position) ?: return
-        Timber.d("onBindViewHolder with index: ${movie.indexInResponse}")
         holder as MovieViewHolder
         holder.binding.movie = movie
         holder.binding.executePendingBindings()
