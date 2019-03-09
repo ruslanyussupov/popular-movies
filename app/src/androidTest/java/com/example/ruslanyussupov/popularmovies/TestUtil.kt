@@ -1,6 +1,7 @@
 package com.example.ruslanyussupov.popularmovies
 
 import com.example.ruslanyussupov.popularmovies.data.model.Movie
+import com.example.ruslanyussupov.popularmovies.data.model.Review
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import timber.log.Timber
@@ -33,6 +34,31 @@ fun createMovies(): List<Movie> {
                     "/lvjscO8wmpEbIfOEZi92Je8Ktlg.jpg")
     )
 
+}
+
+fun createReviews(): List<Review> {
+    return listOf(
+            Review("r100",
+                    "John Doe",
+                    "Awesome!",
+                    "https://www.themoviedb.org"),
+            Review("r100",
+                    "Jane Doe",
+                    "Cool!",
+                    "https://www.themoviedb.org"),
+            Review("r100",
+                    "Rick Sanchez",
+                    "wubba lubba dub dub",
+                    "https://www.themoviedb.org"),
+            Review("r200",
+                    "Jane Doe",
+                    "Super!",
+                    "https://www.themoviedb.org"),
+            Review("r300",
+                    null,
+                    null,
+                    null)
+    )
 }
 
 fun createOkHttpClient(): OkHttpClient {

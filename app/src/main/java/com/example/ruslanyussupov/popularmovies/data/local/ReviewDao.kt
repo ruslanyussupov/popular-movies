@@ -19,7 +19,7 @@ interface ReviewDao {
     @Query("DELETE FROM reviews WHERE :movieId = movieId")
     suspend fun deleteReviews(movieId: Int)
 
-    @Query("SELECT MAX(indexInResponse) FROM reviews ")
-    suspend fun getMaxIndex(): Int?
+    @Query("SELECT MAX(indexInResponse) FROM reviews WHERE :movieId = movieId")
+    suspend fun getMaxIndex(movieId: Int): Int?
 
 }

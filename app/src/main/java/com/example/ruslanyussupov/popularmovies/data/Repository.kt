@@ -101,7 +101,7 @@ class Repository : DataSource {
 
     override suspend fun savePopularMovies(movies: List<Movie>) {
         val jobs = mutableListOf<Job>()
-        movies.onEach {
+        movies.forEach {
             jobs += GlobalScope.launch {
                 it.posterLocalPath = utils.savePoster(it.fullPosterPath, it.id)
                 it.backdropLocalPath = utils.saveBackdrop(it.fullBackdropPath, it.id)
@@ -113,7 +113,7 @@ class Repository : DataSource {
 
     override suspend fun saveTopRatedMovies(movies: List<Movie>) {
         val jobs = mutableListOf<Job>()
-        movies.onEach {
+        movies.forEach {
             jobs += GlobalScope.launch {
                 it.posterLocalPath = utils.savePoster(it.fullPosterPath, it.id)
                 it.backdropLocalPath = utils.saveBackdrop(it.fullBackdropPath, it.id)
@@ -124,8 +124,8 @@ class Repository : DataSource {
     }
 
     override suspend fun saveReviews(movieId: Int, reviews: List<Review>) {
-        var index = movieDb.reviewDao().getMaxIndex() ?: -1
-        reviews.onEach {
+        var index = movieDb.reviewDao().getMaxIndex(movieId) ?: -1
+        reviews.forEach {
             it.movieId = movieId
             it.indexInResponse = ++index
         }
@@ -133,7 +133,7 @@ class Repository : DataSource {
     }
 
     override suspend fun saveVideos(movieId: Int, videos: List<Video>) {
-        videos.onEach { it.movieId = movieId }
+        videos.forEach { it.movieId = movieId }
         movieDb.videoDao().insertVideos(videos)
     }
 
