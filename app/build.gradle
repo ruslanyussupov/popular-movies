@@ -87,6 +87,7 @@ dependencies {
     implementation "com.jakewharton.timber:timber:$timber_version"
 
     testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.arch.core:core-testing:$lifecycle_version"
     androidTestImplementation "androidx.test.ext:junit:1.1.0"
     androidTestImplementation "androidx.test:rules:1.1.1"
     androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'

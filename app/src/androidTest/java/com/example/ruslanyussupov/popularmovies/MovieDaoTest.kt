@@ -1,24 +1,27 @@
 package com.example.ruslanyussupov.popularmovies
 
 import android.content.Context
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.paging.toLiveData
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.ruslanyussupov.popularmovies.data.local.MovieDao
 import com.example.ruslanyussupov.popularmovies.data.local.MovieDb
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Assert
+import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class MovieDaoTest {
+
+    @Suppress("unused")
+    @get:Rule // used to make all live data calls sync
+    val instantExecutor = InstantTaskExecutorRule()
 
     private lateinit var db: MovieDb
     private lateinit var movieDao: MovieDao
@@ -41,11 +44,9 @@ class MovieDaoTest {
         movieDao.insertPopularMovies(movies)
         val popularMovies = movieDao.getPopularMovies().toLiveData(10)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            popularMovies.observeForever {
-                assert(it == movies)
-            }
-        }.join()
+        popularMovies.observeForever {
+            assert(it == movies)
+        }
     }
 
     @Test
@@ -56,11 +57,9 @@ class MovieDaoTest {
         assert(populars.isEmpty())
         val popularMovies = movieDao.getPopularMovies().toLiveData(10)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            popularMovies.observeForever {
-                assert(it.isEmpty())
-            }
-        }.join()
+        popularMovies.observeForever {
+            assert(it.isEmpty())
+        }
     }
 
     @Test
@@ -68,11 +67,9 @@ class MovieDaoTest {
         movieDao.insertTopRatedMovies(movies)
         val topRatedMovies = movieDao.getTopRatedMovies().toLiveData(10)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            topRatedMovies.observeForever {
-                assert(it == movies)
-            }
-        }.join()
+        topRatedMovies.observeForever {
+            assert(it == movies)
+        }
     }
 
     @Test
@@ -82,11 +79,9 @@ class MovieDaoTest {
         assert(topRated.isEmpty())
         val topRatedMovies = movieDao.getTopRatedMovies().toLiveData(10)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            topRatedMovies.observeForever {
-                assert(it.isEmpty())
-            }
-        }.join()
+        topRatedMovies.observeForever {
+            assert(it.isEmpty())
+        }
     }
 
     @Test
@@ -94,11 +89,9 @@ class MovieDaoTest {
         movieDao.insertFavoriteMovies(movies)
         val favoriteMovies = movieDao.getFavoriteMovies().toLiveData(10)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            favoriteMovies.observeForever {
-                assert(it == movies)
-            }
-        }.join()
+        favoriteMovies.observeForever {
+            assert(it == movies)
+        }
     }
 
     @Test
@@ -108,11 +101,9 @@ class MovieDaoTest {
         assert(favorites.isEmpty())
         val favoriteMovies = movieDao.getFavoriteMovies().toLiveData(10)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            favoriteMovies.observeForever {
-                assert(it.isEmpty())
-            }
-        }.join()
+        favoriteMovies.observeForever {
+            assert(it.isEmpty())
+        }
     }
 
     @Test
@@ -146,11 +137,10 @@ class MovieDaoTest {
         assert(populars.isEmpty())
         val topRatedMovies = movieDao.getTopRatedMovies().toLiveData(10)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            topRatedMovies.observeForever {
-                assert(it == movies)
-            }
-        }.join()
+        topRatedMovies.observeForever {
+            assert(it == movies)
+        }
+
         movieDao.deleteTopRatedMovies()
 
         movieDao.insertPopularMovies(movies)
@@ -160,11 +150,9 @@ class MovieDaoTest {
         assert(populars2.isEmpty())
         val favoriteMovies = movieDao.getFavoriteMovies().toLiveData(10)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            favoriteMovies.observeForever {
-                assert(it == movies)
-            }
-        }.join()
+        favoriteMovies.observeForever {
+            assert(it == movies)
+        }
 
         movieDao.deleteFavoriteMovies()
 
@@ -180,11 +168,10 @@ class MovieDaoTest {
         assert(topRated.isEmpty())
         val popularMovies = movieDao.getPopularMovies().toLiveData(10)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            popularMovies.observeForever {
-                assert(it == movies)
-            }
-        }.join()
+        popularMovies.observeForever {
+            assert(it == movies)
+        }
+
         movieDao.deletePopularMovies()
 
         movieDao.insertTopRatedMovies(movies)
@@ -194,11 +181,9 @@ class MovieDaoTest {
         assert(topRated2.isEmpty())
         val favoriteMovies = movieDao.getFavoriteMovies().toLiveData(10)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            favoriteMovies.observeForever {
-                assert(it == movies)
-            }
-        }.join()
+        favoriteMovies.observeForever {
+            assert(it == movies)
+        }
 
         movieDao.deleteFavoriteMovies()
 
@@ -214,11 +199,10 @@ class MovieDaoTest {
         assert(favorites.isEmpty())
         val popularMovies = movieDao.getPopularMovies().toLiveData(10)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            popularMovies.observeForever {
-                assert(it == movies)
-            }
-        }.join()
+        popularMovies.observeForever {
+            assert(it == movies)
+        }
+
         movieDao.deletePopularMovies()
 
         movieDao.insertFavoriteMovies(movies)
@@ -228,11 +212,9 @@ class MovieDaoTest {
         assert(favorites2.isEmpty())
         val topRatedMovies = movieDao.getTopRatedMovies().toLiveData(10)
 
-        GlobalScope.launch(Dispatchers.Main) {
-            topRatedMovies.observeForever {
-                assert(it == movies)
-            }
-        }.join()
+        topRatedMovies.observeForever {
+            assert(it == movies)
+        }
 
         movieDao.deleteTopRatedMovies()
 

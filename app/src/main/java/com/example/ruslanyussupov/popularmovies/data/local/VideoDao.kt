@@ -16,9 +16,6 @@ interface VideoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVideos(videos: List<Video>)
 
-    @Query("DELETE FROM videos")
-    suspend fun deleteVideos()
-
     @Query("DELETE FROM videos WHERE :movieId = movieId")
     suspend fun deleteVideos(movieId: Int)
 

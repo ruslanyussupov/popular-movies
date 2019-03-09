@@ -2,6 +2,7 @@ package com.example.ruslanyussupov.popularmovies
 
 import com.example.ruslanyussupov.popularmovies.data.model.Movie
 import com.example.ruslanyussupov.popularmovies.data.model.Review
+import com.example.ruslanyussupov.popularmovies.data.model.Video
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import timber.log.Timber
@@ -42,19 +43,39 @@ fun createReviews(): List<Review> {
                     "John Doe",
                     "Awesome!",
                     "https://www.themoviedb.org"),
-            Review("r100",
+            Review("r200",
                     "Jane Doe",
                     "Cool!",
                     "https://www.themoviedb.org"),
-            Review("r100",
+            Review("r300",
                     "Rick Sanchez",
                     "wubba lubba dub dub",
                     "https://www.themoviedb.org"),
-            Review("r200",
+            Review("r400",
                     "Jane Doe",
                     "Super!",
                     "https://www.themoviedb.org"),
-            Review("r300",
+            Review("r500",
+                    null,
+                    null,
+                    null)
+    )
+}
+
+fun createVideos(): List<Video> {
+    return listOf(
+            Video("v100",
+                    "lskdjf213",
+                    "Trailer 1",
+                    "https://www.youtube.com",
+                    300),
+            Video("v200",
+                    "dfgruy132",
+                    "Trailer 2",
+                    "https://www.youtube.com",
+                    null),
+            Video("v300",
+                    null,
                     null,
                     null,
                     null)
