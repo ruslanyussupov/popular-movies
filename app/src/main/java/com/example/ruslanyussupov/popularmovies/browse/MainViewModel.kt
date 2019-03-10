@@ -5,7 +5,6 @@ import androidx.lifecycle.*
 import androidx.paging.PagedList
 
 import com.example.ruslanyussupov.popularmovies.App
-import com.example.ruslanyussupov.popularmovies.Utils
 import com.example.ruslanyussupov.popularmovies.data.DataSource
 import com.example.ruslanyussupov.popularmovies.data.model.Movie
 
@@ -23,9 +22,6 @@ class MainViewModel : ViewModel() {
 
     @Inject
     internal lateinit var dataSource: DataSource
-
-    @Inject
-    internal lateinit var utils: Utils
 
     private val _filter = MutableLiveData<Filter>(Filter.POPULAR)
     val filter: LiveData<Filter> = _filter

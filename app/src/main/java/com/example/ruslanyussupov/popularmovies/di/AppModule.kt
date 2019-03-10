@@ -1,15 +1,14 @@
 package com.example.ruslanyussupov.popularmovies.di
 
 import android.content.Context
-
-import com.example.ruslanyussupov.popularmovies.Utils
+import com.example.ruslanyussupov.popularmovies.PicturesManager
+import com.example.ruslanyussupov.popularmovies.PicturesManagerImpl
 
 import javax.inject.Singleton
 
 import dagger.Module
 import dagger.Provides
-import okhttp3.OkHttpClient
-import okhttp3.Request
+
 
 @Module
 class AppModule(private val appContext: Context) {
@@ -22,8 +21,8 @@ class AppModule(private val appContext: Context) {
 
     @Provides
     @Singleton
-    fun providesUtils(okHttpClient: OkHttpClient, requestBuilder: Request.Builder): Utils {
-        return Utils(appContext, okHttpClient, requestBuilder)
+    fun providesPicturesManager(appContext: Context): PicturesManager {
+        return PicturesManagerImpl(appContext)
     }
 
 }

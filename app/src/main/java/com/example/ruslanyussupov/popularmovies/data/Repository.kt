@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.paging.PagedList
 import androidx.paging.toLiveData
 import com.example.ruslanyussupov.popularmovies.App
-import com.example.ruslanyussupov.popularmovies.Utils
+import com.example.ruslanyussupov.popularmovies.PicturesManager
 import com.example.ruslanyussupov.popularmovies.data.DataSource.*
 import com.example.ruslanyussupov.popularmovies.data.local.MovieDb
 import com.example.ruslanyussupov.popularmovies.data.model.*
@@ -28,7 +28,7 @@ class Repository : DataSource {
     internal lateinit var movieDb: MovieDb
 
     @Inject
-    internal lateinit var utils: Utils
+    internal lateinit var picturesManager: PicturesManager
 
     init {
         App.component?.inject(this)
@@ -85,8 +85,8 @@ class Repository : DataSource {
 
     override suspend fun insertFavourite(movie: Movie) {
         movie.apply {
-            posterLocalPath = utils.savePoster(movie.fullPosterPath, movie.id)
-            backdropLocalPath = utils.saveBackdrop(movie.fullBackdropPath, movie.id)
+            posterLocalPath = savePoster(movie.fullPosterPath, movie.id)
+            backdropLocalPath = saveBackdrop(movie.fullBackdropPath, movie.id)
         }
         movieDb.movieDao().insertFavoriteMovie(movie)
     }
@@ -94,8 +94,8 @@ class Repository : DataSource {
     override suspend fun deleteFavourite(movie: Movie) {
         val id = movieDb.movieDao().deleteFavoriteMovie(movie)
         if (id > -1) {
-            utils.deletePoster(id)
-            utils.deleteBackdrop(id)
+            deletePoster(id)
+            deleteBackdrop(id)
         }
     }
 
@@ -103,8 +103,8 @@ class Repository : DataSource {
         val jobs = mutableListOf<Job>()
         movies.forEach {
             jobs += GlobalScope.launch {
-                it.posterLocalPath = utils.savePoster(it.fullPosterPath, it.id)
-                it.backdropLocalPath = utils.saveBackdrop(it.fullBackdropPath, it.id)
+                it.posterLocalPath = savePoster(it.fullPosterPath, it.id)
+                it.backdropLocalPath = saveBackdrop(it.fullBackdropPath, it.id)
             }
         }
         jobs.forEach { it.join() }
@@ -115,8 +115,8 @@ class Repository : DataSource {
         val jobs = mutableListOf<Job>()
         movies.forEach {
             jobs += GlobalScope.launch {
-                it.posterLocalPath = utils.savePoster(it.fullPosterPath, it.id)
-                it.backdropLocalPath = utils.saveBackdrop(it.fullBackdropPath, it.id)
+                it.posterLocalPath = savePoster(it.fullPosterPath, it.id)
+                it.backdropLocalPath = saveBackdrop(it.fullBackdropPath, it.id)
             }
         }
         jobs.forEach { it.join() }
@@ -143,14 +143,14 @@ class Repository : DataSource {
 
     override suspend fun deletePopularMovies() {
         val ids = movieDb.movieDao().deletePopularMovies()
-        utils.deletePosters(ids)
-        utils.deleteBackdrops(ids)
+        deletePosters(ids)
+        deleteBackdrops(ids)
     }
 
     override suspend fun deleteTopRatedMovies() {
         val ids = movieDb.movieDao().deleteTopRatedMovies()
-        utils.deletePosters(ids)
-        utils.deleteBackdrops(ids)
+        deletePosters(ids)
+        deleteBackdrops(ids)
     }
 
     override suspend fun deleteReviews(movieId: Int) {
@@ -227,6 +227,39 @@ class Repository : DataSource {
                 moviesRequest::refresh,
                 moviesRequest.refreshState,
                 moviesRequest::retry)
+    }
+
+    private fun savePoster(url: String, id: Int): String? {
+        return picturesManager.saveBitmap(url, POSTERS_DIR, "poster-$id")
+    }
+
+    private fun saveBackdrop(url: String, id: Int): String? {
+        return picturesManager.saveBitmap(url, BACKDROPS_DIR, "backdrop-$id")
+    }
+
+    private fun deletePosters(ids: List<Int>) {
+        ids.forEach {
+            picturesManager.delete(POSTERS_DIR, "poster-$it")
+        }
+    }
+
+    private fun deleteBackdrops(ids: List<Int>) {
+        ids.forEach {
+            picturesManager.delete(BACKDROPS_DIR, "backdrop-$it")
+        }
+    }
+
+    private fun deletePoster(id: Int) {
+        picturesManager.delete(POSTERS_DIR, "poster-$id")
+    }
+
+    private fun deleteBackdrop(id: Int) {
+        picturesManager.delete(BACKDROPS_DIR, "backdrop-$id")
+    }
+
+    companion object {
+        private const val POSTERS_DIR = "posters"
+        private const val BACKDROPS_DIR = "backdrops"
     }
 
 }

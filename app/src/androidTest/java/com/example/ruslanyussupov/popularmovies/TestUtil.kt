@@ -3,9 +3,6 @@ package com.example.ruslanyussupov.popularmovies
 import com.example.ruslanyussupov.popularmovies.data.model.Movie
 import com.example.ruslanyussupov.popularmovies.data.model.Review
 import com.example.ruslanyussupov.popularmovies.data.model.Video
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import timber.log.Timber
 
 fun createMovies(): List<Movie> {
 
@@ -80,21 +77,4 @@ fun createVideos(): List<Video> {
                     null,
                     null)
     )
-}
-
-fun createOkHttpClient(): OkHttpClient {
-    val logger = HttpLoggingInterceptor(HttpLoggingInterceptor.Logger { Timber.d("API: $it") })
-    logger.level = HttpLoggingInterceptor.Level.BASIC
-    return OkHttpClient.Builder()
-            .addInterceptor(logger)
-            .addInterceptor { chain ->
-                val request = chain.request()
-
-                val url = request.url().newBuilder()
-                        .addQueryParameter("api_key", BuildConfig.THEMOVIEDB_API_KEY)
-                        .addQueryParameter("language", "en-US")
-                        .build()
-
-                chain.proceed(request.newBuilder().url(url).build())
-            }.build()
 }
