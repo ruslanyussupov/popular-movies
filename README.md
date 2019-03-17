@@ -1,6 +1,6 @@
 # Udacity Popular Movies App Project
 This app shows popular and most rated movies from themoviedb.org
-You can add movies to favorites and access them without an internet connection.
+You can add movies to favorites, and access them without an internet connection.
 
 To use the app, you should add your own API_KEY inside `gradle.properties`. To get API Key visit [The Movie DB](https://www.themoviedb.org/) website.
 
@@ -18,9 +18,11 @@ To use the app, you should add your own API_KEY inside `gradle.properties`. To g
 * Rerofit
 
 # Todo:
-* Write tests
-* Get rid of storing duplicate data
-* Add states
+* Apply clean code rules
+* Add tests
+* Show network state
+* Add movies search feature
+* Avoid GlobalScope usage
 
 # License
 ```
