@@ -7,11 +7,11 @@ import androidx.databinding.DataBindingUtil
 import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.GridLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 
 import com.example.ruslanyussupov.popularmovies.R
 import com.example.ruslanyussupov.popularmovies.adapters.MovieAdapter
@@ -20,7 +20,6 @@ import com.example.ruslanyussupov.popularmovies.databinding.FragmentMovieGridBin
 import timber.log.Timber
 
 import com.example.ruslanyussupov.popularmovies.adapters.MovieAdapter.*
-import com.example.ruslanyussupov.popularmovies.GridSpacingItemDecoration
 import com.example.ruslanyussupov.popularmovies.data.DataSource.Filter
 import com.example.ruslanyussupov.popularmovies.data.Status
 
@@ -57,12 +56,9 @@ class MovieGridFragment : Fragment() {
 
         movieAdapter = MovieAdapter(movieClickListener::onMovieClick)
         binding.rvMovies.adapter = movieAdapter
-        binding.rvMovies.layoutManager = GridLayoutManager(activity, MOVIE_GRID_COLUMNS)
-        val offset = resources.getDimensionPixelOffset(R.dimen.movie_item_offset)
-        binding.rvMovies.addItemDecoration(GridSpacingItemDecoration(MOVIE_GRID_COLUMNS, offset, true))
+        binding.rvMovies.layoutManager = StaggeredGridLayoutManager(MOVIE_GRID_COLUMNS, StaggeredGridLayoutManager.VERTICAL)
 
         binding.swipeRefresh.isRefreshing = false
-        binding.loadingPb.visibility = View.GONE
 
         viewModel = activity?.run {
             ViewModelProviders.of(this).get(MainViewModel::class.java)
@@ -84,13 +80,13 @@ class MovieGridFragment : Fragment() {
         viewModel.networkState.observe(this, Observer {networkState ->
             Timber.d("Network state: ${networkState?.status}")
             when (networkState?.status) {
-                Status.RUNNING -> { binding.loadingPb.visibility = View.VISIBLE }
-                Status.SUCCESS -> { binding.loadingPb.visibility = View.GONE }
+                Status.RUNNING -> { movieAdapter.isLoading.set(true) }
+                Status.SUCCESS -> { movieAdapter.isLoading.set(false) }
                 Status.FAILED -> {
-                    binding.loadingPb.visibility = View.GONE
+                    movieAdapter.isLoading.set(false)
                     showSnackBar(networkState.msg ?: "Failed.")
                 }
-                else -> { binding.loadingPb.visibility = View.GONE }
+                else -> { movieAdapter.isLoading.set(false) }
             }
         })
 

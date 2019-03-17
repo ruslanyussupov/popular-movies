@@ -11,7 +11,6 @@ import com.example.ruslanyussupov.popularmovies.data.local.MovieDb
 import com.example.ruslanyussupov.popularmovies.data.model.*
 import com.example.ruslanyussupov.popularmovies.data.remote.MoviesRequest
 import com.example.ruslanyussupov.popularmovies.data.remote.ReviewsRequest
-import com.example.ruslanyussupov.popularmovies.data.remote.TheMovieDbService
 import com.example.ruslanyussupov.popularmovies.data.remote.VideosRequest
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -20,9 +19,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class Repository : DataSource {
-
-    @Inject
-    internal lateinit var movieDbAPI: TheMovieDbService
 
     @Inject
     internal lateinit var movieDb: MovieDb

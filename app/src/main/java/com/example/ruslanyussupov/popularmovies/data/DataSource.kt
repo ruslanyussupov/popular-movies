@@ -6,7 +6,7 @@ import com.example.ruslanyussupov.popularmovies.data.model.*
 
 interface DataSource {
 
-    suspend fun getMovies(filter: Filter, pageSize: Int = 10): Listing<PagedList<Movie>>
+    suspend fun getMovies(filter: Filter, pageSize: Int = 12): Listing<PagedList<Movie>>
 
     suspend fun getMovieVideos(filter: Filter, movieId: Int): Listing<List<Video>>
 

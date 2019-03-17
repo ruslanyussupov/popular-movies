@@ -14,17 +14,10 @@
                 android:id="@+id/rv_movies"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical" />
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_xsmall"/>
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-        <ProgressBar
-            android:id="@+id/loading_pb"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:indeterminateOnly="true"
-            android:visibility="gone"
-            android:layout_gravity="bottom" />
 
     </FrameLayout>
 
