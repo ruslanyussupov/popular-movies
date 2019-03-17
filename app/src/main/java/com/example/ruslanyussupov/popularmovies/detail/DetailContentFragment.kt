@@ -24,6 +24,7 @@ import com.example.ruslanyussupov.popularmovies.data.model.Movie
 import com.example.ruslanyussupov.popularmovies.adapters.ReviewAdapter
 import com.example.ruslanyussupov.popularmovies.data.DataSource.Filter
 import com.example.ruslanyussupov.popularmovies.databinding.MovieDetailsBinding
+import kotlinx.android.synthetic.main.movie_details.view.*
 
 
 import timber.log.Timber
@@ -161,11 +162,29 @@ class DetailContentFragment : Fragment() {
 
         binding.reviewsRv.layoutManager = LinearLayoutManager(activity,
                 LinearLayoutManager.VERTICAL, false)
-        reviewsAdapter = ReviewAdapter(createHeaderView(), ::onReviewClick)
+
+        val header = createHeaderView()
+        val showReviewsTitle = {
+            header.reviews_label.visibility = View.VISIBLE
+            header.reviews_label_underline.visibility = View.VISIBLE
+        }
+        val hideReviewsTitle = {
+            header.reviews_label.visibility = View.GONE
+            header.reviews_label_underline.visibility = View.GONE
+        }
+
+        reviewsAdapter = ReviewAdapter(header, ::onReviewClick)
         binding.reviewsRv.adapter = reviewsAdapter
 
+        hideReviewsTitle()
+
         viewModel.reviews().observe(this, Observer {
-            reviewsAdapter.submitList(it)
+            if (it.isNullOrEmpty()) {
+                hideReviewsTitle()
+            } else {
+                showReviewsTitle()
+                reviewsAdapter.submitList(it)
+            }
         })
 
     }

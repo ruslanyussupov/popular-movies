@@ -46,8 +46,6 @@ class ReviewAdapter(private val header: View,
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             TYPE_HEADER -> HeaderViewHolder(header)
-            TYPE_NO_REVIEW -> NoReviewViewHolder(LayoutInflater.from(parent.context)
-                    .inflate(R.layout.item_review_empty, parent, false))
             TYPE_REVIEW -> {
                 ReviewViewHolder(DataBindingUtil.inflate(LayoutInflater.from(parent.context),
                         R.layout.item_review, parent, false))
@@ -91,12 +89,9 @@ class ReviewAdapter(private val header: View,
 
     class HeaderViewHolder(val view: View) : RecyclerView.ViewHolder(view)
 
-    class NoReviewViewHolder(val view: View) : RecyclerView.ViewHolder(view)
-
     companion object {
         private const val TYPE_HEADER = 0
-        private const val TYPE_NO_REVIEW = 1
-        private const val TYPE_REVIEW = 2
+        private const val TYPE_REVIEW = 1
 
         val REVIEW_COMPARATOR = object : DiffUtil.ItemCallback<Review>() {
             override fun areItemsTheSame(oldItem: Review, newItem: Review): Boolean {
