@@ -2,12 +2,12 @@ package com.example.ruslanyussupov.popularmovies.detail
 
 import androidx.databinding.DataBindingUtil
 import androidx.core.app.NavUtils
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.transaction
+import com.example.ruslanyussupov.popularmovies.BaseActivity
 
 import com.example.ruslanyussupov.popularmovies.R
 import com.example.ruslanyussupov.popularmovies.databinding.ActivityDetailBinding
@@ -15,7 +15,7 @@ import com.example.ruslanyussupov.popularmovies.data.model.Movie
 import kotlinx.android.synthetic.main.activity_detail.*
 
 
-class DetailActivity : AppCompatActivity() {
+class DetailActivity : BaseActivity() {
 
     private lateinit var binding: ActivityDetailBinding
     var onShare: (() -> Unit)? = null

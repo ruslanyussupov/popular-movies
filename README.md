@@ -20,7 +20,6 @@ To use the app, you should add your own API_KEY inside `gradle.properties`. To g
 # Todo:
 * Apply clean code rules
 * Add tests
-* Show network state
 * Add movies search feature
 * Avoid GlobalScope usage
 

@@ -4,12 +4,12 @@ import androidx.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
-import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.transaction
 import androidx.lifecycle.Observer
+import com.example.ruslanyussupov.popularmovies.BaseActivity
 
 import com.example.ruslanyussupov.popularmovies.R
 import com.example.ruslanyussupov.popularmovies.adapters.MovieAdapter
@@ -23,7 +23,7 @@ import timber.log.Timber
 
 import com.example.ruslanyussupov.popularmovies.data.DataSource.*
 
-class MainActivity : AppCompatActivity(), MovieAdapter.OnMovieClickListener {
+class MainActivity : BaseActivity(), MovieAdapter.OnMovieClickListener {
 
     private var isTwoPane = false
     private lateinit var binding: ActivityMainBinding
